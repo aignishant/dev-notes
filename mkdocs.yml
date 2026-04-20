@@ -209,3 +209,31 @@ nav:
       - Glossary: content-hub/15-quick-reference/glossary.md
       - Red-Flag Answers to Avoid: content-hub/15-quick-reference/red-flags.md
       - Day-Before Checklist: content-hub/15-quick-reference/day-before.md
+  - Python Interview:
+    - Overview: python-interview/index.md
+    - Deep-Dive Guides:
+      - Index: python-interview/old/00_INDEX_START_HERE.md
+      - Python Core Fundamentals: python-interview/old/01_Python_Core_Fundamentals.md
+      - OOP in Python: python-interview/old/02_OOP_In_Python.md
+      - Advanced Python: python-interview/old/03_Advanced_Python.md
+      - PEP8 & Best Practices: python-interview/old/04_PEP8_and_Best_Practices.md
+      - Data Structures & Algorithms: python-interview/old/05_Data_Structures_Algorithms.md
+      - System Design: python-interview/old/06_System_Design.md
+      - Concurrency & Async: python-interview/old/07_Python_Concurrency_Async.md
+      - Database & ORM: python-interview/old/08_Database_and_ORM.md
+      - Testing & DevOps: python-interview/old/09_Testing_and_DevOps.md
+      - AI/ML Interview: python-interview/old/10_AI_ML_Interview.md
+      - Libraries & Frameworks: python-interview/old/11_Python_Libraries_Frameworks.md
+      - Modern Python & Trending: python-interview/old/12_Modern_Python_Trending.md
+      - Scenario Based Python: python-interview/old/13_Scenario_Based_Python.md
+      - Real-Time Project Issues: python-interview/old/14_RealTime_Project_Issues.md
+      - Strengths, Weakness & HR: python-interview/old/15_Strengths_Weakness_HR.md
+      - Database Basic to Advanced: python-interview/old/16_Database_Basic_to_Advanced.md
+      - FastAPI Basic to Advanced: python-interview/old/17_FastAPI_Basic_to_Advanced.md
+      - Microservices Complete: python-interview/old/18_Microservices_Complete.md
+      - DSA Patterns Bible: python-interview/old/19_DSA_Patterns_Bible.md
+      - DSA Roadmap Strategy: python-interview/old/20_DSA_Roadmap_Strategy.md
+      - Quantitative Aptitude: python-interview/old/21_Quantitative_Aptitude.md
+      - Enhanced Python Core & OOP: python-interview/old/22_Enhanced_Python_Core_OOP.md
+      - Enhanced DB & System Design: python-interview/old/23_Enhanced_DB_SystemDesign.md
+      - Advanced DSA (FAANG): python-interview/old/24_Advanced_DSA_FAANG.md

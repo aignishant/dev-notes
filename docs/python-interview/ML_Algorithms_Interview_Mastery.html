@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Algorithms Deep Dive — Interview Mastery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06080f;--bg2:#0c1019;--bg3:#131825;--bg4:#1a2033;--bgcard:#111623;--bdr:#1f2942;--bdr2:#2a3655;--tx:#e4e8f7;--tx2:#99a3c0;--tx3:#5e6a8a;--ac:#6c8cff;--ac2:#8ba4ff;--grn:#34d399;--ylw:#fbbf24;--org:#fb923c;--red:#f87171;--pur:#a78bfa;--pnk:#f472b6;--cyn:#22d3ee;--code-bg:#0a0e18;--sw:300px;--hh:58px;--ff:'Outfit',-apple-system,sans-serif;--fh:'Fraunces',Georgia,serif;--fc:'JetBrains Mono',monospace;--rad:10px;--glow:0 0 30px rgba(108,140,255,0.12)}
+[data-theme="light"]{--bg:#f5f7fc;--bg2:#fff;--bg3:#edf0f8;--bg4:#e2e6f2;--bgcard:#fff;--bdr:#d4daf0;--bdr2:#c4cce6;--tx:#1a1e33;--tx2:#545b7a;--tx3:#8890ab;--ac:#4a6cf7;--ac2:#3b5ce4;--grn:#059669;--ylw:#d97706;--org:#ea580c;--red:#dc2626;--pur:#7c3aed;--pnk:#db2777;--cyn:#0891b2;--code-bg:#f0f3fc;--glow:0 0 20px rgba(74,108,247,0.06)}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--ff);background:var(--bg);color:var(--tx);line-height:1.78;font-size:15px;overflow-x:hidden}::selection{background:rgba(108,140,255,0.3)}
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);background:rgba(6,8,15,0.85);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 18px;z-index:1000;backdrop-filter:blur(20px);gap:12px}[data-theme="light"] .hdr{background:rgba(245,247,252,0.9)}.ham{display:none;background:none;border:none;color:var(--tx);font-size:22px;cursor:pointer;padding:6px;border-radius:8px}.ham:hover{background:var(--bg3)}.logo{font-family:var(--fh);font-size:18px;font-weight:800;white-space:nowrap;display:flex;align-items:center;gap:10px}.logo-grad{background:linear-gradient(135deg,var(--ac),var(--cyn),var(--pur));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.sbox{flex:1;max-width:400px;position:relative;margin:0 14px}.sbox input{width:100%;padding:9px 14px 9px 38px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--tx);font-family:var(--ff);font-size:13.5px;outline:none;transition:all .25s}.sbox input:focus{border-color:var(--ac);box-shadow:var(--glow)}.sbox input::placeholder{color:var(--tx3)}.sbox .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none;font-size:14px}.hdr-acts{display:flex;gap:6px;align-items:center;margin-left:auto}.hbtn{background:none;border:1px solid var(--bdr);color:var(--tx2);height:36px;padding:0 12px;border-radius:9px;cursor:pointer;font-size:12px;font-family:var(--ff);font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap}.hbtn:hover{background:var(--bg3);color:var(--tx);border-color:var(--bdr2)}.ptrack{position:absolute;bottom:0;left:0;height:2px;background:var(--bg3);width:100%}.pbar{height:2px;background:linear-gradient(90deg,var(--ac),var(--cyn),var(--grn));width:0%;transition:width .5s ease;border-radius:1px}
+.side{position:fixed;top:var(--hh);left:0;width:var(--sw);height:calc(100vh - var(--hh));background:var(--bg2);border-right:1px solid var(--bdr);overflow-y:auto;padding:6px 0;z-index:900;transition:transform .3s ease}.side::-webkit-scrollbar{width:3px}.side::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}.stats{margin:8px 10px 12px;padding:14px 16px;background:linear-gradient(135deg,rgba(108,140,255,0.08),rgba(167,139,250,0.06));border:1px solid var(--bdr);border-radius:var(--rad);position:relative;overflow:hidden}.stats::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(108,140,255,0.15),transparent);border-radius:50%}.stats-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:8px}.stats-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.stats-l{font-size:12px;color:var(--tx2)}.stats-v{font-family:var(--fc);font-size:14px;font-weight:700;color:var(--ac)}.stats-v.green{color:var(--grn)}.pring{width:100%;height:5px;background:var(--bg);border-radius:3px;margin-top:8px;overflow:hidden}.pring-f{height:100%;background:linear-gradient(90deg,var(--grn),var(--cyn));border-radius:3px;transition:width .6s ease}.nav-part{padding:18px 16px 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--tx3);display:flex;align-items:center;gap:8px}.np-badge{color:#fff;padding:1px 7px;border-radius:4px;font-size:9px;letter-spacing:0.8px}.nav-item{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;text-decoration:none;color:var(--tx2);font-size:12.5px;font-weight:500;border-left:3px solid transparent;transition:all .15s;cursor:pointer}.nav-item:hover{background:var(--bg3);color:var(--tx)}.nav-item.active{color:var(--ac);background:rgba(108,140,255,0.06);border-left-color:var(--ac)}.ni{font-size:14px;flex-shrink:0;width:20px;text-align:center}.nt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.np{font-family:var(--fc);font-size:9px;color:var(--grn);min-width:28px;text-align:right;font-weight:700}.ov{display:none;position:fixed;inset:0;top:var(--hh);background:rgba(0,0,0,0.6);z-index:899;backdrop-filter:blur(4px)}.ov.open{display:block}
+.main{margin-left:var(--sw);margin-top:var(--hh);min-height:calc(100vh - var(--hh));padding:32px 44px 80px;max-width:900px}.content-section{display:none;animation:fadeUp .4s ease}.content-section.active{display:block}@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}.content-section h1{font-family:var(--fh);font-size:2em;font-weight:800;color:var(--tx);margin:0 0 6px;line-height:1.2;letter-spacing:-0.03em}.content-section h1::after{content:'';display:block;width:50px;height:3px;background:linear-gradient(90deg,var(--ac),var(--pur));border-radius:2px;margin-top:14px;margin-bottom:10px}
+.dd{margin:10px 0;border:1px solid var(--bdr);border-radius:var(--rad);overflow:hidden;transition:all .2s}.dd:hover{border-color:var(--bdr2)}.dd.done{border-left:3px solid var(--grn)}.dd.done .dd-head{background:linear-gradient(135deg,rgba(52,211,153,0.04),transparent)}.dd-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bgcard);border:none;color:var(--tx);font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;text-align:left;transition:all .15s}.dd-head:hover{background:var(--bg3)}.dd-chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--bdr2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s;font-size:0}.dd-chk.ok{border-color:var(--grn);background:var(--grn);font-size:10px;color:#fff}.dd-chk.ok::after{content:'✓'}.dd-t{flex:1;line-height:1.3}.dd-arr{color:var(--tx3);transition:transform .3s ease;flex-shrink:0}.dd-head.open .dd-arr{transform:rotate(90deg)}.dd-body{display:none;padding:6px 20px 20px;border-top:1px solid var(--bdr);background:var(--bg);animation:ddOpen .35s ease}.dd-body.open{display:block}@keyframes ddOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}.dd-body h4{font-size:.95em;font-weight:700;color:var(--pur);margin:16px 0 6px}.dd-body h4:first-child{margin-top:10px}.dd-body p{margin:0 0 12px;color:var(--tx2)}.dd-body strong{color:var(--tx);font-weight:600}.dd-body em{color:var(--pur);font-style:italic}.dd-body ul,.dd-body ol{margin:0 0 12px 20px;color:var(--tx2)}.dd-body li{margin-bottom:3px}.dd-body li::marker{color:var(--ac)}.dd-body table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}.dd-body thead th{background:var(--bg3);color:var(--tx);font-weight:600;text-align:left;padding:10px 14px;border:1px solid var(--bdr);white-space:nowrap}.dd-body tbody td{padding:8px 14px;border:1px solid var(--bdr);color:var(--tx2);vertical-align:top}.dd-body tbody tr:nth-child(even){background:rgba(108,140,255,0.02)}.dd-body code{font-family:var(--fc);font-size:0.85em;background:var(--bg3);color:var(--cyn);padding:2px 7px;border-radius:5px;border:1px solid var(--bdr)}.dd-body pre{background:var(--code-bg)!important;border:1px solid var(--bdr);border-radius:var(--rad);padding:18px!important;overflow-x:auto;margin:12px 0;position:relative;line-height:1.65}.dd-body pre code{background:none!important;border:none!important;padding:0!important;color:var(--tx)!important;font-size:12.5px;display:block;white-space:pre}.dd-body blockquote{border-left:3px solid var(--pur);padding:10px 18px;margin:12px 0;background:rgba(167,139,250,0.05);border-radius:0 var(--rad) var(--rad) 0;color:var(--tx2);font-style:italic}.done-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 16px;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx2);border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--ff);font-weight:600;transition:all .2s}.done-btn:hover{border-color:var(--grn);color:var(--grn)}.done-btn.ok{background:rgba(52,211,153,0.1);border-color:var(--grn);color:var(--grn)}.scenario{background:linear-gradient(135deg,rgba(251,191,36,0.06),rgba(108,140,255,0.04));border:1px solid rgba(251,191,36,0.2);border-radius:var(--rad);padding:14px 16px;margin:12px 0}.scenario-tag{font-family:var(--fc);font-size:10px;font-weight:700;color:var(--ylw);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}.mc{background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad);padding:16px;cursor:pointer;transition:all .2s}.mc:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:var(--glow)}.mn{font-family:var(--fc);font-size:11px;color:var(--ac);font-weight:700;margin-bottom:4px}.mt{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px}.mi{font-size:10px;color:var(--tx3)}.qz-h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:12px 16px;background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad);margin-bottom:16px;font-size:13px;font-weight:600}.qz-h button{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx2);padding:4px 12px;border-radius:6px;cursor:pointer;font-family:var(--ff);font-size:12px}.pg{font-family:var(--fc);color:var(--ac);font-size:12px}.tm{font-family:var(--fc);color:var(--cyn);font-size:12px}.qc{background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad);padding:20px;margin-bottom:12px}.qc-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}.badge{font-family:var(--fc);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px}.b0{background:rgba(108,140,255,0.15);color:var(--ac)}.b1{background:rgba(52,211,153,0.15);color:var(--grn)}.b2{background:rgba(167,139,250,0.15);color:var(--pur)}.diff{display:flex;gap:3px;margin-left:auto}.diff i{width:8px;height:8px;border-radius:50%;background:var(--bg3)}.diff i.on{background:var(--ylw)}.qt{font-size:14px;color:var(--tx);line-height:1.7;margin-bottom:14px}.opts{display:grid;gap:8px}.opt{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--bdr);border-radius:var(--rad);cursor:pointer;transition:all .15s;font-size:13px;color:var(--tx2);background:var(--bg)}.opt:hover{border-color:var(--ac);background:rgba(108,140,255,0.04)}.opt.sel{border-color:var(--ac);background:rgba(108,140,255,0.08);color:var(--tx)}.opt.correct{border-color:var(--grn);background:rgba(52,211,153,0.1);color:var(--grn)}.opt.wrong{border-color:var(--red);background:rgba(248,113,113,0.1);color:var(--red)}.olet{width:24px;height:24px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:var(--fc);font-size:11px;font-weight:700;flex-shrink:0;border:1.5px solid var(--bdr)}.opt.sel .olet{background:var(--ac);color:#fff;border-color:var(--ac)}.opt.correct .olet{background:var(--grn);color:#fff;border-color:var(--grn)}.opt.wrong .olet{background:var(--red);color:#fff;border-color:var(--red)}.exp{margin-top:12px;padding:12px 16px;background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.15);border-radius:var(--rad);font-size:12.5px;color:var(--tx2);line-height:1.7;display:none}.exp.show{display:block}.qnav{display:flex;gap:8px;margin-top:16px;justify-content:space-between}.qb{padding:8px 18px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg3);color:var(--tx2);cursor:pointer;font-family:var(--ff);font-size:12px;font-weight:600;transition:all .2s}.qb:hover{color:var(--tx);border-color:var(--bdr2)}.qb.p{background:var(--ac);color:#fff;border-color:var(--ac)}.rcard{text-align:center;padding:30px 20px;background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad)}.rpct{font-family:var(--fc);font-size:56px;font-weight:800;margin:12px 0}.rpct.pass{color:var(--grn)}.rpct.fail{color:var(--red)}.rrow{display:flex;justify-content:center;gap:30px;margin:16px 0}.ri{text-align:center}.rv{font-family:var(--fc);font-size:20px;font-weight:700}.rl{font-size:11px;color:var(--tx3);margin-top:2px}.rbtns{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.stt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;background:var(--ac);color:#fff;border:none;border-radius:50%;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(108,140,255,0.35);transition:all .2s;z-index:1001}.stt:hover{transform:scale(1.1)}.stt.show{display:flex}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bgcard);border:1px solid var(--bdr);color:var(--tx);padding:10px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:2000;box-shadow:0 8px 30px rgba(0,0,0,0.3);opacity:0;transition:all .35s ease;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:768px){.ham{display:flex}.side{transform:translateX(-100%)}.side.open{transform:translateX(0)}.main{margin-left:0;padding:20px 16px 60px}.sbox{display:none}.hbtn .bl{display:none}.logo{font-size:16px}}
+</style>
+</head>
+<body>
+<header class="hdr">
+<button class="ham" onclick="toggleSidebar()">☰</button>
+<div class="logo"><span class="logo-grad">⚙️ ML Algorithms</span></div>
+<div class="sbox"><span class="si">🔍</span><input type="text" id="search" placeholder="Search questions..." oninput="handleSearch(this.value)"></div>
+<div class="hdr-acts">
+<button class="hbtn" id="themeBtn" onclick="toggleTheme()">🌙 <span class="bl">Dark</span></button>
+<button class="hbtn" onclick="resetProgress()">↺ <span class="bl">Reset</span></button>
+</div>
+<div class="ptrack"><div class="pbar" id="pbar"></div></div>
+</header>
+<div class="ov" id="overlay" onclick="toggleSidebar()"></div>
+<nav class="side" id="sidebar">
+<div class="stats">
+<div class="stats-t">Your Progress</div>
+<div class="stats-row"><span class="stats-l">Completed</span><span class="stats-v green" id="stDone">0</span></div>
+<div class="stats-row"><span class="stats-l">Total</span><span class="stats-v" id="stTotal">0</span></div>
+<div class="pring"><div class="pring-f" id="pringBar" style="width:0%"></div></div>
+</div>
+<div class="nav-part">ALGORITHMS <span class="np-badge" style="background:var(--ac)">10</span></div>
+<a class="nav-item active" data-section="ch0" onclick="showSection('ch0')"><span class="ni">📖</span><span class="nt">All Questions</span><span class="np" id="np_ch0"></span></a>
+<a class="nav-item" data-section="ch1" onclick="showSection('ch1')"><span class="ni">📈</span><span class="nt">Linear & Logistic Regression</span><span class="np" id="np_ch1"></span></a>
+<a class="nav-item" data-section="ch2" onclick="showSection('ch2')"><span class="ni">🌳</span><span class="nt">Decision Trees & Ensembles</span><span class="np" id="np_ch2"></span></a>
+<a class="nav-item" data-section="ch3" onclick="showSection('ch3')"><span class="ni">🚀</span><span class="nt">XGBoost, LightGBM & CatBoost</span><span class="np" id="np_ch3"></span></a>
+<a class="nav-item" data-section="ch4" onclick="showSection('ch4')"><span class="ni">🎯</span><span class="nt">SVM & Kernel Methods</span><span class="np" id="np_ch4"></span></a>
+<a class="nav-item" data-section="ch5" onclick="showSection('ch5')"><span class="ni">📍</span><span class="nt">KNN & Distance-Based</span><span class="np" id="np_ch5"></span></a>
+<a class="nav-item" data-section="ch6" onclick="showSection('ch6')"><span class="ni">🎲</span><span class="nt">Naive Bayes & Probabilistic</span><span class="np" id="np_ch6"></span></a>
+<a class="nav-item" data-section="ch7" onclick="showSection('ch7')"><span class="ni">🔵</span><span class="nt">Clustering Algorithms</span><span class="np" id="np_ch7"></span></a>
+<a class="nav-item" data-section="ch8" onclick="showSection('ch8')"><span class="ni">📉</span><span class="nt">Dimensionality Reduction</span><span class="np" id="np_ch8"></span></a>
+<a class="nav-item" data-section="ch9" onclick="showSection('ch9')"><span class="ni">⚡</span><span class="nt">Algorithm Selection & Comparison</span><span class="np" id="np_ch9"></span></a>
+<div class="nav-part">PRACTICE <span class="np-badge" style="background:var(--grn)">MOCK</span></div>
+<a class="nav-item" data-section="mock" onclick="showSection('mock')"><span class="ni">🎯</span><span class="nt">Mock Tests</span></a>
+</nav>
+<main class="main" id="mainContent"></main>
+<button class="stt" id="sttBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="toast" id="toast"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ML ALGORITHMS DEEP DIVE — 108 QUESTIONS DATABASE
+// ═══════════════════════════════════════════════════════════════
+var QDB=[
+// ── Ch1: Linear & Logistic Regression (Q1-Q16) ──
+{id:"q1",ch:"ch1",title:"What is Linear Regression? Explain the mathematical formulation.",
+body:`<h4>Definition</h4>
+<p><strong>Linear Regression</strong> models the relationship between a dependent variable (y) and one or more independent variables (X) by fitting a linear equation: <code>ŷ = w₁x₁ + w₂x₂ + ... + wₙxₙ + b</code></p>
+<h4>Objective</h4>
+<p>Find weights (w) and bias (b) that minimize the <strong>Mean Squared Error (MSE):</strong> <code>L = (1/n) Σ(yᵢ - ŷᵢ)²</code></p>
+<h4>Solving Methods</h4>
+<ul>
+<li><strong>Normal Equation (Closed-form):</strong> <code>w = (XᵀX)⁻¹Xᵀy</code> — exact solution in one step. O(n³) complexity, fails for large n or singular matrices.</li>
+<li><strong>Gradient Descent:</strong> Iteratively update weights in the direction of steepest loss decrease. Scales to millions of samples.</li>
+</ul>
+<h4>Assumptions (Critical for Interviews)</h4>
+<ol>
+<li><strong>Linearity:</strong> Relationship between X and y is linear</li>
+<li><strong>Independence:</strong> Observations are independent of each other</li>
+<li><strong>Homoscedasticity:</strong> Constant variance of residuals</li>
+<li><strong>Normality:</strong> Residuals are normally distributed</li>
+<li><strong>No multicollinearity:</strong> Features are not highly correlated</li>
+</ol>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"When would you NOT use linear regression?"</strong></p>
+<p><strong>Answer:</strong> When the relationship is non-linear (try polynomial features or tree-based models), when there are significant outliers (use robust regression or Huber loss), when features are highly correlated (use Ridge regression), when the target is categorical (use Logistic Regression), or when the data has heteroscedasticity (use weighted least squares or transform the target).</p>
+</div>`},
+
+{id:"q2",ch:"ch1",title:"What are the assumptions of Linear Regression? What happens when they're violated?",
+body:`<h4>Assumptions & Violations</h4>
+<table><thead><tr><th>Assumption</th><th>Violation Effect</th><th>Detection</th><th>Fix</th></tr></thead><tbody>
+<tr><td><strong>Linearity</strong></td><td>Biased predictions, systematic errors</td><td>Residual plots show patterns</td><td>Add polynomial features, use non-linear model</td></tr>
+<tr><td><strong>Independence</strong></td><td>Underestimated standard errors</td><td>Durbin-Watson test</td><td>Time-series models, GLS</td></tr>
+<tr><td><strong>Homoscedasticity</strong></td><td>Inefficient estimates, wrong confidence intervals</td><td>Residuals vs fitted plot, Breusch-Pagan test</td><td>Weighted LS, log transform target</td></tr>
+<tr><td><strong>Normality of residuals</strong></td><td>Invalid hypothesis tests</td><td>Q-Q plot, Shapiro-Wilk test</td><td>Transform target, robust methods</td></tr>
+<tr><td><strong>No multicollinearity</strong></td><td>Unstable coefficients, hard to interpret</td><td>VIF > 5-10, correlation matrix</td><td>Remove features, PCA, Ridge regression</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your residual plot shows a funnel shape (increasing variance). What's happening and how do you fix it?"</strong></p>
+<p><strong>Answer:</strong> This is heteroscedasticity — variance of errors increases with predicted values. Common with monetary data (expensive houses have larger absolute errors). Fixes: (1) Log-transform the target variable, (2) Use Weighted Least Squares giving less weight to high-variance observations, (3) Use robust standard errors (White's estimator) for valid inference, (4) Switch to a model like Random Forest that doesn't assume constant variance.</p>
+</div>`},
+
+{id:"q3",ch:"ch1",title:"Explain Ridge Regression (L2). When do you use it over standard Linear Regression?",
+body:`<h4>Objective</h4>
+<p><code>L = Σ(yᵢ - ŷᵢ)² + λ × Σwⱼ²</code></p>
+<p>Adds an <strong>L2 penalty</strong> that shrinks all coefficients toward zero but never exactly to zero.</p>
+<h4>When to Use</h4>
+<ul>
+<li><strong>Multicollinearity:</strong> When features are correlated, standard OLS gives wildly unstable coefficients. Ridge stabilizes them by distributing weight among correlated features.</li>
+<li><strong>p > n (more features than samples):</strong> OLS has no unique solution. Ridge always has one.</li>
+<li><strong>Preventing overfitting:</strong> When standard regression overfits training data.</li>
+</ul>
+<h4>Key Properties</h4>
+<ul>
+<li>Has a closed-form solution: <code>w = (XᵀX + λI)⁻¹Xᵀy</code> — the λI term makes the matrix always invertible</li>
+<li>Does NOT perform feature selection — all features remain with reduced coefficients</li>
+<li>Bias increases, variance decreases — trade-off controlled by λ</li>
+</ul>
+<pre><code>from sklearn.linear_model import Ridge, RidgeCV
+
+# Auto-tune lambda via cross-validation
+model = RidgeCV(alphas=[0.001, 0.01, 0.1, 1, 10, 100])
+model.fit(X_train, y_train)
+print(f"Best alpha: {model.alpha_}")</code></pre>`},
+
+{id:"q4",ch:"ch1",title:"Explain Lasso Regression (L1). How does it perform feature selection?",
+body:`<h4>Objective</h4>
+<p><code>L = Σ(yᵢ - ŷᵢ)² + λ × Σ|wⱼ|</code></p>
+<h4>Why Weights Go to Exactly Zero</h4>
+<p>The L1 penalty creates a <strong>diamond-shaped constraint region</strong>. The loss function contours (ellipses) are most likely to first touch this diamond at a vertex — where one or more coordinates are exactly zero. Geometrically, the "corners" of the L1 ball naturally produce sparse solutions.</p>
+<h4>Lasso vs Ridge</h4>
+<table><thead><tr><th>Scenario</th><th>Use Lasso</th><th>Use Ridge</th></tr></thead><tbody>
+<tr><td>Many irrelevant features</td><td>✅ Removes them</td><td>❌ Keeps all</td></tr>
+<tr><td>Correlated features</td><td>Picks one randomly</td><td>✅ Keeps both, shrinks</td></tr>
+<tr><td>Feature selection needed</td><td>✅ Built-in</td><td>❌ No selection</td></tr>
+<tr><td>All features relevant</td><td>May remove useful ones</td><td>✅ Better performance</td></tr>
+</tbody></table>
+<h4>Limitation</h4>
+<p>When features are highly correlated (group of similar features), Lasso arbitrarily picks one and zeros out the rest. This is unpredictable and may remove informative features. Use <strong>Elastic Net</strong> to get both selection and group handling.</p>`},
+
+{id:"q5",ch:"ch1",title:"What is Elastic Net? When is it better than Lasso or Ridge alone?",
+body:`<h4>Objective</h4>
+<p><code>L = Σ(yᵢ - ŷᵢ)² + λ₁ × Σ|wⱼ| + λ₂ × Σwⱼ²</code></p>
+<h4>Advantages</h4>
+<ul>
+<li><strong>Groups of correlated features:</strong> Unlike Lasso (which picks one randomly), Elastic Net selects or discards entire groups together</li>
+<li><strong>More than n features:</strong> Lasso selects at most n features when p > n; Elastic Net has no such limitation</li>
+<li><strong>Stability:</strong> Lasso's feature selection can be unstable with slightly different data; Elastic Net is more robust</li>
+</ul>
+<pre><code>from sklearn.linear_model import ElasticNetCV
+
+model = ElasticNetCV(
+    l1_ratio=[0.1, 0.3, 0.5, 0.7, 0.9, 0.99],  # Mix of L1/L2
+    alphas=[0.001, 0.01, 0.1, 1.0],
+    cv=5
+)
+model.fit(X_train, y_train)
+# l1_ratio=1 → pure Lasso, l1_ratio=0 → pure Ridge</code></pre>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You have a genomics dataset with 50,000 gene expression features and 200 samples. Which regression method?"</strong></p>
+<p><strong>Answer:</strong> Elastic Net. With p >> n (50K features, 200 samples): (1) Standard OLS is impossible — infinite solutions, (2) Lasso can select at most 200 features, which is limiting, (3) Ridge keeps all 50K features — not interpretable, (4) Elastic Net provides sparse feature selection (L1 component) while handling correlated genes (L2 component). Gene expression data is notoriously correlated, making Elastic Net ideal.</p>
+</div>`},
+
+{id:"q6",ch:"ch1",title:"What is Logistic Regression? How is it different from Linear Regression?",
+body:`<h4>Key Difference</h4>
+<p>Despite the name, Logistic Regression is a <strong>classification algorithm</strong>, not regression. It predicts the probability of a binary outcome using the sigmoid function.</p>
+<h4>Mathematical Formulation</h4>
+<p><code>P(y=1|X) = σ(wᵀX + b) = 1 / (1 + e^(-(wᵀX + b)))</code></p>
+<ul>
+<li>Linear combination → sigmoid → probability ∈ (0, 1)</li>
+<li>Decision boundary at P = 0.5 (or custom threshold)</li>
+<li>Loss: Binary Cross-Entropy (log loss), NOT MSE</li>
+</ul>
+<h4>Why NOT Use Linear Regression for Classification?</h4>
+<ul>
+<li>Linear Regression outputs unbounded values (−∞ to +∞) — not valid probabilities</li>
+<li>MSE loss with 0/1 labels creates a non-convex optimization problem</li>
+<li>Logistic + Cross-Entropy is convex → guaranteed global minimum</li>
+<li>Logistic naturally outputs calibrated probabilities</li>
+</ul>
+<h4>Multi-Class Extension</h4>
+<ul>
+<li><strong>One-vs-Rest (OvR):</strong> Train K binary classifiers, pick highest confidence. Simple, works well.</li>
+<li><strong>Softmax (Multinomial):</strong> Single model, K outputs, softmax converts to probabilities summing to 1. More elegant, native multi-class.</li>
+</ul>`},
+
+{id:"q7",ch:"ch1",title:"What is the sigmoid function? Why is it used in Logistic Regression?",
+body:`<h4>Sigmoid Function</h4>
+<p><code>σ(z) = 1 / (1 + e^(-z))</code></p>
+<h4>Properties</h4>
+<ul>
+<li>Maps any real number to (0, 1) — interpretable as probability</li>
+<li>S-shaped curve: smooth, differentiable everywhere</li>
+<li>σ(0) = 0.5, σ(+∞) → 1, σ(-∞) → 0</li>
+<li>Derivative: σ'(z) = σ(z) × (1 - σ(z)) — easy to compute, used in backpropagation</li>
+</ul>
+<h4>Limitations</h4>
+<ul>
+<li><strong>Vanishing gradients:</strong> For |z| >> 0, gradient is nearly zero → slow learning in deep networks</li>
+<li><strong>Not zero-centered:</strong> Output is always positive → can cause zig-zag gradient updates</li>
+<li><strong>Computationally expensive:</strong> Exponential function in every forward pass</li>
+</ul>
+<h4>Alternatives for Deep Learning</h4>
+<ul>
+<li><strong>ReLU:</strong> max(0, x) — fast, no vanishing gradient for positive values. Standard for hidden layers.</li>
+<li><strong>Tanh:</strong> Zero-centered sigmoid. Output: (-1, 1). Better than sigmoid for hidden layers.</li>
+<li><strong>GELU:</strong> Used in transformers (BERT, GPT). Smooth approximation of ReLU.</li>
+</ul>`},
+
+{id:"q8",ch:"ch1",title:"How do you interpret Logistic Regression coefficients?",
+body:`<h4>Odds Ratio Interpretation</h4>
+<p>A coefficient wⱼ means: a 1-unit increase in feature xⱼ multiplies the <strong>odds</strong> of the positive class by e^(wⱼ).</p>
+<ul>
+<li><strong>wⱼ = 0.5:</strong> e^0.5 ≈ 1.65 → odds increase by 65% per unit increase</li>
+<li><strong>wⱼ = -1.0:</strong> e^-1 ≈ 0.37 → odds decrease by 63% per unit increase</li>
+<li><strong>wⱼ = 0:</strong> Feature has no effect on prediction</li>
+</ul>
+<h4>Important Caveats</h4>
+<ul>
+<li><strong>Must standardize features</strong> to compare coefficient magnitudes fairly</li>
+<li><strong>Multicollinearity</strong> makes individual coefficients unreliable (use VIF check)</li>
+<li><strong>Non-linear relationships</strong> aren't captured — need polynomial features or interactions</li>
+<li>Coefficients represent <em>marginal</em> effects holding other features constant</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your Logistic Regression for loan default has coefficient 0.03 for income. What does this mean?"</strong></p>
+<p><strong>Answer:</strong> Each $1 increase in income multiplies the odds of default by e^0.03 ≈ 1.03 — a 3% increase in odds per dollar. But wait — this means higher income increases default odds, which is counterintuitive. I'd investigate: Is income possibly correlated with loan size (higher earners take bigger loans)? Is there multicollinearity? Check VIF and consider interaction terms like income/loan_ratio instead of raw income.</p>
+</div>`},
+
+{id:"q9",ch:"ch1",title:"What is the decision boundary in Logistic Regression?",
+body:`<h4>Concept</h4>
+<p>The decision boundary is where <code>P(y=1) = 0.5</code>, which occurs at <code>wᵀX + b = 0</code>. This is a <strong>linear hyperplane</strong> in feature space.</p>
+<h4>Key Properties</h4>
+<ul>
+<li>In 2D: the boundary is a straight line</li>
+<li>In 3D: the boundary is a plane</li>
+<li>In nD: the boundary is a hyperplane</li>
+<li>The boundary is always linear — Logistic Regression cannot learn curves or circles</li>
+</ul>
+<h4>Making Non-Linear Boundaries</h4>
+<ul>
+<li><strong>Polynomial features:</strong> Add x², xy, x³ terms → curved boundaries in original feature space</li>
+<li><strong>Kernel trick:</strong> Not native to LR but can be applied (similar to SVM)</li>
+<li><strong>Feature engineering:</strong> Create features that linearize the problem</li>
+</ul>
+<h4>Adjusting the Threshold</h4>
+<p>The default threshold of 0.5 isn't always optimal. For imbalanced classes or when false negatives are costly, lower the threshold (e.g., 0.3) to classify more samples as positive.</p>`},
+
+{id:"q10",ch:"ch1",title:"What is Polynomial Regression? When do you use it?",
+body:`<h4>Concept</h4>
+<p>Extend linear regression by adding <strong>polynomial features</strong>: x, x², x³, and cross-terms. The model is still linear in parameters (coefficients), but captures non-linear relationships in features.</p>
+<pre><code>from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+
+model = Pipeline([
+    ('poly', PolynomialFeatures(degree=3)),
+    ('reg', LinearRegression())
+])
+# Features [x] → [1, x, x², x³]
+# Still linear regression on expanded features!</code></pre>
+<h4>When to Use</h4>
+<ul>
+<li>Clear non-linear pattern in residual plots but you want interpretable coefficients</li>
+<li>Small dataset where you know the approximate functional form</li>
+<li>Physics-based relationships (quadratic drag, cubic growth)</li>
+</ul>
+<h4>Dangers</h4>
+<ul>
+<li><strong>Overfitting:</strong> High-degree polynomials fit training noise. Degree 20 with 50 samples = disaster.</li>
+<li><strong>Extrapolation:</strong> Polynomial predictions outside training range are wildly unreliable</li>
+<li><strong>Feature explosion:</strong> Degree d with p features creates C(p+d, d) features. Use regularization!</li>
+</ul>`},
+
+{id:"q11",ch:"ch1",title:"What is Logistic Regression's cost function? Why not use MSE?",
+body:`<h4>Binary Cross-Entropy (Log Loss)</h4>
+<p><code>L = -(1/n) Σ [yᵢ·log(pᵢ) + (1-yᵢ)·log(1-pᵢ)]</code></p>
+<h4>Why Not MSE?</h4>
+<ul>
+<li><strong>Non-convex with sigmoid:</strong> MSE + sigmoid creates multiple local minima → gradient descent gets stuck</li>
+<li><strong>Slow learning:</strong> MSE gradient is small when sigmoid output is near 0 or 1, even for wrong predictions</li>
+<li><strong>Cross-entropy gradient:</strong> Proportional to (prediction - actual) → learns fast from mistakes</li>
+<li><strong>Probabilistic justification:</strong> Maximizing likelihood is equivalent to minimizing cross-entropy</li>
+</ul>
+<h4>Properties of Log Loss</h4>
+<ul>
+<li>Heavily penalizes confident wrong predictions: predicting 0.99 when truth is 0 → huge loss</li>
+<li>Convex function → guaranteed global minimum with gradient descent</li>
+<li>Natural loss function for binary probability outputs</li>
+</ul>`},
+
+{id:"q12",ch:"ch1",title:"How does Logistic Regression handle multi-class classification?",
+body:`<h4>One-vs-Rest (OvR)</h4>
+<ul>
+<li>Train K separate binary classifiers: "class k vs everything else"</li>
+<li>At prediction: run all K classifiers, pick the class with highest probability</li>
+<li><strong>Pros:</strong> Simple, works with any binary classifier, parallelizable</li>
+<li><strong>Cons:</strong> Probabilities not calibrated across classifiers, ambiguous regions possible</li>
+</ul>
+<h4>Multinomial (Softmax)</h4>
+<ul>
+<li>Single model with K sets of weights, one per class</li>
+<li>Softmax converts K raw scores to probabilities summing to 1: <code>P(k) = e^(zₖ) / Σe^(zⱼ)</code></li>
+<li>Loss: Categorical Cross-Entropy</li>
+<li><strong>Pros:</strong> Proper probabilities, single model, more principled</li>
+<li><strong>Cons:</strong> Requires iterative solver, harder to parallelize</li>
+</ul>
+<pre><code>from sklearn.linear_model import LogisticRegression
+
+# One-vs-Rest
+model_ovr = LogisticRegression(multi_class='ovr')
+
+# Multinomial (Softmax)
+model_softmax = LogisticRegression(multi_class='multinomial', solver='lbfgs')</code></pre>`},
+
+{id:"q13",ch:"ch1",title:"What is Maximum Likelihood Estimation (MLE) and how does it relate to Logistic Regression?",
+body:`<h4>MLE Concept</h4>
+<p>Find the parameters that <strong>maximize the probability of observing the actual data</strong>. In other words, what parameters make the observed data most likely?</p>
+<h4>Connection to Logistic Regression</h4>
+<p>For each sample, Logistic Regression predicts P(y=1|X). The likelihood of the observed data is:</p>
+<p><code>L(w) = Π pᵢ^yᵢ × (1-pᵢ)^(1-yᵢ)</code></p>
+<p>Maximizing this is equivalent to minimizing the negative log-likelihood, which IS cross-entropy loss. So minimizing cross-entropy = maximizing likelihood.</p>
+<h4>Why This Matters</h4>
+<ul>
+<li>Provides a principled foundation for the loss function</li>
+<li>Explains why cross-entropy is the "right" loss for classification</li>
+<li>Extends to other distributions: Poisson regression, negative binomial, etc.</li>
+<li>Regularization = adding a prior (MAP estimation = MLE + prior = Bayesian perspective)</li>
+</ul>`},
+
+{id:"q14",ch:"ch1",title:"What is multicollinearity? How does it affect regression?",
+body:`<h4>Definition</h4>
+<p>Two or more features are <strong>linearly correlated</strong>. Example: house_sqft and house_sqm (one is 10.76× the other).</p>
+<h4>Effects on Regression</h4>
+<ul>
+<li><strong>Coefficients become unstable:</strong> Small data changes cause wild coefficient swings</li>
+<li><strong>Signs may flip:</strong> A feature known to be positive might get a negative coefficient</li>
+<li><strong>Standard errors inflate:</strong> Can't determine individual feature contributions</li>
+<li><strong>Predictions may be fine:</strong> Multicollinearity hurts interpretation, not necessarily prediction accuracy</li>
+</ul>
+<h4>Detection</h4>
+<ul>
+<li><strong>Correlation matrix:</strong> Pairwise correlations > 0.8 (misses multi-way collinearity)</li>
+<li><strong>VIF (Variance Inflation Factor):</strong> Regress each feature on all others. VIF > 5-10 = problematic. <code>VIF = 1 / (1 - R²ⱼ)</code></li>
+<li><strong>Condition number:</strong> Eigenvalue ratio of feature covariance matrix > 30 = severe</li>
+</ul>
+<h4>Solutions</h4>
+<ul>
+<li>Remove one of the correlated features</li>
+<li>Use PCA to combine correlated features into components</li>
+<li>Use Ridge regression (L2 regularization stabilizes coefficients)</li>
+<li>If prediction is the goal, ignore it — tree-based models handle it fine</li>
+</ul>`},
+
+{id:"q15",ch:"ch1",title:"Compare Logistic Regression vs other classifiers. When is LR the best choice?",
+body:`<h4>When Logistic Regression Wins</h4>
+<ul>
+<li><strong>Small to medium datasets</strong> with roughly linear decision boundaries</li>
+<li><strong>Need for interpretability:</strong> Coefficients directly show feature effects (odds ratios)</li>
+<li><strong>Probability calibration:</strong> LR outputs naturally calibrated probabilities — critical for risk scoring</li>
+<li><strong>Regulatory requirements:</strong> Finance, healthcare often require explainable models</li>
+<li><strong>Fast training and inference:</strong> Much faster than tree ensembles or neural networks</li>
+<li><strong>As a baseline:</strong> Always start with LR to set a performance floor</li>
+</ul>
+<h4>When Other Models Win</h4>
+<table><thead><tr><th>Scenario</th><th>Better Alternative</th><th>Why</th></tr></thead><tbody>
+<tr><td>Non-linear relationships</td><td>XGBoost, Random Forest</td><td>Trees capture interactions automatically</td></tr>
+<tr><td>Image/text data</td><td>Deep Learning</td><td>Representation learning</td></tr>
+<tr><td>Extreme imbalance</td><td>XGBoost + class weights</td><td>Better handling of rare classes</td></tr>
+<tr><td>Very high dimensions</td><td>SVM with kernel</td><td>Kernel trick for non-linear boundaries</td></tr>
+</tbody></table>`},
+
+{id:"q16",ch:"ch1",title:"What is Softmax Regression? How does it generalize Logistic Regression?",
+body:`<h4>Generalization</h4>
+<p>Logistic Regression handles 2 classes. <strong>Softmax Regression</strong> (Multinomial LR) handles K classes by computing K linear functions and normalizing with softmax:</p>
+<p><code>P(class=k) = e^(wₖᵀX) / Σⱼ e^(wⱼᵀX)</code></p>
+<h4>Properties</h4>
+<ul>
+<li>All K probabilities sum to 1</li>
+<li>For K=2, softmax reduces to sigmoid (mathematically equivalent)</li>
+<li>Loss: Categorical Cross-Entropy <code>L = -Σ yₖ·log(pₖ)</code></li>
+<li>Used as the final layer in most neural network classifiers</li>
+</ul>
+<h4>Temperature Scaling</h4>
+<p><code>P(k) = e^(zₖ/T) / Σ e^(zⱼ/T)</code></p>
+<ul>
+<li><strong>T → 0:</strong> Sharper distribution (more confident)</li>
+<li><strong>T = 1:</strong> Standard softmax</li>
+<li><strong>T → ∞:</strong> Uniform distribution (maximum uncertainty)</li>
+<li>Used in knowledge distillation (higher T reveals "dark knowledge")</li>
+</ul>`},
+
+// ── Ch2: Decision Trees & Ensembles (Q17-Q32) ──
+{id:"q17",ch:"ch2",title:"How does a Decision Tree work? Explain the splitting process.",
+body:`<h4>Core Algorithm</h4>
+<ol>
+<li>Start with all data at the root node</li>
+<li>For each feature, find the <strong>best split point</strong> that maximizes information gain (or minimizes impurity)</li>
+<li>Split data into two child nodes based on the best feature and threshold</li>
+<li>Recursively repeat for each child until stopping criteria are met</li>
+</ol>
+<h4>Splitting Criteria</h4>
+<table><thead><tr><th>Criterion</th><th>Formula</th><th>Used In</th></tr></thead><tbody>
+<tr><td><strong>Gini Impurity</strong></td><td>1 - Σpₖ²</td><td>Classification (CART default)</td></tr>
+<tr><td><strong>Entropy</strong></td><td>-Σpₖ·log₂(pₖ)</td><td>Classification (ID3, C4.5)</td></tr>
+<tr><td><strong>MSE Reduction</strong></td><td>Variance before - weighted variance after</td><td>Regression</td></tr>
+</tbody></table>
+<h4>Stopping Criteria</h4>
+<ul>
+<li>Maximum depth reached</li>
+<li>Minimum samples per leaf</li>
+<li>Minimum impurity decrease threshold</li>
+<li>All samples belong to same class</li>
+<li>No more features to split on</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Why are decision trees prone to overfitting?"</strong></p>
+<p><strong>Answer:</strong> An unrestricted tree keeps splitting until each leaf has pure data — essentially memorizing every training point including noise. A tree with n samples can create n leaves. To prevent this: (1) Limit max_depth, (2) Set min_samples_leaf, (3) Prune after growing (post-pruning), (4) Use ensembles (Random Forest averages out individual tree overfitting via bagging).</p>
+</div>`},
+
+{id:"q18",ch:"ch2",title:"What is Gini Impurity vs Entropy? Which should you use?",
+body:`<h4>Gini Impurity</h4>
+<p><code>Gini = 1 - Σpₖ²</code></p>
+<ul>
+<li>Ranges from 0 (pure) to 0.5 (binary, equal split)</li>
+<li>Measures probability of misclassifying a random sample</li>
+<li>Computationally cheaper (no logarithm)</li>
+<li>Tends to isolate the most frequent class into its own branch</li>
+</ul>
+<h4>Entropy (Information Gain)</h4>
+<p><code>Entropy = -Σpₖ·log₂(pₖ)</code></p>
+<ul>
+<li>Ranges from 0 (pure) to log₂(K) (equal distribution)</li>
+<li>From information theory — measures surprise/uncertainty</li>
+<li>Slightly more balanced splits</li>
+<li>Used in ID3 and C4.5 algorithms</li>
+</ul>
+<h4>Practical Difference</h4>
+<p>In practice, they produce <strong>very similar trees</strong> (disagreement in < 2% of cases). Gini is default in scikit-learn because it's slightly faster. Use entropy only if you have a specific reason (information-theoretic analysis).</p>`},
+
+{id:"q19",ch:"ch2",title:"What is pruning? Explain pre-pruning vs post-pruning.",
+body:`<h4>Pre-Pruning (Early Stopping)</h4>
+<p>Stop growing the tree <strong>during construction</strong> based on constraints:</p>
+<ul>
+<li><code>max_depth</code>: Limit tree depth</li>
+<li><code>min_samples_split</code>: Minimum samples to attempt a split</li>
+<li><code>min_samples_leaf</code>: Minimum samples in each leaf</li>
+<li><code>max_leaf_nodes</code>: Maximum number of leaves</li>
+<li><code>min_impurity_decrease</code>: Minimum gain required to split</li>
+</ul>
+<h4>Post-Pruning</h4>
+<p>Grow a full tree first, then <strong>remove branches</strong> that don't improve validation performance:</p>
+<ul>
+<li><strong>Cost Complexity Pruning (CCP):</strong> Add a penalty for tree complexity. Tune alpha parameter via cross-validation.</li>
+<li><strong>Reduced Error Pruning:</strong> For each internal node, test if replacing the subtree with a leaf reduces validation error.</li>
+</ul>
+<pre><code># Cost Complexity Pruning in sklearn
+from sklearn.tree import DecisionTreeClassifier
+
+clf = DecisionTreeClassifier(random_state=42)
+path = clf.cost_complexity_pruning_path(X_train, y_train)
+# Find best ccp_alpha via cross-validation
+clf = DecisionTreeClassifier(ccp_alpha=best_alpha)</code></pre>`},
+
+{id:"q20",ch:"ch2",title:"How does Random Forest work? Explain the two sources of randomness.",
+body:`<h4>Algorithm</h4>
+<ol>
+<li>Create B bootstrap samples (sampling with replacement) from training data</li>
+<li>For each bootstrap sample, grow a decision tree with random feature subsampling at each split</li>
+<li>For prediction: average (regression) or majority vote (classification) across all B trees</li>
+</ol>
+<h4>Two Sources of Randomness</h4>
+<ol>
+<li><strong>Bagging (Row Randomness):</strong> Each tree sees ~63% of training data (bootstrap sample). The remaining ~37% is "out-of-bag" (OOB) — free validation data!</li>
+<li><strong>Feature Randomness:</strong> At each split, only consider a random subset of features. Typically √p for classification, p/3 for regression.</li>
+</ol>
+<h4>Why It Works</h4>
+<p>Each tree is slightly different (due to different data and features). Individual trees may have high variance, but averaging many diverse trees <strong>dramatically reduces variance</strong>. The math: Var(average of B trees) ≈ ρσ² + (1-ρ)σ²/B, where ρ is tree correlation. Lower ρ (more diversity) → better ensemble.</p>
+<h4>OOB Score</h4>
+<p>Each sample is OOB for ~37% of trees. Evaluate each sample using only trees that didn't see it → free cross-validation estimate without needing a separate validation set.</p>`},
+
+{id:"q21",ch:"ch2",title:"What are the most important Random Forest hyperparameters?",
+body:`<h4>Hyperparameters Ranked by Impact</h4>
+<ol>
+<li><strong>n_estimators (100-1000):</strong> More trees = better, with diminishing returns. Rarely hurts to add more (just slower). Start with 500.</li>
+<li><strong>max_features (√p for clf, p/3 for reg):</strong> Controls tree diversity. Lower = more diverse = less overfitting but higher bias. Key trade-off knob.</li>
+<li><strong>max_depth (None or 10-30):</strong> None = fully grown trees (default). Limiting depth reduces overfitting for small datasets.</li>
+<li><strong>min_samples_leaf (1-20):</strong> Higher = smoother predictions, less overfitting. Try 5-10 for noisy data.</li>
+<li><strong>class_weight ('balanced'):</strong> For imbalanced data. Adjusts sample weights inversely proportional to class frequency.</li>
+</ol>
+<pre><code>from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(
+    n_estimators=500,
+    max_features='sqrt',
+    max_depth=None,
+    min_samples_leaf=5,
+    class_weight='balanced',
+    oob_score=True,
+    n_jobs=-1,
+    random_state=42
+)</code></pre>`},
+
+{id:"q22",ch:"ch2",title:"What is feature importance in Random Forest? What are its pitfalls?",
+body:`<h4>MDI (Mean Decrease Impurity)</h4>
+<p>Sum the total Gini/entropy decrease from all splits on a feature across all trees. Built-in and fast.</p>
+<h4>Pitfalls of MDI</h4>
+<ul>
+<li><strong>Biased toward high-cardinality features:</strong> Features with many unique values (IDs, timestamps) get more split opportunities → artificially inflated importance</li>
+<li><strong>Biased toward continuous features:</strong> More possible split points than categorical features</li>
+<li><strong>Doesn't distinguish correlation from causation:</strong> A feature correlated with the target through another feature may show high importance</li>
+</ul>
+<h4>Better Alternative: Permutation Importance</h4>
+<ul>
+<li>Shuffle one feature's values and measure the accuracy drop</li>
+<li>Model-agnostic, unbiased by cardinality</li>
+<li>Slower but more reliable</li>
+</ul>
+<h4>Best: SHAP Values</h4>
+<ul>
+<li>Game-theoretic attribution of each feature's contribution to each prediction</li>
+<li>Global AND local explanations</li>
+<li>Consistent and theoretically grounded</li>
+<li>Computationally expensive for large datasets</li>
+</ul>`},
+
+{id:"q23",ch:"ch2",title:"What is Bagging? How does it reduce variance?",
+body:`<h4>Bootstrap Aggregating (Bagging)</h4>
+<ol>
+<li>Create B bootstrap samples (sample with replacement, same size as original)</li>
+<li>Train a model on each bootstrap sample independently</li>
+<li>Aggregate predictions: vote (classification) or average (regression)</li>
+</ol>
+<h4>Mathematical Intuition</h4>
+<p>If you have B independent models each with variance σ², the variance of their average is σ²/B. So averaging reduces variance by a factor of B! In practice, trees from bootstrap samples aren't fully independent (they share the same underlying data), so the reduction is less than B×, but still substantial.</p>
+<h4>When Bagging Helps Most</h4>
+<ul>
+<li><strong>High-variance models:</strong> Deep decision trees, neural networks with few data points</li>
+<li><strong>NOT helpful for high-bias models:</strong> If individual models underfit, averaging won't help</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Would bagging help if your base model is linear regression?"</strong></p>
+<p><strong>Answer:</strong> Not much. Linear regression is a low-variance, potentially high-bias model. Bagging reduces variance but not bias. Averaging many similar linear models gives roughly the same linear model. Bagging works best with high-variance models like deep decision trees where each tree fits the data differently. For linear regression, boosting (which reduces bias) would be more helpful.</p>
+</div>`},
+
+{id:"q24",ch:"ch2",title:"What is Boosting? Explain how AdaBoost works.",
+body:`<h4>Boosting Philosophy</h4>
+<p>Train models <strong>sequentially</strong>, where each new model focuses on the errors of previous models. Turns weak learners into a strong learner.</p>
+<h4>AdaBoost Algorithm</h4>
+<ol>
+<li>Initialize equal weights for all samples: wᵢ = 1/n</li>
+<li>Train a weak learner (e.g., decision stump — tree with depth 1)</li>
+<li>Calculate weighted error rate</li>
+<li>Compute learner weight: αₜ = 0.5 × ln((1-error)/error) — better models get higher weight</li>
+<li>Update sample weights: increase weight of misclassified samples, decrease for correct ones</li>
+<li>Repeat for T iterations</li>
+<li>Final prediction: weighted vote of all T weak learners</li>
+</ol>
+<h4>Key Insight</h4>
+<p>By up-weighting misclassified samples, each new model is forced to pay more attention to the "hard" examples that previous models got wrong. The ensemble gradually focuses on the decision boundary.</p>`},
+
+{id:"q25",ch:"ch2",title:"What is Gradient Boosting? How is it different from AdaBoost?",
+body:`<h4>Gradient Boosting</h4>
+<p>Instead of re-weighting samples (AdaBoost), each new tree is trained to predict the <strong>negative gradient (residuals)</strong> of the loss function.</p>
+<h4>Algorithm</h4>
+<ol>
+<li>Initialize with a constant prediction (mean for regression)</li>
+<li>For each iteration:
+  <ul>
+  <li>Compute residuals: rᵢ = yᵢ - F(xᵢ) (actual minus current prediction)</li>
+  <li>Fit a new tree to the residuals</li>
+  <li>Update predictions: F(x) = F(x) + η × new_tree(x), where η is the learning rate</li>
+  </ul>
+</li>
+<li>Final model: sum of all trees scaled by learning rate</li>
+</ol>
+<h4>Comparison</h4>
+<table><thead><tr><th>Aspect</th><th>AdaBoost</th><th>Gradient Boosting</th></tr></thead><tbody>
+<tr><td>Mechanism</td><td>Re-weight samples</td><td>Fit residuals (gradients)</td></tr>
+<tr><td>Loss function</td><td>Exponential</td><td>Any differentiable loss</td></tr>
+<tr><td>Flexibility</td><td>Limited</td><td>Can use MSE, log loss, Huber, custom</td></tr>
+<tr><td>Sensitivity to outliers</td><td>High (exponential loss)</td><td>Depends on loss choice</td></tr>
+</tbody></table>`},
+
+{id:"q26",ch:"ch2",title:"Compare Bagging vs Boosting. When to use which?",
+body:`<h4>Summary</h4>
+<table><thead><tr><th>Aspect</th><th>Bagging</th><th>Boosting</th></tr></thead><tbody>
+<tr><td><strong>Training</strong></td><td>Parallel (independent)</td><td>Sequential (dependent)</td></tr>
+<tr><td><strong>Reduces</strong></td><td>Variance</td><td>Bias (and some variance)</td></tr>
+<tr><td><strong>Overfitting risk</strong></td><td>Low</td><td>Higher (can overfit if too many rounds)</td></tr>
+<tr><td><strong>Speed</strong></td><td>Parallelizable</td><td>Slower (sequential)</td></tr>
+<tr><td><strong>Sensitivity to noise</strong></td><td>Robust</td><td>Sensitive (focuses on hard/noisy examples)</td></tr>
+<tr><td><strong>Typical base learner</strong></td><td>Deep trees</td><td>Shallow trees (stumps or depth 3-6)</td></tr>
+<tr><td><strong>Example</strong></td><td>Random Forest</td><td>XGBoost, LightGBM, CatBoost</td></tr>
+</tbody></table>
+<h4>Decision Guide</h4>
+<ul>
+<li><strong>Use Bagging (RF) when:</strong> Data is noisy, you want robust baseline, interpretable feature importance, don't want to tune much</li>
+<li><strong>Use Boosting (XGBoost) when:</strong> You need maximum accuracy, willing to tune, data is clean, competition/production performance matters</li>
+</ul>`},
+
+{id:"q27",ch:"ch2",title:"What is stacking? How is it different from bagging and boosting?",
+body:`<h4>Stacking Architecture</h4>
+<ol>
+<li><strong>Level 0 — Diverse Base Models:</strong> Train LR, RF, XGBoost, SVM, KNN on the same data</li>
+<li><strong>Generate meta-features:</strong> Use K-fold to get out-of-fold predictions from each model</li>
+<li><strong>Level 1 — Meta-Learner:</strong> Train a simple model (usually LR) on the base model predictions</li>
+</ol>
+<h4>Key Differences</h4>
+<table><thead><tr><th></th><th>Bagging</th><th>Boosting</th><th>Stacking</th></tr></thead><tbody>
+<tr><td>Models</td><td>Same type</td><td>Same type</td><td>Different types</td></tr>
+<tr><td>Training</td><td>Parallel on subsets</td><td>Sequential on residuals</td><td>Parallel, then meta-learning</td></tr>
+<tr><td>Combination</td><td>Voting/averaging</td><td>Weighted sum</td><td>Learned combination</td></tr>
+</tbody></table>
+<h4>Critical Rule</h4>
+<p>Never use the same data to train base models and meta-learner — always use out-of-fold predictions to prevent leakage.</p>`},
+
+{id:"q28",ch:"ch2",title:"What is Extra Trees (Extremely Randomized Trees)? How does it differ from Random Forest?",
+body:`<h4>Key Difference</h4>
+<p>Extra Trees adds even MORE randomness than Random Forest:</p>
+<ul>
+<li><strong>Random Forest:</strong> For each feature, finds the BEST split threshold</li>
+<li><strong>Extra Trees:</strong> For each feature, picks a RANDOM split threshold</li>
+</ul>
+<h4>Consequences</h4>
+<ul>
+<li><strong>Faster training:</strong> No need to search for optimal thresholds</li>
+<li><strong>Lower variance:</strong> More randomness = more diverse trees = lower variance</li>
+<li><strong>Higher bias:</strong> Random thresholds mean individual trees are worse</li>
+<li><strong>No bootstrap:</strong> Extra Trees uses the full dataset for each tree (no bagging)</li>
+</ul>
+<h4>When to Choose Extra Trees</h4>
+<ul>
+<li>Very large datasets where RF is too slow</li>
+<li>When overfitting is a bigger concern than underfitting</li>
+<li>As a faster alternative during prototyping</li>
+</ul>`},
+
+{id:"q29",ch:"ch2",title:"How do Decision Trees handle missing values?",
+body:`<h4>Algorithm-Specific Handling</h4>
+<ul>
+<li><strong>CART (sklearn):</strong> Does NOT handle missing values natively. You must impute before training.</li>
+<li><strong>XGBoost:</strong> Learns the optimal direction for missing values at each split. Missing values go left or right based on which reduces loss more. No imputation needed!</li>
+<li><strong>LightGBM:</strong> Similar to XGBoost — handles missing values natively.</li>
+<li><strong>CatBoost:</strong> Treats missing as a separate category. Native handling.</li>
+<li><strong>C4.5/C5.0:</strong> Distributes missing samples proportionally to both children based on known data.</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your data has 20% missing values across multiple features. Which tree-based model do you choose?"</strong></p>
+<p><strong>Answer:</strong> XGBoost or LightGBM — both handle missing values natively by learning the optimal split direction. This is better than imputation because: (1) The "missingness" itself may be informative, (2) No imputation bias is introduced, (3) Different features can have different optimal handling. If using Random Forest (sklearn), I'd need to impute first — KNN imputation for small data, median/mode for large data, plus a binary "is_missing" indicator feature.</p>
+</div>`},
+
+{id:"q30",ch:"ch2",title:"What is the out-of-bag (OOB) error in Random Forest?",
+body:`<h4>Concept</h4>
+<p>Each tree in RF is trained on a bootstrap sample (~63% of data). The remaining ~37% is "out-of-bag" for that tree. For each sample, use only the trees that DIDN'T see it for prediction → get a free validation estimate.</p>
+<h4>Benefits</h4>
+<ul>
+<li><strong>No need for separate validation set:</strong> Uses all training data efficiently</li>
+<li><strong>Reliable estimate:</strong> Each sample is validated by ~37% of trees</li>
+<li><strong>Fast:</strong> Computed during training at negligible extra cost</li>
+</ul>
+<pre><code>from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=500, oob_score=True)
+rf.fit(X_train, y_train)
+print(f"OOB Accuracy: {rf.oob_score_:.4f}")
+# Approximately equal to cross-validation accuracy!</code></pre>`},
+
+{id:"q31",ch:"ch2",title:"How do you handle imbalanced classes with tree-based models?",
+body:`<h4>Strategies</h4>
+<ul>
+<li><strong>class_weight='balanced':</strong> Sklearn automatically adjusts weights inversely proportional to class frequency</li>
+<li><strong>scale_pos_weight:</strong> In XGBoost, set to (count_negative / count_positive) for binary imbalance</li>
+<li><strong>SMOTE + trees:</strong> Oversample minority class before training</li>
+<li><strong>Threshold tuning:</strong> Don't use 0.5 — optimize threshold on precision-recall curve</li>
+<li><strong>BalancedRandomForest:</strong> imblearn's variant that undersamples majority class per tree</li>
+</ul>`},
+
+{id:"q32",ch:"ch2",title:"When would you choose a single Decision Tree over an ensemble?",
+body:`<h4>Use Single Decision Tree When:</h4>
+<ul>
+<li><strong>Interpretability is mandatory:</strong> Regulatory or business requirements demand a transparent model. A 3-level tree is easy to explain: "If age > 60 AND cholesterol > 250 AND smoker → high risk."</li>
+<li><strong>Rule extraction:</strong> You need to export decision rules for manual implementation in a rule engine</li>
+<li><strong>Visualization:</strong> Stakeholder presentations where you need to show the decision flow</li>
+<li><strong>Very small data:</strong> With < 100 samples, ensembles may not improve much</li>
+<li><strong>Feature importance exploration:</strong> Quick EDA tool to understand feature relationships</li>
+</ul>
+<h4>Almost Always Use Ensembles Otherwise</h4>
+<p>The accuracy gap between a single tree and an ensemble is typically 5-15%. Unless interpretability is a hard constraint, ensembles dominate.</p>`},
+
+// ── Ch3: XGBoost, LightGBM & CatBoost (Q33-Q48) ──
+{id:"q33",ch:"ch3",title:"What is XGBoost? What makes it special compared to regular Gradient Boosting?",
+body:`<h4>Innovations</h4>
+<ul>
+<li><strong>Regularized objective:</strong> <code>L = Σl(yᵢ, ŷᵢ) + Σ[γT + 0.5λ||w||²]</code> where T = number of leaves, w = leaf weights. Penalizes complex trees.</li>
+<li><strong>Second-order optimization:</strong> Uses both gradient AND Hessian (second derivative) for better split finding. Classic GB only uses gradient.</li>
+<li><strong>Column subsampling:</strong> Randomly selects features per tree and per split (like RF), reducing overfitting</li>
+<li><strong>Missing value handling:</strong> Learns optimal direction for missing values at each split</li>
+<li><strong>Sparsity awareness:</strong> Efficient handling of sparse features (one-hot encoded, many zeros)</li>
+<li><strong>Cache-aware access:</strong> Block-based structure optimized for CPU cache → much faster</li>
+<li><strong>Parallelism:</strong> Parallelized split finding across features (even though boosting is sequential)</li>
+</ul>
+<h4>Why It Dominates</h4>
+<p>Before XGBoost, Gradient Boosting existed (sklearn GBM) but was slow and lacked regularization. XGBoost made GB fast, regularized, and production-ready — leading to its dominance in Kaggle competitions and industry.</p>`},
+
+{id:"q34",ch:"ch3",title:"Explain the key hyperparameters of XGBoost and how to tune them.",
+body:`<h4>Most Important (Tune First)</h4>
+<ul>
+<li><strong>n_estimators (100-5000):</strong> Number of boosting rounds. Use early stopping to find the right value.</li>
+<li><strong>learning_rate (0.01-0.3):</strong> Shrinkage — lower = slower but better generalization. Use 0.01-0.1 with more trees.</li>
+<li><strong>max_depth (3-10):</strong> Tree depth. 6 is common. Deeper = more complex = more overfitting risk.</li>
+</ul>
+<h4>Important (Tune Second)</h4>
+<ul>
+<li><strong>subsample (0.5-1.0):</strong> Row sampling per tree. 0.8 is typical. Reduces overfitting.</li>
+<li><strong>colsample_bytree (0.5-1.0):</strong> Feature sampling per tree. 0.8 is typical.</li>
+<li><strong>reg_alpha (L1, 0-10):</strong> L1 regularization on leaf weights</li>
+<li><strong>reg_lambda (L2, 0-10):</strong> L2 regularization on leaf weights (default=1)</li>
+<li><strong>min_child_weight (1-10):</strong> Minimum sum of instance weight in a leaf. Higher = more conservative.</li>
+</ul>
+<h4>Tuning Strategy</h4>
+<ol>
+<li>Set learning_rate=0.1, n_estimators=1000, use early_stopping_rounds=50</li>
+<li>Tune max_depth and min_child_weight</li>
+<li>Tune subsample and colsample_bytree</li>
+<li>Tune regularization (alpha, lambda)</li>
+<li>Lower learning_rate to 0.01, increase n_estimators, retune early stopping</li>
+</ol>`},
+
+{id:"q35",ch:"ch3",title:"What is LightGBM? How is it different from XGBoost?",
+body:`<h4>Key Innovations</h4>
+<ul>
+<li><strong>Leaf-wise growth:</strong> Grows the leaf with highest loss reduction first. XGBoost uses level-wise (all nodes at same depth first). Leaf-wise is more efficient but can overfit on small data.</li>
+<li><strong>GOSS (Gradient-based One-Side Sampling):</strong> Keeps all samples with large gradients, randomly samples from small gradients. Focuses on hard examples efficiently.</li>
+<li><strong>EFB (Exclusive Feature Bundling):</strong> Bundles sparse features that rarely co-occur into a single feature. Massively reduces memory and computation for one-hot encoded data.</li>
+<li><strong>Histogram-based splitting:</strong> Bins continuous features into discrete histograms. Faster split finding, less memory.</li>
+</ul>
+<h4>Comparison</h4>
+<table><thead><tr><th>Aspect</th><th>XGBoost</th><th>LightGBM</th></tr></thead><tbody>
+<tr><td>Tree growth</td><td>Level-wise</td><td>Leaf-wise</td></tr>
+<tr><td>Speed</td><td>Fast</td><td>Faster (2-10x)</td></tr>
+<tr><td>Memory</td><td>Higher</td><td>Lower (histograms)</td></tr>
+<tr><td>Small data risk</td><td>Lower overfit</td><td>Higher overfit</td></tr>
+<tr><td>Categorical handling</td><td>Needs encoding</td><td>Native support</td></tr>
+</tbody></table>
+<p><strong>Rule of thumb:</strong> LightGBM for large datasets (>100K rows), XGBoost for smaller datasets or when overfitting is a concern.</p>`},
+
+{id:"q36",ch:"ch3",title:"What is CatBoost? When should you choose it?",
+body:`<h4>Key Innovations</h4>
+<ul>
+<li><strong>Ordered Target Encoding:</strong> For categorical features, uses only preceding samples' target values — no data leakage. Each sample's encoding is computed differently depending on its position in a random permutation.</li>
+<li><strong>Symmetric Trees:</strong> All trees are symmetric (balanced), making inference faster (can use bitwise operations)</li>
+<li><strong>Ordered Boosting:</strong> Uses different data subsets for computing residuals vs training trees — reduces prediction shift (a subtle form of overfitting in standard boosting)</li>
+</ul>
+<h4>When to Choose CatBoost</h4>
+<ul>
+<li><strong>Many categorical features:</strong> CatBoost handles them natively without manual encoding</li>
+<li><strong>Minimal tuning time:</strong> Best default parameters among the three — works well out of the box</li>
+<li><strong>Small datasets:</strong> Ordered boosting reduces overfitting on small data</li>
+<li><strong>Need fast inference:</strong> Symmetric trees enable very fast predictions</li>
+</ul>
+<pre><code>from catboost import CatBoostClassifier
+
+model = CatBoostClassifier(
+    iterations=1000,
+    cat_features=['city', 'device_type', 'browser'],  # Just list them!
+    eval_metric='AUC',
+    verbose=100
+)</code></pre>`},
+
+{id:"q37",ch:"ch3",title:"Compare XGBoost vs LightGBM vs CatBoost. How do you choose?",
+body:`<h4>Decision Matrix</h4>
+<table><thead><tr><th>Scenario</th><th>Best Choice</th><th>Why</th></tr></thead><tbody>
+<tr><td>Large dataset (>1M rows)</td><td>LightGBM</td><td>Fastest training, lowest memory</td></tr>
+<tr><td>Many categorical features</td><td>CatBoost</td><td>Native categorical handling</td></tr>
+<tr><td>Small dataset (<10K rows)</td><td>CatBoost or XGBoost</td><td>Less overfitting risk</td></tr>
+<tr><td>Maximum accuracy needed</td><td>Try all three + stack</td><td>Performance is often similar</td></tr>
+<tr><td>Production deployment</td><td>XGBoost or LightGBM</td><td>Best ecosystem, ONNX support</td></tr>
+<tr><td>Minimal tuning time</td><td>CatBoost</td><td>Best defaults</td></tr>
+<tr><td>GPU training</td><td>All three support GPU</td><td>LightGBM is fastest on GPU</td></tr>
+</tbody></table>
+<h4>Practical Tip</h4>
+<p>In competitions and production, the difference between the three is usually < 0.5% accuracy. Feature engineering matters 10x more than model choice. Pick the one your team knows best, and invest time in features instead.</p>`},
+
+{id:"q38",ch:"ch3",title:"What is early stopping in boosting? Why is it essential?",
+body:`<h4>Concept</h4>
+<p>Monitor validation loss during training. Stop adding trees when validation loss hasn't improved for N rounds (patience).</p>
+<h4>Why It's Essential</h4>
+<ul>
+<li>Boosting can add infinite trees, each reducing training loss further — but after a point, validation loss increases (overfitting)</li>
+<li>Early stopping automatically finds the right number of trees</li>
+<li>Effectively replaces manual n_estimators tuning</li>
+</ul>
+<pre><code>import xgboost as xgb
+
+model = xgb.XGBClassifier(
+    n_estimators=10000,  # Set high — early stopping will find the real number
+    learning_rate=0.05,
+    early_stopping_rounds=50
+)
+model.fit(
+    X_train, y_train,
+    eval_set=[(X_val, y_val)],
+    verbose=100
+)
+print(f"Best iteration: {model.best_iteration}")</code></pre>`},
+
+{id:"q39",ch:"ch3",title:"How does XGBoost handle missing values internally?",
+body:`<h4>Algorithm</h4>
+<p>At each split, XGBoost tries sending ALL missing values to the left child and ALL to the right child. It picks whichever direction gives <strong>lower loss</strong>.</p>
+<h4>Why This Is Powerful</h4>
+<ul>
+<li>No need for imputation — the model learns the best handling</li>
+<li>Different features can have different optimal directions for missing values</li>
+<li>Different splits on the same feature can handle missing values differently</li>
+<li>The missingness pattern itself becomes a learned feature</li>
+</ul>
+<h4>Implication</h4>
+<p>Don't impute before XGBoost! Imputing removes the information about which values were missing. Let XGBoost handle it natively. Exception: if you're stacking XGBoost with other models that need imputation, impute in the pipeline.</p>`},
+
+{id:"q40",ch:"ch3",title:"What is the learning rate in boosting and why should it be small?",
+body:`<h4>The Learning Rate (η or Shrinkage)</h4>
+<p>Scales each tree's contribution: <code>F(x) = F(x) + η × tree(x)</code></p>
+<h4>Small Learning Rate Benefits</h4>
+<ul>
+<li><strong>Regularization:</strong> Each tree contributes less, requiring more trees → smoother function</li>
+<li><strong>Better generalization:</strong> Empirically, lower η + more trees almost always outperforms higher η + fewer trees</li>
+<li><strong>More robust:</strong> Individual noisy trees have less impact</li>
+</ul>
+<h4>Trade-off</h4>
+<ul>
+<li>η = 0.3: Fast training, 100-300 trees, risk of overfitting</li>
+<li>η = 0.1: Balanced, 500-1000 trees</li>
+<li>η = 0.01: Best accuracy, 5000-10000 trees, slow training</li>
+</ul>
+<p><strong>Best practice:</strong> Use η = 0.01-0.05 with early stopping and n_estimators=10000. Let early stopping determine the actual number of trees.</p>`},
+
+{id:"q41",ch:"ch3",title:"What is column subsampling in XGBoost? How does it help?",
+body:`<h4>Three Levels of Column Subsampling</h4>
+<ul>
+<li><strong>colsample_bytree:</strong> Random feature subset per tree (like Random Forest)</li>
+<li><strong>colsample_bylevel:</strong> Random feature subset per tree depth level</li>
+<li><strong>colsample_bynode:</strong> Random feature subset per split (most fine-grained)</li>
+</ul>
+<h4>Benefits</h4>
+<ul>
+<li><strong>Reduces overfitting:</strong> Forces each tree to use different features, increasing diversity</li>
+<li><strong>Decorrelates trees:</strong> Similar to RF's feature randomization</li>
+<li><strong>Speed:</strong> Fewer features to evaluate per split → faster training</li>
+<li><strong>Handles correlated features:</strong> Prevents the same dominant feature from being used in every tree</li>
+</ul>`},
+
+{id:"q42",ch:"ch3",title:"How does LightGBM's leaf-wise growth differ from level-wise?",
+body:`<h4>Level-Wise (XGBoost Default)</h4>
+<p>Grow all nodes at the same depth before moving deeper. Produces balanced trees.</p>
+<ul>
+<li>More conservative — doesn't chase high-gain splits aggressively</li>
+<li>Less prone to overfitting</li>
+<li>May waste computation on low-gain nodes at the same depth</li>
+</ul>
+<h4>Leaf-Wise (LightGBM)</h4>
+<p>Always split the leaf with the <strong>highest loss reduction</strong>, regardless of depth.</p>
+<ul>
+<li>Can produce highly asymmetric trees</li>
+<li>More efficient — focuses computation on high-impact splits</li>
+<li>Can overfit on small datasets (creates very deep paths)</li>
+<li>Mitigate with <code>max_depth</code> or <code>num_leaves</code> limits</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your LightGBM model overfits on a 5,000 sample dataset. How do you fix it?"</strong></p>
+<p><strong>Answer:</strong> Leaf-wise growth is aggressive on small data. Fixes: (1) Limit num_leaves (try 15-31 instead of default 31), (2) Set max_depth to 5-7, (3) Increase min_data_in_leaf to 20-50, (4) Increase lambda_l1/lambda_l2 regularization, (5) Reduce learning rate to 0.01, (6) Consider switching to XGBoost or CatBoost which are more conservative on small data.</p>
+</div>`},
+
+{id:"q43",ch:"ch3",title:"What is Gradient-based One-Side Sampling (GOSS) in LightGBM?",
+body:`<h4>Intuition</h4>
+<p>Samples with <strong>large gradients</strong> are undertrained (far from correct prediction) and carry more information. Samples with <strong>small gradients</strong> are well-trained and contribute less to learning.</p>
+<h4>Algorithm</h4>
+<ol>
+<li>Sort samples by absolute gradient</li>
+<li>Keep all top-a% samples (large gradients)</li>
+<li>Randomly sample b% from the remaining small-gradient samples</li>
+<li>Amplify the small-gradient samples by (1-a)/b to compensate for undersampling</li>
+</ol>
+<h4>Benefit</h4>
+<p>Reduces training data size while maintaining accuracy. Particularly effective on large datasets where using all data is expensive.</p>`},
+
+{id:"q44",ch:"ch3",title:"What is Exclusive Feature Bundling (EFB) in LightGBM?",
+body:`<h4>Problem</h4>
+<p>One-hot encoding creates many sparse features. Processing each individually is wasteful since they rarely co-occur.</p>
+<h4>Solution</h4>
+<p>EFB identifies features that are mutually exclusive (rarely non-zero simultaneously) and bundles them into a single feature by adding offsets.</p>
+<h4>Example</h4>
+<p>Features [is_Chrome, is_Firefox, is_Safari] never co-occur. Bundle into one feature: Chrome=1, Firefox=2, Safari=3. One feature instead of three.</p>
+<h4>Benefit</h4>
+<p>Reduces the number of features LightGBM needs to process, dramatically speeding up training on one-hot encoded data or naturally sparse data.</p>`},
+
+{id:"q45",ch:"ch3",title:"How does CatBoost's Ordered Target Encoding prevent leakage?",
+body:`<h4>Standard Target Encoding Problem</h4>
+<p>If you compute "city → mean(target) for that city" on training data, you use the sample's own target to compute its feature — data leakage!</p>
+<h4>CatBoost's Solution</h4>
+<ol>
+<li>Randomly permute training samples</li>
+<li>For sample at position i, compute target encoding using ONLY samples at positions 0 to i-1</li>
+<li>Add a prior to handle rare categories: <code>encoded = (countInClass × targetSum + prior × globalMean) / (countInClass + prior)</code></li>
+</ol>
+<h4>Key Insight</h4>
+<p>Each sample's encoding is computed from a DIFFERENT set of other samples. No sample ever uses its own target value. This is computed across multiple random permutations for robustness.</p>`},
+
+{id:"q46",ch:"ch3",title:"What is the scale_pos_weight parameter in XGBoost?",
+body:`<h4>Purpose</h4>
+<p>Handles class imbalance by giving higher weight to the positive (minority) class in the loss function.</p>
+<h4>Setting</h4>
+<p><code>scale_pos_weight = count(negative) / count(positive)</code></p>
+<p>For 1000 negatives and 50 positives: scale_pos_weight = 1000/50 = 20. Each positive sample is treated as 20× more important.</p>
+<h4>Alternative: Sample Weights</h4>
+<p>More flexible — can assign different weights to individual samples, not just classes. Useful when some misclassifications are more costly than others (e.g., missing VIP customer churn is worse than missing regular customer churn).</p>`},
+
+{id:"q47",ch:"ch3",title:"How do you monitor and prevent overfitting in gradient boosting?",
+body:`<h4>Detection</h4>
+<ul>
+<li><strong>Training loss keeps decreasing but validation loss starts increasing</strong> — classic overfitting signal</li>
+<li><strong>Training/validation gap > 5-10%</strong> in metrics</li>
+<li><strong>OOB score (RF) diverges from training score</strong></li>
+</ul>
+<h4>Prevention</h4>
+<ol>
+<li><strong>Early stopping:</strong> Most important single technique for boosting</li>
+<li><strong>Lower learning rate:</strong> 0.01-0.05 with more trees generalizes better</li>
+<li><strong>Limit tree depth:</strong> 3-6 for boosting (not the deep trees used in RF)</li>
+<li><strong>Subsample < 1.0:</strong> Row subsampling adds stochasticity</li>
+<li><strong>Column subsampling:</strong> colsample_bytree = 0.6-0.9</li>
+<li><strong>Regularization:</strong> reg_alpha (L1) and reg_lambda (L2) on leaf weights</li>
+<li><strong>min_child_weight:</strong> Higher = more conservative splits</li>
+<li><strong>More data:</strong> The ultimate fix for any overfitting</li>
+</ol>`},
+
+{id:"q48",ch:"ch3",title:"What is SHAP and how is it used with tree-based models?",
+body:`<h4>SHAP (SHapley Additive exPlanations)</h4>
+<p>A game-theory approach that assigns each feature a <strong>contribution value (SHAP value)</strong> for each individual prediction.</p>
+<h4>Key Properties</h4>
+<ul>
+<li><strong>Local explanations:</strong> Why did the model predict THIS for THIS sample?</li>
+<li><strong>Global explanations:</strong> Average absolute SHAP values across all samples → feature importance</li>
+<li><strong>Additivity:</strong> SHAP values sum to (prediction - base_value)</li>
+<li><strong>Consistency:</strong> If a feature contributes more, its SHAP value is higher</li>
+</ul>
+<h4>TreeSHAP</h4>
+<p>Specialized fast algorithm for tree-based models. O(TLD²) instead of O(2ᵐ) for exact SHAP. Makes SHAP practical for XGBoost, LightGBM, CatBoost.</p>
+<pre><code>import shap
+
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_test)
+
+# Summary plot: global feature importance
+shap.summary_plot(shap_values, X_test)
+
+# Force plot: explain single prediction
+shap.force_plot(explainer.expected_value, shap_values[0], X_test.iloc[0])</code></pre>`},
+
+// ── Ch4: SVM & Kernel Methods (Q49-Q58) ──
+{id:"q49",ch:"ch4",title:"What is SVM? Explain the concept of maximum margin.",
+body:`<h4>Core Idea</h4>
+<p>SVM finds the <strong>hyperplane that maximizes the margin</strong> between two classes. The margin is the distance between the hyperplane and the nearest data points from each class.</p>
+<h4>Key Concepts</h4>
+<ul>
+<li><strong>Support Vectors:</strong> The data points closest to the decision boundary — they define the margin and the model. Only these matter; remove all other points and the SVM is unchanged.</li>
+<li><strong>Margin:</strong> Width = 2/||w||. Maximizing margin = minimizing ||w||².</li>
+<li><strong>Optimization:</strong> minimize ½||w||² subject to yᵢ(wᵀxᵢ + b) ≥ 1 for all i</li>
+</ul>
+<h4>Why Maximum Margin?</h4>
+<ul>
+<li>Larger margin → more robust to slight data perturbations</li>
+<li>Better generalization — the theory guarantees lower generalization error with larger margins</li>
+<li>Unique solution — the maximum-margin hyperplane is unique</li>
+</ul>`},
+
+{id:"q50",ch:"ch4",title:"What is the kernel trick? Explain different kernel functions.",
+body:`<h4>The Problem</h4>
+<p>Linear SVM can only draw straight lines. Real data often isn't linearly separable (imagine two concentric circles).</p>
+<h4>The Trick</h4>
+<p>Map data to a <strong>higher-dimensional space</strong> where it becomes linearly separable. The kernel trick computes dot products in this high-dimensional space WITHOUT actually computing the transformation. K(x, y) = φ(x)ᵀφ(y) directly.</p>
+<h4>Common Kernels</h4>
+<table><thead><tr><th>Kernel</th><th>Formula</th><th>Use When</th></tr></thead><tbody>
+<tr><td><strong>Linear</strong></td><td>xᵀy</td><td>Data is linearly separable, high-dimensional text data</td></tr>
+<tr><td><strong>RBF (Gaussian)</strong></td><td>exp(-γ||x-y||²)</td><td>Default. Works well for most non-linear problems</td></tr>
+<tr><td><strong>Polynomial</strong></td><td>(γxᵀy + r)^d</td><td>Known polynomial relationships</td></tr>
+<tr><td><strong>Sigmoid</strong></td><td>tanh(γxᵀy + r)</td><td>Similar to neural network (rarely used)</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You have a dataset with circular class boundaries. How does SVM handle this?"</strong></p>
+<p><strong>Answer:</strong> Linear SVM would fail since no straight line can separate circles. Using the RBF kernel, SVM implicitly maps data to an infinite-dimensional space where the circles become linearly separable. The γ parameter controls how far the influence of each support vector reaches — low γ = smooth boundaries (underfitting risk), high γ = complex boundaries (overfitting risk). I'd tune γ and C via grid search with cross-validation.</p>
+</div>`},
+
+{id:"q51",ch:"ch4",title:"What is the C parameter in SVM? What does it control?",
+body:`<h4>C = Regularization Parameter</h4>
+<p>Controls the trade-off between <strong>maximizing the margin</strong> and <strong>minimizing classification errors</strong>.</p>
+<ul>
+<li><strong>Large C:</strong> Strictly classifies all training points correctly → narrow margin, risk of overfitting. "Don't tolerate any misclassification!"</li>
+<li><strong>Small C:</strong> Allows some misclassifications for a wider margin → better generalization. "It's OK to get some wrong if the overall boundary is smoother."</li>
+</ul>
+<h4>Intuition</h4>
+<p>C is like a penalty for each misclassified point. High C = high penalty = model works hard to classify every point correctly (even noisy ones). Low C = low penalty = model focuses on the overall pattern.</p>
+<pre><code>from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'C': [0.01, 0.1, 1, 10, 100],
+    'gamma': ['scale', 'auto', 0.01, 0.1, 1],
+    'kernel': ['rbf']
+}
+grid = GridSearchCV(SVC(), param_grid, cv=5, scoring='accuracy')
+grid.fit(X_train, y_train)</code></pre>`},
+
+{id:"q52",ch:"ch4",title:"What is the gamma parameter in RBF kernel?",
+body:`<h4>Definition</h4>
+<p>γ controls how far the influence of a single training example reaches in RBF kernel: K(x,y) = exp(-γ||x-y||²)</p>
+<h4>Effects</h4>
+<ul>
+<li><strong>Small γ:</strong> Each point has far-reaching influence → smoother decision boundary → underfitting risk</li>
+<li><strong>Large γ:</strong> Each point has local influence → complex, wavy boundary → overfitting risk</li>
+</ul>
+<h4>Interaction with C</h4>
+<ul>
+<li>Small C + Small γ: Very smooth, may underfit</li>
+<li>Large C + Large γ: Very complex, likely overfits</li>
+<li>The optimal (C, γ) combination must be found via cross-validation</li>
+</ul>`},
+
+{id:"q53",ch:"ch4",title:"What is soft margin vs hard margin SVM?",
+body:`<h4>Hard Margin</h4>
+<ul>
+<li>No misclassifications allowed — all points must be on the correct side of the margin</li>
+<li>Only works if data is perfectly linearly separable</li>
+<li>Extremely sensitive to outliers — a single mislabeled point can ruin the boundary</li>
+</ul>
+<h4>Soft Margin</h4>
+<ul>
+<li>Allows some points to violate the margin (slack variables ξᵢ)</li>
+<li>Optimization: minimize ½||w||² + C × Σξᵢ</li>
+<li>C controls how much violation is tolerated</li>
+<li>Much more practical for real-world noisy data</li>
+</ul>`},
+
+{id:"q54",ch:"ch4",title:"What is SVM Regression (SVR)?",
+body:`<h4>Concept</h4>
+<p>Instead of finding the widest margin between classes, SVR finds a tube of width ε that contains as many points as possible, while minimizing model complexity.</p>
+<h4>Parameters</h4>
+<ul>
+<li><strong>ε (epsilon):</strong> Width of the tube. Points inside the tube have zero loss. Only points outside contribute to the error.</li>
+<li><strong>C:</strong> Same role as classification — trade-off between flatness and error tolerance</li>
+<li><strong>Kernel:</strong> Same options (linear, RBF, polynomial)</li>
+</ul>
+<h4>When to Use SVR</h4>
+<ul>
+<li>Small to medium datasets with non-linear relationships</li>
+<li>When you want to be insensitive to small errors (ε-insensitive loss)</li>
+<li>NOT for large datasets — SVR scales poorly (O(n²) to O(n³))</li>
+</ul>`},
+
+{id:"q55",ch:"ch4",title:"What are the advantages and disadvantages of SVM?",
+body:`<h4>Advantages</h4>
+<ul>
+<li><strong>Effective in high-dimensional spaces:</strong> Works well even when dimensions > samples (text classification with millions of features)</li>
+<li><strong>Memory efficient:</strong> Only stores support vectors, not all data</li>
+<li><strong>Versatile:</strong> Kernel trick enables non-linear boundaries without explicit feature engineering</li>
+<li><strong>Robust to overfitting:</strong> Maximum margin principle provides good generalization</li>
+</ul>
+<h4>Disadvantages</h4>
+<ul>
+<li><strong>Doesn't scale:</strong> O(n²) to O(n³) — impractical for >100K samples</li>
+<li><strong>No probability output:</strong> Gives decision values, not probabilities (Platt scaling needed)</li>
+<li><strong>Sensitive to feature scaling:</strong> Must standardize all features</li>
+<li><strong>Hard to tune:</strong> C, γ, kernel choice — wrong choices give terrible results</li>
+<li><strong>No missing value handling:</strong> Must impute before training</li>
+<li><strong>Not interpretable:</strong> Hard to explain why a prediction was made (especially with kernels)</li>
+</ul>`},
+
+{id:"q56",ch:"ch4",title:"When would you use SVM in 2025? Is it still relevant?",
+body:`<h4>SVM is Still Relevant For:</h4>
+<ul>
+<li><strong>Text classification:</strong> Linear SVM on TF-IDF features — still competitive, very fast</li>
+<li><strong>Small data + high dimensions:</strong> p >> n scenarios where SVM's maximum margin principle shines</li>
+<li><strong>Anomaly detection:</strong> One-Class SVM for novelty detection</li>
+<li><strong>Bioinformatics:</strong> Gene expression data (thousands of features, few samples)</li>
+</ul>
+<h4>SVM Has Been Replaced By:</h4>
+<ul>
+<li><strong>Tabular data:</strong> XGBoost/LightGBM dominate (faster, handle missing values, easier to tune)</li>
+<li><strong>Images/text:</strong> Deep learning vastly outperforms (CNNs, Transformers)</li>
+<li><strong>Large datasets:</strong> SVM doesn't scale; tree ensembles do</li>
+</ul>`},
+
+{id:"q57",ch:"ch4",title:"What is One-Class SVM? When is it used?",
+body:`<h4>Concept</h4>
+<p>Trained on ONLY the normal (majority) class. Learns a boundary around normal data. Anything outside the boundary is flagged as an anomaly.</p>
+<h4>Use Cases</h4>
+<ul>
+<li><strong>Anomaly detection:</strong> When you have many normal examples but very few or no anomaly examples</li>
+<li><strong>Fraud detection:</strong> Train on legitimate transactions, flag anything unusual</li>
+<li><strong>Manufacturing:</strong> Train on normal product measurements, detect defects</li>
+<li><strong>Network intrusion:</strong> Learn normal traffic patterns, flag deviations</li>
+</ul>
+<h4>Parameter: ν (nu)</h4>
+<p>Upper bound on the fraction of outliers and lower bound on the fraction of support vectors. Set ν ≈ expected contamination rate.</p>`},
+
+{id:"q58",ch:"ch4",title:"What is the hinge loss used in SVM?",
+body:`<h4>Definition</h4>
+<p><code>L = max(0, 1 - yᵢ × f(xᵢ))</code> where yᵢ ∈ {-1, +1}</p>
+<h4>Properties</h4>
+<ul>
+<li>Zero loss if the point is correctly classified with margin ≥ 1</li>
+<li>Linear penalty for violations</li>
+<li>Not differentiable at the hinge point (uses subgradient)</li>
+<li>Creates sparse solutions — only support vectors contribute to the model</li>
+</ul>
+<h4>Comparison with Log Loss</h4>
+<ul>
+<li><strong>Hinge loss:</strong> Once a point is correctly classified with sufficient margin, it's ignored. Creates sparse models.</li>
+<li><strong>Log loss:</strong> Always provides some gradient, even for correctly classified points. Always tries to improve probability estimates.</li>
+</ul>`},
+
+// ── Ch5: KNN & Distance-Based (Q59-Q66) ──
+{id:"q59",ch:"ch5",title:"How does KNN work? What is the prediction process?",
+body:`<h4>Algorithm</h4>
+<ol>
+<li><strong>Training:</strong> Do nothing! Just store the training data. (This is why it's called a "lazy learner.")</li>
+<li><strong>Prediction:</strong> For a new point, compute distance to ALL training points</li>
+<li>Find the K nearest neighbors</li>
+<li><strong>Classification:</strong> Majority vote among K neighbors</li>
+<li><strong>Regression:</strong> Average of K neighbors' values</li>
+</ol>
+<h4>Distance Metrics</h4>
+<table><thead><tr><th>Metric</th><th>Formula</th><th>When to Use</th></tr></thead><tbody>
+<tr><td>Euclidean</td><td>√Σ(xᵢ-yᵢ)²</td><td>Default, continuous features</td></tr>
+<tr><td>Manhattan</td><td>Σ|xᵢ-yᵢ|</td><td>High dimensions, sparse data</td></tr>
+<tr><td>Cosine</td><td>1 - cos(angle)</td><td>Text data, high-dimensional sparse vectors</td></tr>
+<tr><td>Minkowski</td><td>(Σ|xᵢ-yᵢ|^p)^(1/p)</td><td>Generalizes Euclidean (p=2) and Manhattan (p=1)</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your KNN model works well on training data but fails on new data. The dataset has 200 features. What's wrong?"</strong></p>
+<p><strong>Answer:</strong> The curse of dimensionality. In 200 dimensions, all points are roughly equidistant — the concept of "nearest" becomes meaningless. Solutions: (1) Reduce to 10-20 dimensions using PCA first, (2) Use feature selection to keep only relevant features, (3) Try Manhattan distance instead of Euclidean (more robust in high dimensions), (4) Consider switching to a tree-based model that handles high dimensions better.</p>
+</div>`},
+
+{id:"q60",ch:"ch5",title:"How do you choose the value of K in KNN?",
+body:`<h4>K Selection Trade-off</h4>
+<ul>
+<li><strong>K = 1:</strong> Most flexible, captures local patterns, highly sensitive to noise, overfits</li>
+<li><strong>K = n:</strong> Always predicts the majority class, completely underfits</li>
+<li><strong>Odd K:</strong> Preferred for binary classification to avoid ties</li>
+</ul>
+<h4>Methods to Choose K</h4>
+<ul>
+<li><strong>Cross-validation:</strong> Try K = 1, 3, 5, 7, ..., √n and pick the one with best CV score</li>
+<li><strong>Rule of thumb:</strong> K = √n (square root of training samples) as a starting point</li>
+<li><strong>Elbow method:</strong> Plot K vs error rate, find the "elbow" where error stabilizes</li>
+</ul>
+<h4>Weighted KNN</h4>
+<p>Instead of equal voting, weight neighbors by inverse distance: <code>weight = 1 / distance</code>. Closer neighbors have more influence. Often better than plain KNN, especially for larger K values.</p>`},
+
+{id:"q61",ch:"ch5",title:"Why is feature scaling critical for KNN?",
+body:`<h4>The Problem</h4>
+<p>KNN computes distances. If Age ranges 0-100 and Income ranges 0-1,000,000, income dominates every distance calculation. Age becomes irrelevant regardless of its actual importance.</p>
+<h4>Solution</h4>
+<p>Scale all features to the same range before applying KNN:</p>
+<ul>
+<li><strong>StandardScaler:</strong> Zero mean, unit variance — works for Gaussian-like features</li>
+<li><strong>MinMaxScaler:</strong> Scale to [0, 1] — works when features have bounded ranges</li>
+<li><strong>RobustScaler:</strong> Uses median/IQR — robust to outliers</li>
+</ul>
+<h4>Also Applies To</h4>
+<ul>
+<li>K-Means clustering (same distance-based issue)</li>
+<li>SVM (especially with RBF kernel)</li>
+<li>PCA (maximizing variance is scale-dependent)</li>
+</ul>`},
+
+{id:"q62",ch:"ch5",title:"What are the advantages and disadvantages of KNN?",
+body:`<h4>Advantages</h4>
+<ul>
+<li><strong>No training phase:</strong> Instant "training" — just store data</li>
+<li><strong>No assumptions:</strong> Non-parametric — no assumption about data distribution</li>
+<li><strong>Simple to implement:</strong> Easy to understand and code</li>
+<li><strong>Naturally handles multi-class:</strong> No special modification needed</li>
+<li><strong>Adapts to any decision boundary:</strong> Given enough data, can approximate any function</li>
+</ul>
+<h4>Disadvantages</h4>
+<ul>
+<li><strong>Slow prediction:</strong> O(nd) per prediction — compute distance to ALL n training points with d features. For 1M training points, each prediction scans 1M distances.</li>
+<li><strong>Memory intensive:</strong> Must store entire training set</li>
+<li><strong>Curse of dimensionality:</strong> Fails in high dimensions</li>
+<li><strong>Sensitive to irrelevant features:</strong> All features contribute to distance equally</li>
+<li><strong>Requires feature scaling:</strong> Mandatory preprocessing step</li>
+<li><strong>No model insight:</strong> Doesn't tell you which features matter</li>
+</ul>`},
+
+{id:"q63",ch:"ch5",title:"How can you speed up KNN for large datasets?",
+body:`<h4>Exact Methods</h4>
+<ul>
+<li><strong>KD-Tree:</strong> Binary tree partitioning space. O(log n) average query time. Fails in high dimensions (d > 20).</li>
+<li><strong>Ball Tree:</strong> Hierarchical clustering of points. Better than KD-Tree for higher dimensions.</li>
+</ul>
+<h4>Approximate Methods</h4>
+<ul>
+<li><strong>Locality-Sensitive Hashing (LSH):</strong> Hash similar points to the same bucket. Sub-linear query time.</li>
+<li><strong>Annoy (Spotify):</strong> Random hyperplane partitioning. Very fast for recommendations.</li>
+<li><strong>FAISS (Facebook):</strong> GPU-accelerated similarity search. Handles billions of vectors.</li>
+<li><strong>HNSW:</strong> Hierarchical Navigable Small World graphs. Best accuracy/speed trade-off for many use cases.</li>
+</ul>
+<pre><code># sklearn automatically chooses the best algorithm
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=5, algorithm='auto')
+# 'auto' picks between brute, kd_tree, ball_tree</code></pre>`},
+
+{id:"q64",ch:"ch5",title:"What is distance-weighted KNN?",
+body:`<h4>Standard KNN</h4>
+<p>All K neighbors vote equally. A neighbor at distance 0.1 has the same influence as one at distance 10.</p>
+<h4>Distance-Weighted KNN</h4>
+<p>Weight each neighbor's vote by inverse distance: <code>weight = 1 / distance</code>. Closer neighbors have more influence on the prediction.</p>
+<h4>Benefits</h4>
+<ul>
+<li>More robust to the choice of K — even with large K, nearby points dominate</li>
+<li>Smoother decision boundaries</li>
+<li>Can use large K without losing sensitivity to local patterns</li>
+</ul>
+<pre><code>from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=15, weights='distance')</code></pre>`},
+
+{id:"q65",ch:"ch5",title:"When would you choose KNN over other algorithms?",
+body:`<h4>KNN Shines When:</h4>
+<ul>
+<li><strong>Very small data:</strong> < 1000 samples where complex models overfit</li>
+<li><strong>Low dimensionality:</strong> 2-10 features where distances are meaningful</li>
+<li><strong>Non-parametric baseline:</strong> Quick sanity check — if KNN works well, data has good spatial structure</li>
+<li><strong>Recommendation systems:</strong> "Users who are similar to you bought X" — collaborative filtering</li>
+<li><strong>Imputation:</strong> KNN imputation fills missing values using nearest neighbors</li>
+</ul>
+<h4>Don't Use KNN When:</h4>
+<ul>
+<li>Dataset > 100K rows (too slow)</li>
+<li>High dimensions > 20 (curse of dimensionality)</li>
+<li>Need interpretability (no feature importances)</li>
+<li>Production latency matters (slow inference)</li>
+</ul>`},
+
+{id:"q66",ch:"ch5",title:"What is the relationship between KNN and the Voronoi diagram?",
+body:`<h4>Voronoi Diagram</h4>
+<p>Partitions space into regions where each region contains all points closest to a specific training point. The decision boundary of 1-NN IS the Voronoi diagram.</p>
+<h4>With K > 1</h4>
+<p>The boundary becomes smoother as K increases — it's the boundary where the majority class among the K nearest training points changes. Higher K → smoother, more generalized boundaries.</p>
+<h4>Connection to Classification</h4>
+<p>KNN essentially estimates the posterior probability P(class|x) by looking at the local class distribution around x. As K→∞ and n→∞, KNN converges to the Bayes optimal classifier (the best possible classifier given the data distribution).</p>`},
+
+// ── Ch6: Naive Bayes & Probabilistic (Q67-Q74) ──
+{id:"q67",ch:"ch6",title:"What is Naive Bayes? Explain the algorithm and its 'naive' assumption.",
+body:`<h4>Bayes' Theorem</h4>
+<p><code>P(class|features) = P(features|class) × P(class) / P(features)</code></p>
+<h4>The 'Naive' Assumption</h4>
+<p>Assumes all features are <strong>conditionally independent</strong> given the class: P(x₁, x₂, ..., xₙ|class) = P(x₁|class) × P(x₂|class) × ... × P(xₙ|class)</p>
+<p>This is almost NEVER true in practice (words in text are correlated, symptoms co-occur), yet Naive Bayes often works surprisingly well because:</p>
+<ul>
+<li>The relative ordering of P(class|features) is often correct even if absolute probabilities aren't</li>
+<li>Classification depends on ranking probabilities, not their exact values</li>
+<li>The independence assumption simplifies computation from O(2ⁿ) to O(n)</li>
+</ul>
+<h4>Variants</h4>
+<table><thead><tr><th>Variant</th><th>Feature Type</th><th>Use Case</th></tr></thead><tbody>
+<tr><td>Gaussian NB</td><td>Continuous (assumes normal distribution)</td><td>General classification</td></tr>
+<tr><td>Multinomial NB</td><td>Counts (word frequencies)</td><td>Text classification (BoW/TF-IDF)</td></tr>
+<tr><td>Bernoulli NB</td><td>Binary (word present/absent)</td><td>Binary text features</td></tr>
+</tbody></table>`},
+
+{id:"q68",ch:"ch6",title:"Why does Naive Bayes work despite its 'wrong' assumption?",
+body:`<h4>Theoretical Explanations</h4>
+<ul>
+<li><strong>Optimal decision boundary:</strong> Even with wrong probability estimates, NB's decision boundary can be close to optimal if the Bayes-optimal boundary happens to be linear</li>
+<li><strong>Ranking vs estimation:</strong> Classification needs correct RANKING of P(class|x), not correct absolute probabilities. NB's rankings are often correct.</li>
+<li><strong>Low variance:</strong> NB has very few parameters to estimate → low variance → less overfitting. The bias from the wrong assumption is often compensated.</li>
+<li><strong>Dependencies cancel out:</strong> If feature pairs have both positive and negative correlations, their effects roughly cancel in the final prediction.</li>
+</ul>
+<h4>When NB Fails</h4>
+<ul>
+<li>Strong feature interactions that are critical for classification</li>
+<li>When correct probability estimates (not just rankings) matter</li>
+<li>When features are highly redundant (counted multiple times effectively)</li>
+</ul>`},
+
+{id:"q69",ch:"ch6",title:"What is the zero-frequency problem in Naive Bayes? How do you solve it?",
+body:`<h4>The Problem</h4>
+<p>If a feature value never appears with a class in training data, P(feature|class) = 0. Since NB multiplies probabilities: P(class|features) = 0 regardless of other features. One zero kills everything!</p>
+<h4>Solution: Laplace Smoothing (Add-k Smoothing)</h4>
+<p><code>P(xᵢ|class) = (count(xᵢ, class) + α) / (count(class) + α × |V|)</code></p>
+<p>where α is the smoothing parameter (typically α = 1 = Laplace) and |V| is the vocabulary size.</p>
+<h4>Intuition</h4>
+<p>Pretend every feature-class combination was seen α times. This shifts zero probabilities to small positive values while preserving relative differences between frequently and rarely seen combinations.</p>`},
+
+{id:"q70",ch:"ch6",title:"When is Naive Bayes a good choice?",
+body:`<h4>NB Excels At:</h4>
+<ul>
+<li><strong>Text classification:</strong> Spam detection, sentiment analysis, document categorization — NB's speed and decent accuracy make it ideal</li>
+<li><strong>Very small training sets:</strong> Fewer parameters = less overfitting risk. NB can work with 50-100 samples.</li>
+<li><strong>Real-time predictions:</strong> Extremely fast inference — just multiply probabilities</li>
+<li><strong>Multi-class with many classes:</strong> Scales linearly with number of classes</li>
+<li><strong>Baseline model:</strong> Quick benchmark before trying complex models</li>
+<li><strong>Missing features at inference:</strong> Can simply skip missing features (marginalize them out)</li>
+</ul>
+<h4>NB Struggles With:</h4>
+<ul>
+<li>Correlated features that interact (XOR-like problems)</li>
+<li>Numeric features with non-Gaussian distributions</li>
+<li>When well-calibrated probabilities are needed</li>
+</ul>`},
+
+{id:"q71",ch:"ch6",title:"Compare Naive Bayes vs Logistic Regression.",
+body:`<h4>Comparison</h4>
+<table><thead><tr><th>Aspect</th><th>Naive Bayes</th><th>Logistic Regression</th></tr></thead><tbody>
+<tr><td>Type</td><td>Generative (models P(X|Y))</td><td>Discriminative (models P(Y|X))</td></tr>
+<tr><td>Assumption</td><td>Feature independence</td><td>Linear decision boundary</td></tr>
+<tr><td>Training speed</td><td>Extremely fast</td><td>Fast (iterative)</td></tr>
+<tr><td>Small data</td><td>Better (fewer parameters)</td><td>Good with regularization</td></tr>
+<tr><td>Large data</td><td>LR usually wins</td><td>Better asymptotically</td></tr>
+<tr><td>Probability calibration</td><td>Poor (overconfident)</td><td>Well-calibrated by design</td></tr>
+<tr><td>Correlated features</td><td>Hurts performance</td><td>Handles OK with regularization</td></tr>
+</tbody></table>
+<h4>Rule of Thumb</h4>
+<p>NB converges faster (works better with less data), but LR has lower asymptotic error (better with more data). Try both, compare with CV.</p>`},
+
+{id:"q72",ch:"ch6",title:"What is Gaussian Naive Bayes? When do you use each variant?",
+body:`<h4>Gaussian NB</h4>
+<p>Assumes each feature follows a <strong>normal distribution</strong> within each class. Estimates mean (μ) and variance (σ²) per feature per class.</p>
+<p><code>P(xᵢ|class) = (1/√(2πσ²)) × exp(-(xᵢ-μ)²/(2σ²))</code></p>
+<h4>Choosing the Right Variant</h4>
+<ul>
+<li><strong>Gaussian NB:</strong> Continuous features that are roughly bell-shaped</li>
+<li><strong>Multinomial NB:</strong> Count data (word frequencies in text, TF-IDF values)</li>
+<li><strong>Bernoulli NB:</strong> Binary features (word present/absent in document)</li>
+<li><strong>Complement NB:</strong> For imbalanced text — estimates class complement instead of class itself</li>
+</ul>`},
+
+{id:"q73",ch:"ch6",title:"What are Bayesian methods in ML? Bayesian vs Frequentist.",
+body:`<h4>Frequentist Approach (Standard ML)</h4>
+<ul>
+<li>Parameters are fixed, unknown constants</li>
+<li>Find a single best estimate (MLE): <code>w* = argmax P(data|w)</code></li>
+<li>Point estimate — no uncertainty quantification</li>
+</ul>
+<h4>Bayesian Approach</h4>
+<ul>
+<li>Parameters have probability distributions — they're uncertain</li>
+<li>Combine prior beliefs with data: <code>P(w|data) ∝ P(data|w) × P(w)</code></li>
+<li>Get a full distribution over parameters → natural uncertainty quantification</li>
+</ul>
+<h4>Practical Benefits of Bayesian ML</h4>
+<ul>
+<li><strong>Uncertainty estimates:</strong> "I predict default with 75% probability ± 15%"</li>
+<li><strong>Works with small data:</strong> Prior regularizes when data is scarce</li>
+<li><strong>Automatic Occam's razor:</strong> Simpler models are naturally favored</li>
+<li><strong>Sequential updating:</strong> Can incorporate new data without retraining from scratch</li>
+</ul>`},
+
+{id:"q74",ch:"ch6",title:"What is Gaussian Mixture Model (GMM)? How does it differ from K-Means?",
+body:`<h4>GMM</h4>
+<p>A probabilistic clustering model. Assumes data comes from a mixture of K Gaussian distributions, each with its own mean and covariance.</p>
+<h4>GMM vs K-Means</h4>
+<table><thead><tr><th>Aspect</th><th>K-Means</th><th>GMM</th></tr></thead><tbody>
+<tr><td>Assignment</td><td>Hard (each point in one cluster)</td><td>Soft (probability of each cluster)</td></tr>
+<tr><td>Cluster shape</td><td>Spherical only</td><td>Elliptical (any shape via covariance)</td></tr>
+<tr><td>Output</td><td>Cluster labels</td><td>Probabilities per cluster</td></tr>
+<tr><td>Algorithm</td><td>Lloyd's (iterative reassignment)</td><td>EM (Expectation-Maximization)</td></tr>
+<tr><td>Speed</td><td>Faster</td><td>Slower</td></tr>
+</tbody></table>
+<h4>When to Use GMM</h4>
+<ul>
+<li>Clusters have different shapes/sizes/orientations</li>
+<li>You need soft assignments (e.g., a customer may belong 60% to segment A and 40% to segment B)</li>
+<li>Density estimation for anomaly detection</li>
+</ul>`},
+
+// ── Ch7: Clustering (Q75-Q86) ──
+{id:"q75",ch:"ch7",title:"How does K-Means work? Walk through the algorithm.",
+body:`<h4>Algorithm (Lloyd's)</h4>
+<ol>
+<li><strong>Initialize:</strong> Randomly place K centroids (or use K-Means++ for smarter init)</li>
+<li><strong>Assign:</strong> Assign each point to the nearest centroid</li>
+<li><strong>Update:</strong> Move each centroid to the mean of its assigned points</li>
+<li><strong>Repeat:</strong> Iterate assign-update until centroids stop moving (convergence)</li>
+</ol>
+<h4>K-Means++ Initialization</h4>
+<p>Standard random init can lead to poor clusters. K-Means++ spreads initial centroids apart:</p>
+<ol>
+<li>Choose first centroid randomly</li>
+<li>For each subsequent centroid, pick a point with probability proportional to its squared distance from the nearest existing centroid</li>
+<li>Repeat until K centroids are chosen</li>
+</ol>
+<h4>Limitations</h4>
+<ul>
+<li>Assumes spherical, equal-sized clusters</li>
+<li>Sensitive to initialization (use K-Means++, run multiple times)</li>
+<li>Must specify K in advance</li>
+<li>Sensitive to outliers (single outlier can shift a centroid)</li>
+</ul>`},
+
+{id:"q76",ch:"ch7",title:"How do you choose the optimal K in K-Means?",
+body:`<h4>Methods</h4>
+<ul>
+<li><strong>Elbow Method:</strong> Plot inertia (within-cluster sum of squares) vs K. Look for the "elbow" where adding clusters stops significantly reducing inertia. Subjective but common.</li>
+<li><strong>Silhouette Score:</strong> Measures how similar a point is to its own cluster vs nearest neighbor cluster. Range [-1, 1]. Higher = better. Choose K with highest average silhouette.</li>
+<li><strong>Gap Statistic:</strong> Compares within-cluster dispersion to that expected under a null reference distribution. More rigorous but computationally expensive.</li>
+<li><strong>Domain knowledge:</strong> Sometimes K is determined by business needs (e.g., 3 customer tiers: bronze, silver, gold).</li>
+</ul>
+<pre><code>from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+scores = []
+for k in range(2, 11):
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = km.fit_predict(X)
+    scores.append(silhouette_score(X, labels))
+best_k = range(2, 11)[scores.index(max(scores))]</code></pre>`},
+
+{id:"q77",ch:"ch7",title:"What is DBSCAN? How does it differ from K-Means?",
+body:`<h4>Algorithm</h4>
+<ul>
+<li><strong>Core points:</strong> Have at least min_samples neighbors within distance eps</li>
+<li><strong>Border points:</strong> Within eps of a core point but not core themselves</li>
+<li><strong>Noise points:</strong> Neither core nor border — outliers!</li>
+<li>Clusters form by connecting core points that are within eps of each other</li>
+</ul>
+<h4>DBSCAN vs K-Means</h4>
+<table><thead><tr><th>Aspect</th><th>K-Means</th><th>DBSCAN</th></tr></thead><tbody>
+<tr><td>Must specify K?</td><td>Yes</td><td>No — discovers K automatically</td></tr>
+<tr><td>Cluster shape</td><td>Spherical only</td><td>Arbitrary shapes</td></tr>
+<tr><td>Outlier handling</td><td>None (assigns all points)</td><td>Labels outliers as noise</td></tr>
+<tr><td>Parameters</td><td>K</td><td>eps, min_samples</td></tr>
+<tr><td>Cluster sizes</td><td>Similar sizes</td><td>Can find varying sizes</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your K-Means gives poor results on geographical data with oddly-shaped clusters. What do you try?"</strong></p>
+<p><strong>Answer:</strong> DBSCAN is perfect for geographical data because: (1) It finds arbitrary-shaped clusters (rivers, coastlines create non-spherical patterns), (2) It identifies outliers (isolated locations), (3) No need to guess K. I'd set eps based on the typical distance between nearby locations (use a k-distance plot to find the knee point) and min_samples ≥ 5. Alternative: HDBSCAN, which automatically adapts eps across different density regions.</p>
+</div>`},
+
+{id:"q78",ch:"ch7",title:"What is HDBSCAN? Why is it preferred over DBSCAN?",
+body:`<h4>Improvement Over DBSCAN</h4>
+<p>DBSCAN uses a <strong>single eps</strong> for the entire dataset — fails when clusters have different densities. HDBSCAN adapts to varying densities automatically.</p>
+<h4>Algorithm</h4>
+<ol>
+<li>Build a minimum spanning tree based on mutual reachability distances</li>
+<li>Create a hierarchy of clusterings at different density levels</li>
+<li>Extract the most stable clusters from the hierarchy</li>
+</ol>
+<h4>Advantages</h4>
+<ul>
+<li><strong>No eps parameter:</strong> Only min_cluster_size (intuitive: "minimum cluster should have at least 50 points")</li>
+<li><strong>Varying density:</strong> Finds dense clusters next to sparse clusters</li>
+<li><strong>Robust:</strong> Less sensitive to parameter choices than DBSCAN</li>
+<li><strong>Cluster persistence:</strong> Provides stability scores for each cluster</li>
+</ul>`},
+
+{id:"q79",ch:"ch7",title:"What is hierarchical clustering? Agglomerative vs Divisive.",
+body:`<h4>Agglomerative (Bottom-Up)</h4>
+<ol>
+<li>Start with each point as its own cluster</li>
+<li>Merge the two closest clusters</li>
+<li>Repeat until one cluster remains</li>
+<li>Cut the dendrogram at desired level to get K clusters</li>
+</ol>
+<h4>Linkage Methods</h4>
+<table><thead><tr><th>Method</th><th>Distance Between Clusters</th><th>Properties</th></tr></thead><tbody>
+<tr><td>Single</td><td>Minimum distance between any two points</td><td>Can find elongated clusters, sensitive to noise</td></tr>
+<tr><td>Complete</td><td>Maximum distance</td><td>Compact clusters, sensitive to outliers</td></tr>
+<tr><td>Average</td><td>Average of all pairwise distances</td><td>Compromise</td></tr>
+<tr><td>Ward's</td><td>Increase in within-cluster variance</td><td>Minimizes variance, compact spherical clusters</td></tr>
+</tbody></table>
+<h4>Divisive (Top-Down)</h4>
+<p>Start with all data in one cluster, recursively split. Less common, more expensive.</p>`},
+
+{id:"q80",ch:"ch7",title:"How do you evaluate clustering quality without labels?",
+body:`<h4>Internal Metrics (No Ground Truth)</h4>
+<ul>
+<li><strong>Silhouette Score:</strong> How similar a point is to its cluster vs nearest other cluster. Range [-1, 1]. Above 0.5 is good.</li>
+<li><strong>Calinski-Harabasz Index:</strong> Ratio of between-cluster variance to within-cluster variance. Higher = better.</li>
+<li><strong>Davies-Bouldin Index:</strong> Average similarity between clusters. Lower = better.</li>
+<li><strong>Inertia/WCSS:</strong> Sum of squared distances to centroids. Lower = tighter clusters (but always decreases with more K).</li>
+</ul>
+<h4>External Metrics (With Ground Truth)</h4>
+<ul>
+<li><strong>Adjusted Rand Index (ARI):</strong> Agreement between clusters and true labels, adjusted for chance. Range [-1, 1].</li>
+<li><strong>Normalized Mutual Information (NMI):</strong> Information shared between clusters and labels. Range [0, 1].</li>
+</ul>`},
+
+{id:"q81",ch:"ch7",title:"What is the silhouette score? How do you interpret it?",
+body:`<h4>Definition</h4>
+<p>For each point i:</p>
+<ul>
+<li><strong>a(i):</strong> Average distance to all other points in the SAME cluster (cohesion)</li>
+<li><strong>b(i):</strong> Average distance to all points in the NEAREST other cluster (separation)</li>
+<li><strong>s(i) = (b(i) - a(i)) / max(a(i), b(i))</strong></li>
+</ul>
+<h4>Interpretation</h4>
+<ul>
+<li><strong>s ≈ 1:</strong> Point is well-matched to its cluster, far from neighboring clusters</li>
+<li><strong>s ≈ 0:</strong> Point is on the boundary between two clusters</li>
+<li><strong>s < 0:</strong> Point is probably assigned to the wrong cluster</li>
+</ul>`},
+
+{id:"q82",ch:"ch7",title:"What is Mean Shift clustering?",
+body:`<h4>Algorithm</h4>
+<ol>
+<li>Place a window (kernel) at each data point</li>
+<li>Compute the mean of all points within the window</li>
+<li>Shift the window center to the mean</li>
+<li>Repeat until convergence — windows converge to density peaks</li>
+<li>Points converging to the same peak belong to the same cluster</li>
+</ol>
+<h4>Properties</h4>
+<ul>
+<li><strong>Automatic K:</strong> Number of clusters determined by number of density peaks</li>
+<li><strong>Non-parametric:</strong> No assumptions about cluster shape</li>
+<li><strong>One parameter:</strong> Bandwidth (kernel size)</li>
+<li><strong>Slow:</strong> O(n²T) — impractical for large datasets</li>
+</ul>`},
+
+{id:"q83",ch:"ch7",title:"When do you use clustering in production ML systems?",
+body:`<h4>Real-World Applications</h4>
+<ul>
+<li><strong>Customer segmentation:</strong> Group customers by behavior for targeted marketing</li>
+<li><strong>Anomaly detection:</strong> Points far from any cluster center are anomalies</li>
+<li><strong>Feature engineering:</strong> Cluster assignments as features for downstream supervised models</li>
+<li><strong>Image segmentation:</strong> Group pixels by color/texture</li>
+<li><strong>Document clustering:</strong> Group similar articles, emails, support tickets</li>
+<li><strong>Recommendation:</strong> Find similar items or users via cluster membership</li>
+<li><strong>Data exploration:</strong> Understand dataset structure before building models</li>
+</ul>`},
+
+{id:"q84",ch:"ch7",title:"Compare all clustering algorithms — decision guide.",
+body:`<h4>Quick Reference</h4>
+<table><thead><tr><th>Algorithm</th><th>K Required?</th><th>Cluster Shape</th><th>Outliers</th><th>Scalability</th></tr></thead><tbody>
+<tr><td>K-Means</td><td>Yes</td><td>Spherical</td><td>No handling</td><td>Very fast (O(nKT))</td></tr>
+<tr><td>DBSCAN</td><td>No</td><td>Arbitrary</td><td>Detects them</td><td>Good (O(n log n))</td></tr>
+<tr><td>HDBSCAN</td><td>No</td><td>Arbitrary, varying density</td><td>Detects them</td><td>Good</td></tr>
+<tr><td>GMM</td><td>Yes</td><td>Elliptical</td><td>Soft detection</td><td>Moderate</td></tr>
+<tr><td>Hierarchical</td><td>Flexible</td><td>Any (depends on linkage)</td><td>Depends</td><td>Slow (O(n²))</td></tr>
+<tr><td>Mean Shift</td><td>No</td><td>Arbitrary</td><td>Implicit</td><td>Slow (O(n²))</td></tr>
+</tbody></table>`},
+
+{id:"q85",ch:"ch7",title:"What is spectral clustering?",
+body:`<h4>Concept</h4>
+<p>Uses the <strong>eigenvalues of a similarity matrix</strong> to reduce dimensionality before clustering in the low-dimensional space. Can find clusters that are connected but not necessarily compact.</p>
+<h4>Algorithm</h4>
+<ol>
+<li>Compute similarity matrix (RBF kernel between all pairs)</li>
+<li>Compute graph Laplacian</li>
+<li>Find K smallest eigenvectors of the Laplacian</li>
+<li>Run K-Means on the eigenvector embedding</li>
+</ol>
+<h4>When to Use</h4>
+<ul>
+<li>Non-convex clusters (two moons, concentric circles)</li>
+<li>Graph-structured data (social networks, molecule structure)</li>
+<li>Image segmentation</li>
+</ul>`},
+
+{id:"q86",ch:"ch7",title:"What is Mini-Batch K-Means? When do you use it?",
+body:`<h4>Concept</h4>
+<p>Standard K-Means uses ALL data per iteration. Mini-Batch K-Means uses a <strong>random subset</strong> per iteration — much faster with minimal accuracy loss.</p>
+<h4>Speed Comparison</h4>
+<ul>
+<li>Standard K-Means on 1M points: ~minutes</li>
+<li>Mini-Batch K-Means on 1M points: ~seconds</li>
+</ul>
+<h4>When to Use</h4>
+<ul>
+<li>Large datasets (>100K points)</li>
+<li>When approximate clusters are acceptable</li>
+<li>Streaming data (can update incrementally)</li>
+<li>Quick prototyping</li>
+</ul>`},
+
+// ── Ch8: Dimensionality Reduction (Q87-Q96) ──
+{id:"q87",ch:"ch8",title:"What is PCA? Explain the full algorithm.",
+body:`<h4>Algorithm</h4>
+<ol>
+<li><strong>Standardize:</strong> Zero mean, unit variance for each feature</li>
+<li><strong>Compute covariance matrix:</strong> C = (1/n) XᵀX</li>
+<li><strong>Eigendecomposition:</strong> Find eigenvectors (directions) and eigenvalues (variance explained)</li>
+<li><strong>Sort:</strong> Order eigenvectors by eigenvalue (highest first)</li>
+<li><strong>Project:</strong> Multiply data by top-K eigenvectors to get K-dimensional representation</li>
+</ol>
+<h4>How to Choose K</h4>
+<ul>
+<li><strong>Explained variance ratio:</strong> Keep enough components to explain 95% of total variance</li>
+<li><strong>Scree plot:</strong> Plot eigenvalues, find the "elbow" where they plateau</li>
+<li><strong>Downstream task:</strong> Use cross-validation on the actual ML task with different K values</li>
+</ul>
+<pre><code>from sklearn.decomposition import PCA
+
+pca = PCA(n_components=0.95)  # Keep 95% of variance
+X_reduced = pca.fit_transform(X_scaled)
+print(f"Reduced from {X_scaled.shape[1]} to {X_reduced.shape[1]} features")
+print(f"Explained variance: {pca.explained_variance_ratio_.cumsum()[-1]:.2%}")</code></pre>`},
+
+{id:"q88",ch:"ch8",title:"What are t-SNE and UMAP? When do you use each?",
+body:`<h4>t-SNE</h4>
+<p>Non-linear dimensionality reduction optimized for <strong>2D/3D visualization</strong>. Preserves local structure — nearby points in high dimensions stay nearby in low dimensions.</p>
+<ul>
+<li><strong>Pros:</strong> Beautiful visualizations, reveals cluster structure</li>
+<li><strong>Cons:</strong> Slow (O(n²)), stochastic (different runs give different results), can't transform new data, distances between clusters are NOT meaningful</li>
+</ul>
+<h4>UMAP</h4>
+<p>Newer alternative that preserves both local AND global structure better than t-SNE.</p>
+<ul>
+<li><strong>Pros:</strong> Faster, preserves global structure better, can transform new data, works as a general dimensionality reduction (not just visualization)</li>
+<li><strong>Cons:</strong> More hyperparameters to tune</li>
+</ul>
+<h4>When to Use</h4>
+<ul>
+<li><strong>t-SNE:</strong> Publication-quality 2D visualizations of clusters</li>
+<li><strong>UMAP:</strong> General-purpose dimensionality reduction, feature engineering, visualization</li>
+<li><strong>Neither for:</strong> Feature preprocessing before training (use PCA — it's linear and invertible)</li>
+</ul>`},
+
+{id:"q89",ch:"ch8",title:"PCA vs t-SNE vs UMAP — when to use each?",
+body:`<h4>Decision Guide</h4>
+<table><thead><tr><th>Goal</th><th>Use</th><th>Why</th></tr></thead><tbody>
+<tr><td>Feature reduction for ML</td><td>PCA</td><td>Linear, fast, invertible, preserves global variance</td></tr>
+<tr><td>2D visualization</td><td>t-SNE or UMAP</td><td>Captures non-linear structure</td></tr>
+<tr><td>Noise reduction</td><td>PCA</td><td>Small components = noise</td></tr>
+<tr><td>Non-linear reduction</td><td>UMAP</td><td>Preserves manifold structure</td></tr>
+<tr><td>Large dataset (>100K)</td><td>PCA or UMAP</td><td>t-SNE too slow</td></tr>
+<tr><td>Transform new data</td><td>PCA or UMAP</td><td>t-SNE can't transform new points</td></tr>
+</tbody></table>`},
+
+{id:"q90",ch:"ch8",title:"What is Kernel PCA? When do you need it?",
+body:`<h4>Problem with Linear PCA</h4>
+<p>PCA finds linear projections. If the meaningful structure in data is non-linear (e.g., data lies on a curved manifold), PCA misses it.</p>
+<h4>Solution</h4>
+<p>Apply the kernel trick to PCA — implicitly map data to a high-dimensional space (via kernel function) and perform PCA there.</p>
+<h4>When to Use</h4>
+<ul>
+<li>Data lies on a non-linear manifold (swiss roll, concentric circles)</li>
+<li>Linear PCA doesn't capture meaningful structure</li>
+<li>Feature extraction for non-linear classification</li>
+</ul>`},
+
+{id:"q91",ch:"ch8",title:"What is LDA (Linear Discriminant Analysis)?",
+body:`<h4>Concept</h4>
+<p>Supervised dimensionality reduction — finds projections that <strong>maximize class separation</strong>. Unlike PCA (which maximizes total variance regardless of classes), LDA maximizes between-class variance relative to within-class variance.</p>
+<h4>Key Properties</h4>
+<ul>
+<li>Can reduce to at most K-1 dimensions (K = number of classes)</li>
+<li>Assumes normally distributed classes with equal covariance</li>
+<li>Also works as a classifier (not just dimensionality reduction)</li>
+</ul>
+<h4>PCA vs LDA</h4>
+<table><thead><tr><th>Aspect</th><th>PCA</th><th>LDA</th></tr></thead><tbody>
+<tr><td>Supervised?</td><td>No</td><td>Yes</td></tr>
+<tr><td>Objective</td><td>Max total variance</td><td>Max class separation</td></tr>
+<tr><td>Max components</td><td>min(n, p)</td><td>K - 1</td></tr>
+<tr><td>Assumptions</td><td>None</td><td>Normal distributions, equal covariance</td></tr>
+</tbody></table>`},
+
+{id:"q92",ch:"ch8",title:"What are autoencoders for dimensionality reduction?",
+body:`<h4>Architecture</h4>
+<p>Neural network with a bottleneck: Input → Encoder → Low-dimensional latent space → Decoder → Reconstructed input. The encoder learns a compressed representation.</p>
+<h4>Advantages Over PCA</h4>
+<ul>
+<li>Captures non-linear relationships</li>
+<li>Can handle complex data (images, text)</li>
+<li>Flexible architecture — can add constraints (sparsity, variational)</li>
+</ul>
+<h4>Variants</h4>
+<ul>
+<li><strong>Vanilla Autoencoder:</strong> Basic compression/reconstruction</li>
+<li><strong>Variational Autoencoder (VAE):</strong> Learns a probability distribution — can generate new data</li>
+<li><strong>Denoising Autoencoder:</strong> Input is corrupted, learns robust features</li>
+<li><strong>Sparse Autoencoder:</strong> Adds L1 penalty on activations for sparse representations</li>
+</ul>`},
+
+{id:"q93",ch:"ch8",title:"What is feature extraction vs feature selection?",
+body:`<h4>Feature Selection</h4>
+<p>Choose a <strong>subset</strong> of original features. Remaining features are interpretable — they're the original columns.</p>
+<ul>
+<li>Methods: Lasso, mutual information, tree-based importance, RFE</li>
+<li>Pro: Interpretability preserved</li>
+<li>Con: Limited to existing features</li>
+</ul>
+<h4>Feature Extraction</h4>
+<p>Create <strong>new features</strong> as combinations/transformations of originals. New features may not be interpretable.</p>
+<ul>
+<li>Methods: PCA, autoencoders, t-SNE, UMAP, embeddings</li>
+<li>Pro: Can capture complex patterns</li>
+<li>Con: Loss of interpretability</li>
+</ul>`},
+
+{id:"q94",ch:"ch8",title:"What is Truncated SVD? How does it relate to PCA?",
+body:`<h4>SVD (Singular Value Decomposition)</h4>
+<p><code>X = UΣVᵀ</code> — decomposes any matrix into three matrices.</p>
+<h4>Truncated SVD</h4>
+<p>Keep only the top K singular values/vectors → approximate X with lower-rank matrix.</p>
+<h4>Relationship to PCA</h4>
+<ul>
+<li>PCA on centered data is equivalent to SVD on the centered data matrix</li>
+<li>Truncated SVD works on raw data (no centering needed) → works with sparse matrices</li>
+<li>Use TruncatedSVD for sparse data (TF-IDF matrices, one-hot encoded data)</li>
+<li>Use PCA for dense data</li>
+</ul>`},
+
+{id:"q95",ch:"ch8",title:"What is ICA (Independent Component Analysis)?",
+body:`<h4>Concept</h4>
+<p>Finds statistically <strong>independent</strong> components in the data. Unlike PCA (which finds uncorrelated components), ICA finds components that are as independent as possible.</p>
+<h4>Classic Application: Cocktail Party Problem</h4>
+<p>Multiple microphones record mixed conversations. ICA separates the individual speakers' voices from the mixed recordings.</p>
+<h4>PCA vs ICA</h4>
+<ul>
+<li><strong>PCA:</strong> Uncorrelated components, ordered by variance explained</li>
+<li><strong>ICA:</strong> Independent components, no natural ordering</li>
+<li>Uncorrelated ≠ independent. Independence is a stronger condition.</li>
+</ul>`},
+
+{id:"q96",ch:"ch8",title:"What is the manifold hypothesis? Why does dimensionality reduction work?",
+body:`<h4>The Hypothesis</h4>
+<p>Real-world high-dimensional data lies on or near a <strong>low-dimensional manifold</strong> embedded in the high-dimensional space.</p>
+<h4>Why It's True</h4>
+<ul>
+<li>Images: A 256×256 image has 65,536 dimensions, but the space of "meaningful images" is tiny compared to all possible pixel combinations</li>
+<li>Text: Word2Vec maps 100K vocabulary to 300 dimensions because most meaning lies in a low-dimensional semantic space</li>
+<li>Physical constraints: Real-world data is generated by processes with far fewer degrees of freedom than the observation space</li>
+</ul>
+<h4>Implication</h4>
+<p>Dimensionality reduction works because we're not throwing away information — we're finding the low-dimensional manifold where the data truly lives.</p>`},
+
+// ── Ch9: Algorithm Selection & Comparison (Q97-Q108) ──
+{id:"q97",ch:"ch9",title:"Algorithm cheat sheet: Which algorithm for which problem?",
+body:`<h4>Quick Decision Guide</h4>
+<table><thead><tr><th>Scenario</th><th>First Try</th><th>Then Try</th></tr></thead><tbody>
+<tr><td>Tabular + Classification</td><td>XGBoost/LightGBM</td><td>Random Forest, LR</td></tr>
+<tr><td>Tabular + Regression</td><td>XGBoost/LightGBM</td><td>Ridge/Lasso, RF Regressor</td></tr>
+<tr><td>Text Classification</td><td>BERT fine-tune</td><td>TF-IDF + LR/SVM</td></tr>
+<tr><td>Image Classification</td><td>Pre-trained CNN fine-tune</td><td>ResNet, EfficientNet</td></tr>
+<tr><td>Small Data (<500 samples)</td><td>Logistic Regression, Naive Bayes</td><td>KNN, Transfer Learning</td></tr>
+<tr><td>Clustering</td><td>K-Means / HDBSCAN</td><td>GMM, Spectral</td></tr>
+<tr><td>Anomaly Detection</td><td>Isolation Forest</td><td>One-Class SVM, Autoencoder</td></tr>
+<tr><td>Recommender System</td><td>Matrix Factorization</td><td>Two-tower Neural Network</td></tr>
+<tr><td>Time Series</td><td>XGBoost with lag features</td><td>LSTM, Prophet</td></tr>
+</tbody></table>`},
+
+{id:"q98",ch:"ch9",title:"What is Isolation Forest? How does it detect anomalies?",
+body:`<h4>Intuition</h4>
+<p>Anomalies are <strong>few and different</strong>. In a random tree, anomalies get isolated (reach a leaf node) in fewer splits than normal points.</p>
+<h4>Algorithm</h4>
+<ol>
+<li>Build random trees by randomly selecting features and random split values</li>
+<li>Measure the <strong>path length</strong> (number of splits) to isolate each point</li>
+<li>Short path → easy to isolate → likely anomaly</li>
+<li>Long path → buried in dense region → likely normal</li>
+</ol>
+<h4>Advantages</h4>
+<ul>
+<li><strong>No distance computation:</strong> O(n·T·log(n)) — much faster than distance-based methods</li>
+<li><strong>Handles high dimensions:</strong> Random feature selection avoids curse of dimensionality</li>
+<li><strong>No need for labeled anomalies:</strong> Completely unsupervised</li>
+<li><strong>Scales well:</strong> Works on millions of samples</li>
+</ul>
+<pre><code>from sklearn.ensemble import IsolationForest
+
+clf = IsolationForest(contamination=0.01, random_state=42)
+predictions = clf.fit_predict(X)  # -1 = anomaly, 1 = normal</code></pre>`},
+
+{id:"q99",ch:"ch9",title:"What is the difference between parametric and non-parametric algorithms?",
+body:`<h4>Parametric</h4>
+<p>Fixed number of parameters regardless of training data size. The model structure is determined before seeing data.</p>
+<ul>
+<li>Examples: Linear/Logistic Regression, Naive Bayes, Linear SVM</li>
+<li>Pros: Fast, low memory, less overfitting risk, interpretable</li>
+<li>Cons: Strong assumptions, limited complexity</li>
+</ul>
+<h4>Non-Parametric</h4>
+<p>Model complexity grows with training data. No fixed form assumed.</p>
+<ul>
+<li>Examples: KNN, Decision Trees, Random Forest, SVM with kernel</li>
+<li>Pros: Flexible, fewer assumptions, adapts to complex patterns</li>
+<li>Cons: Slower, needs more data, overfitting risk</li>
+</ul>`},
+
+{id:"q100",ch:"ch9",title:"Scenario: Client has tabular data with 50 features, 1M rows. Which model and why?",
+body:`<h4>Recommended: LightGBM</h4>
+<p>For 1M rows of tabular data, LightGBM is the clear winner:</p>
+<ul>
+<li><strong>Speed:</strong> Fastest training among gradient boosting libraries on large data (histogram-based, GOSS, EFB)</li>
+<li><strong>Memory:</strong> Lower memory footprint than XGBoost due to histograms</li>
+<li><strong>Accuracy:</strong> Competitive or better than XGBoost on large data</li>
+<li><strong>Native categorical handling:</strong> No need for one-hot encoding</li>
+<li><strong>Missing values:</strong> Handled automatically</li>
+</ul>
+<h4>Comparison for This Scenario</h4>
+<ul>
+<li><strong>Logistic Regression:</strong> Fast but likely underfits with 50 features and non-linear relationships</li>
+<li><strong>Random Forest:</strong> Good but slower and slightly less accurate than boosting</li>
+<li><strong>XGBoost:</strong> Great but slower than LightGBM at 1M rows</li>
+<li><strong>Neural Network:</strong> For tabular data, unlikely to beat tree-based models and much harder to tune</li>
+<li><strong>SVM:</strong> O(n²) — impractical at 1M rows</li>
+</ul>`},
+
+{id:"q101",ch:"ch9",title:"Scenario: You need a model that's easily explainable to regulators. What do you choose?",
+body:`<h4>Recommended: Logistic Regression or Shallow Decision Tree</h4>
+<ul>
+<li><strong>Logistic Regression:</strong> Coefficients directly interpretable as odds ratios. "Each additional year of account age reduces default odds by 8%." Regulators in finance love this.</li>
+<li><strong>Decision Tree (depth ≤ 4):</strong> Can be visualized as a flowchart. "If debt-to-income > 0.4 AND credit score < 620 → high risk." Easy for non-technical stakeholders.</li>
+<li><strong>Scorecard models:</strong> Based on logistic regression, industry standard in credit risk.</li>
+</ul>
+<h4>If Complex Model Required</h4>
+<p>Use XGBoost with SHAP explanations. SHAP provides both global feature importance and local explanations for each prediction. Many regulators now accept SHAP-based explanations alongside model documentation.</p>`},
+
+{id:"q102",ch:"ch9",title:"Scenario: Your training data arrives as a stream. Which algorithms can handle this?",
+body:`<h4>Online Learning Algorithms</h4>
+<ul>
+<li><strong>SGD Classifier/Regressor:</strong> Logistic regression and SVM via stochastic gradient descent. <code>partial_fit()</code> in sklearn.</li>
+<li><strong>Naive Bayes:</strong> Naturally incremental — update counts with each new sample</li>
+<li><strong>Online Random Forest:</strong> Mondrian Forests, Adaptive Random Forest (ARF)</li>
+<li><strong>River library:</strong> Python library specifically for online/streaming ML</li>
+<li><strong>Hoeffding Trees:</strong> Decision trees designed for streaming data</li>
+</ul>
+<h4>Strategy for Production</h4>
+<p>Hybrid approach: (1) Train a batch model offline on historical data (XGBoost), (2) Deploy an online model (SGD) for quick adaptation, (3) Periodically retrain the batch model with accumulated new data, (4) Combine both via weighted ensemble.</p>`},
+
+{id:"q103",ch:"ch9",title:"What is the difference between lazy and eager learners?",
+body:`<h4>Lazy Learners (Instance-Based)</h4>
+<ul>
+<li>Store training data, defer all computation to prediction time</li>
+<li><strong>Examples:</strong> KNN, Locally Weighted Regression</li>
+<li><strong>Pros:</strong> Adapt to new data immediately, simple to update</li>
+<li><strong>Cons:</strong> Slow prediction (O(n) per query), high memory</li>
+</ul>
+<h4>Eager Learners</h4>
+<ul>
+<li>Build a model during training, discard raw data (usually)</li>
+<li><strong>Examples:</strong> Linear Regression, Decision Trees, SVM, Neural Networks</li>
+<li><strong>Pros:</strong> Fast prediction (just apply learned function), compact model</li>
+<li><strong>Cons:</strong> Longer training, need to retrain for new data</li>
+</ul>`},
+
+{id:"q104",ch:"ch9",title:"Compare all major supervised learning algorithms.",
+body:`<h4>Comprehensive Comparison</h4>
+<table><thead><tr><th>Algorithm</th><th>Speed</th><th>Accuracy</th><th>Interpretability</th><th>Best For</th></tr></thead><tbody>
+<tr><td>Logistic Regression</td><td>Very Fast</td><td>Good (linear)</td><td>High</td><td>Baselines, regulated industries</td></tr>
+<tr><td>Naive Bayes</td><td>Very Fast</td><td>OK</td><td>High</td><td>Text, tiny data</td></tr>
+<tr><td>KNN</td><td>Slow pred</td><td>Good</td><td>Medium</td><td>Small data, imputation</td></tr>
+<tr><td>Decision Tree</td><td>Fast</td><td>Medium</td><td>Very High</td><td>Explainability, rules</td></tr>
+<tr><td>Random Forest</td><td>Fast</td><td>High</td><td>Medium</td><td>Robust baseline, noisy data</td></tr>
+<tr><td>XGBoost</td><td>Fast</td><td>Very High</td><td>Low</td><td>Tabular data, competitions</td></tr>
+<tr><td>LightGBM</td><td>Fastest</td><td>Very High</td><td>Low</td><td>Large tabular data</td></tr>
+<tr><td>SVM</td><td>Moderate</td><td>High</td><td>Low</td><td>High-dim text, small data</td></tr>
+<tr><td>Neural Network</td><td>Slow</td><td>Highest</td><td>Very Low</td><td>Unstructured data</td></tr>
+</tbody></table>`},
+
+{id:"q105",ch:"ch9",title:"Scenario: You're building an ML model for a startup with limited compute. How do you choose?",
+body:`<h4>Constraints</h4>
+<ul>
+<li>Limited GPU budget (maybe no GPU)</li>
+<li>Small team (1-2 ML engineers)</li>
+<li>Need fast iteration and deployment</li>
+<li>Data probably < 100K rows initially</li>
+</ul>
+<h4>Recommendation</h4>
+<ol>
+<li><strong>Start with Logistic Regression/XGBoost:</strong> CPU-only, fast training, good accuracy on tabular data</li>
+<li><strong>For NLP:</strong> TF-IDF + Logistic Regression as baseline, then fine-tune a small pre-trained model (DistilBERT) if needed</li>
+<li><strong>For images:</strong> Use pre-trained models (EfficientNet-B0) with minimal fine-tuning. Don't train from scratch.</li>
+<li><strong>Deploy:</strong> Flask/FastAPI for simple REST API. Pickle serialization for model storage. Docker for reproducibility.</li>
+<li><strong>Scale later:</strong> Move to managed ML platforms (SageMaker, Vertex AI) when you have product-market fit and growing data</li>
+</ol>`},
+
+{id:"q106",ch:"ch9",title:"What is the time and space complexity of major ML algorithms?",
+body:`<h4>Training Complexity</h4>
+<table><thead><tr><th>Algorithm</th><th>Time</th><th>Space</th></tr></thead><tbody>
+<tr><td>Linear Regression (OLS)</td><td>O(np² + p³)</td><td>O(np)</td></tr>
+<tr><td>Linear Regression (SGD)</td><td>O(npE)</td><td>O(p)</td></tr>
+<tr><td>Logistic Regression</td><td>O(npE)</td><td>O(p)</td></tr>
+<tr><td>KNN</td><td>O(1) — just store</td><td>O(np)</td></tr>
+<tr><td>Decision Tree</td><td>O(np·log(n))</td><td>O(tree size)</td></tr>
+<tr><td>Random Forest</td><td>O(B·n·√p·log(n))</td><td>O(B·tree size)</td></tr>
+<tr><td>SVM (kernel)</td><td>O(n²p) to O(n³)</td><td>O(n²)</td></tr>
+<tr><td>K-Means</td><td>O(nKTp)</td><td>O(nK)</td></tr>
+</tbody></table>
+<p>n = samples, p = features, E = epochs, B = trees, K = clusters, T = iterations</p>`},
+
+{id:"q107",ch:"ch9",title:"What is the Bias-Variance trade-off for different algorithms?",
+body:`<h4>Algorithm Positioning</h4>
+<table><thead><tr><th>Algorithm</th><th>Bias</th><th>Variance</th><th>Typical Behavior</th></tr></thead><tbody>
+<tr><td>Linear Regression</td><td>High</td><td>Low</td><td>Underfits complex data</td></tr>
+<tr><td>KNN (K=1)</td><td>Low</td><td>Very High</td><td>Overfits noise</td></tr>
+<tr><td>KNN (K=large)</td><td>High</td><td>Low</td><td>Underfits</td></tr>
+<tr><td>Decision Tree (deep)</td><td>Low</td><td>Very High</td><td>Memorizes training</td></tr>
+<tr><td>Random Forest</td><td>Low</td><td>Medium-Low</td><td>Bagging reduces variance</td></tr>
+<tr><td>XGBoost</td><td>Very Low</td><td>Low-Medium</td><td>Boosting reduces bias</td></tr>
+<tr><td>Neural Network</td><td>Very Low</td><td>High</td><td>Needs regularization</td></tr>
+</tbody></table>`},
+
+{id:"q108",ch:"ch9",title:"Final scenario: Design an ML approach for predicting house prices.",
+body:`<h4>Complete Solution</h4>
+<ol>
+<li><strong>Problem:</strong> Regression — predict continuous house price</li>
+<li><strong>EDA:</strong> Check target distribution (often log-normal → log-transform it), visualize feature correlations, identify outliers (mansions vs normal homes)</li>
+<li><strong>Features:</strong>
+  <ul>
+  <li>Numerical: sqft, bedrooms, bathrooms, year_built, lot_size</li>
+  <li>Categorical: neighborhood, house_type, school_district</li>
+  <li>Engineered: price_per_sqft in neighborhood (target encode), age_of_house, renovation_recency, distance_to_downtown</li>
+  </ul>
+</li>
+<li><strong>Preprocessing:</strong> Log-transform target (skewed), target-encode neighborhoods (high cardinality), handle missing values</li>
+<li><strong>Models to Try:</strong>
+  <ul>
+  <li>Baseline: Ridge Regression (interpretable)</li>
+  <li>Main: XGBoost/LightGBM (best tabular performance)</li>
+  <li>Advanced: Stack Ridge + RF + XGBoost with Linear meta-learner</li>
+  </ul>
+</li>
+<li><strong>Evaluation:</strong> RMSE on log-prices (or MAPE for business interpretation). Time-based split (predict future prices from past).</li>
+<li><strong>Deployment:</strong> Batch predictions for listings, refresh weekly. Monitor for market shift (data drift).</li>
+</ol>`}
+];
+
+// ═══ MOCK TEST BANK ═══
+var QB=[
+{tp:"Linear Models",d:1,q:"Linear Regression minimizes which loss function?",o:["Cross-entropy","Mean Squared Error (MSE)","Hinge loss","Log loss"],a:1,x:"Linear Regression minimizes the sum of squared errors between predictions and actual values."},
+{tp:"Linear Models",d:2,q:"Lasso (L1) regularization can drive weights to exactly zero because:",o:["It uses squared penalty","Its diamond constraint hits corners where coordinates are zero","It's faster than Ridge","It doesn't penalize weights"],a:1,x:"L1's diamond constraint region has corners at axes where some coordinates are zero."},
+{tp:"Linear Models",d:2,q:"Logistic Regression outputs probabilities using:",o:["ReLU function","Sigmoid function that maps to (0,1)","Linear function","Softmax only"],a:1,x:"Sigmoid: σ(z) = 1/(1+e^(-z)) squashes any value to probability range (0,1)."},
+{tp:"Trees",d:1,q:"Decision Trees split nodes to maximize:",o:["Accuracy directly","Information gain or minimize impurity (Gini/Entropy)","Tree depth","Number of leaves"],a:1,x:"Splits are chosen to maximize information gain (entropy reduction) or minimize Gini impurity."},
+{tp:"Trees",d:2,q:"Random Forest reduces overfitting compared to a single decision tree by:",o:["Using deeper trees","Averaging many diverse trees trained on different data subsets","Using fewer features total","Pruning more aggressively"],a:1,x:"Bagging + feature randomization create diverse trees. Averaging reduces variance dramatically."},
+{tp:"Trees",d:2,q:"The out-of-bag (OOB) score in Random Forest approximates:",o:["Training accuracy","Cross-validation accuracy without needing a validation set","Feature importance","Optimal K"],a:1,x:"Each sample is OOB for ~37% of trees, giving a free CV-like validation estimate."},
+{tp:"Boosting",d:2,q:"XGBoost differs from standard Gradient Boosting by adding:",o:["Only more trees","Regularization on leaf weights + second-order optimization","Random feature subsampling only","None — they're identical"],a:1,x:"XGBoost adds L1/L2 regularization on leaves and uses Hessian (2nd derivative) for better splits."},
+{tp:"Boosting",d:2,q:"LightGBM's leaf-wise growth can overfit on small data because:",o:["It's slower","It creates very deep paths by always splitting the highest-gain leaf","It doesn't use regularization","It ignores features"],a:1,x:"Leaf-wise aggressively pursues high-gain splits creating deep, asymmetric trees that memorize noise."},
+{tp:"Boosting",d:1,q:"CatBoost's main advantage over XGBoost is:",o:["Faster training always","Native categorical feature handling without manual encoding","GPU support","More trees"],a:1,x:"CatBoost's ordered target encoding handles categoricals natively without leakage."},
+{tp:"SVM",d:2,q:"The kernel trick in SVM allows:",o:["Faster training","Computing dot products in high-dimensional space without explicit transformation","Handling missing values","Reducing features"],a:1,x:"K(x,y) = φ(x)·φ(y) computed directly, enabling non-linear boundaries without expensive transformation."},
+{tp:"SVM",d:1,q:"The C parameter in SVM controls:",o:["Number of support vectors","Trade-off between margin width and misclassification tolerance","Kernel type","Feature scaling"],a:1,x:"Large C = narrow margin, few errors. Small C = wider margin, more tolerance for errors."},
+{tp:"KNN",d:1,q:"KNN is called a 'lazy learner' because:",o:["It's inaccurate","It stores data and does all computation at prediction time","It trains slowly","It uses few features"],a:1,x:"No training phase. All work happens at prediction: compute distances to ALL training points."},
+{tp:"KNN",d:2,q:"KNN fails in high dimensions because:",o:["It runs out of memory","All points become roughly equidistant — distances lose meaning","It can't handle many features","The algorithm is too simple"],a:1,x:"Curse of dimensionality: in 1000D, the concept of 'nearest' neighbor becomes meaningless."},
+{tp:"NaiveBayes",d:2,q:"Naive Bayes assumes features are:",o:["Normally distributed","Conditionally independent given the class","Highly correlated","Binary"],a:1,x:"The 'naive' assumption: P(x1,x2|class) = P(x1|class) × P(x2|class). Rarely true but often works."},
+{tp:"NaiveBayes",d:1,q:"Laplace smoothing in Naive Bayes prevents:",o:["Overfitting","Zero probability for unseen feature-class combinations","Slow training","Missing values"],a:1,x:"Without smoothing, one zero probability kills the entire posterior. Adding α prevents this."},
+{tp:"Clustering",d:2,q:"DBSCAN's main advantage over K-Means is:",o:["Faster training","Finding arbitrary-shaped clusters and detecting outliers","Better with spherical clusters","Simpler parameters"],a:1,x:"DBSCAN finds clusters of any shape, detects outliers as noise, and doesn't need K specified."},
+{tp:"Clustering",d:1,q:"The silhouette score measures:",o:["Cluster count","How well points match their cluster vs nearest other cluster","Training speed","Feature importance"],a:1,x:"s(i) = (b-a)/max(a,b). Near 1 = well-clustered, near 0 = boundary, negative = wrong cluster."},
+{tp:"DimReduction",d:2,q:"PCA finds directions that:",o:["Minimize distance to origin","Maximize variance of projected data","Maximize class separation","Minimize feature count"],a:1,x:"PCA's principal components are directions of maximum variance, found via eigendecomposition."},
+{tp:"DimReduction",d:2,q:"t-SNE is NOT suitable for:",o:["2D visualization","Feature preprocessing for downstream ML models","Exploring cluster structure","High-dimensional data visualization"],a:1,x:"t-SNE is non-deterministic, can't transform new data, and distorts global distances. Use PCA for preprocessing."},
+{tp:"Selection",d:2,q:"For 1M rows of tabular data, which is typically fastest AND most accurate?",o:["SVM with RBF kernel","LightGBM","KNN","Logistic Regression"],a:1,x:"LightGBM: histogram-based splits, GOSS sampling, EFB bundling — designed for large tabular data."},
+{tp:"Selection",d:2,q:"Isolation Forest detects anomalies by:",o:["Computing distances to all points","Measuring how quickly random trees isolate a point","Clustering then finding outliers","Using labeled anomalies"],a:1,x:"Anomalies are few and different — they get isolated in fewer random splits than normal points."},
+{tp:"Selection",d:2,q:"For a regulated industry requiring model explainability, best choice is:",o:["Deep neural network","Logistic Regression with odds ratios","XGBoost","Random Forest"],a:1,x:"Logistic Regression coefficients are directly interpretable as odds ratios — regulators love this."},
+{tp:"Selection",d:1,q:"Which ensemble method reduces variance the most?",o:["Boosting","Bagging (e.g., Random Forest)","Stacking","Single deep tree"],a:1,x:"Bagging averages many independent models, directly reducing variance. Boosting primarily reduces bias."},
+{tp:"Boosting",d:2,q:"Early stopping in XGBoost monitors:",o:["Training loss only","Validation loss — stops when it hasn't improved for N rounds","Feature importance","Tree depth"],a:1,x:"Early stopping watches validation metric and stops adding trees when no improvement for patience rounds."},
+{tp:"Trees",d:2,q:"Gini impurity and entropy for decision tree splits produce:",o:["Very different trees","Very similar trees in practice (<2% disagreement)","Gini always better","Entropy always better"],a:1,x:"They produce nearly identical splits. Gini is default because it's slightly faster (no log computation)."},
+{tp:"Linear Models",d:2,q:"Elastic Net is preferred over pure Lasso when:",o:["All features are independent","Features are correlated and you want both selection and stability","Data is very small","Only for regression"],a:1,x:"Lasso picks one from correlated groups randomly. Elastic Net selects/discards entire groups together."},
+{tp:"Clustering",d:2,q:"HDBSCAN improves on DBSCAN by:",o:["Being faster","Handling clusters with varying densities without a fixed eps","Using K-Means internally","Requiring fewer parameters"],a:1,x:"DBSCAN uses one eps for all — fails with varying density. HDBSCAN adapts to local density."},
+{tp:"SVM",d:2,q:"SVM is NOT practical for which scenario?",o:["High-dimensional text data","Small datasets","Datasets with >1 million samples","Binary classification"],a:1,x:"SVM scales O(n²) to O(n³). At 1M+ samples it's impractically slow. Use tree-based models instead."},
+{tp:"Selection",d:2,q:"Knowledge distillation trains a small student model to mimic a large teacher. Why use soft labels?",o:["They're easier to compute","They contain dark knowledge about inter-class similarities","They reduce training time","They eliminate the need for the teacher"],a:1,x:"Soft outputs like [0.7, 0.2, 0.1] reveal the teacher's 'dark knowledge' about class relationships."}
+];
+
+// ═══ ENGINE ═══
+var prog={},PROG_KEY="ml_algo_progress";
+function loadProg(){try{var d=localStorage.getItem(PROG_KEY);if(d)prog=JSON.parse(d)}catch(e){prog={}}}
+function saveProg(){try{localStorage.setItem(PROG_KEY,JSON.stringify(prog))}catch(e){}}
+function renderQuestions(){
+var main=document.getElementById('mainContent');
+var chapters={ch0:{title:"⚙️ ML Algorithms Deep Dive — Complete Interview Guide",desc:"108 conceptual and scenario-based questions covering every major ML algorithm."},ch1:{title:"📈 Linear & Logistic Regression",desc:"Foundation algorithms: regression, classification, regularization."},ch2:{title:"🌳 Decision Trees & Ensembles",desc:"Trees, Random Forest, Bagging, Boosting, Stacking."},ch3:{title:"🚀 XGBoost, LightGBM & CatBoost",desc:"Modern gradient boosting frameworks and their internals."},ch4:{title:"🎯 SVM & Kernel Methods",desc:"Support vector machines, kernels, and margins."},ch5:{title:"📍 KNN & Distance-Based",desc:"K-nearest neighbors, distance metrics, lazy learning."},ch6:{title:"🎲 Naive Bayes & Probabilistic",desc:"Bayesian classification and probabilistic models."},ch7:{title:"🔵 Clustering Algorithms",desc:"K-Means, DBSCAN, HDBSCAN, hierarchical, and more."},ch8:{title:"📉 Dimensionality Reduction",desc:"PCA, t-SNE, UMAP, autoencoders, and manifold learning."},ch9:{title:"⚡ Algorithm Selection & Comparison",desc:"When to use which algorithm — decision guides and scenarios."},mock:{title:"🎯 Mock Tests",desc:"Test your ML algorithm knowledge."}};
+var html='';
+for(var ch in chapters){var info=chapters[ch];var qs=ch==='ch0'?QDB:(ch==='mock'?[]:QDB.filter(function(q){return q.ch===ch}));
+html+='<section id="'+ch+'" class="content-section'+(ch==='ch0'?' active':'')+'"><h1>'+info.title+'</h1><p style="color:var(--tx2);margin-bottom:20px">'+info.desc+'</p>';
+if(ch==='mock'){html+='<div id="mockArea"></div>'}else{qs.forEach(function(q,i){var num=ch==='ch0'?(i+1):(qs.indexOf(q)+1);html+='<div class="dd" data-sub-id="'+q.id+'"><button class="dd-head" onclick="toggleSub(this)"><span class="dd-chk" id="chk_'+q.id+'"></span><span class="dd-t">Q'+num+': '+q.title+'</span><svg class="dd-arr" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><div class="dd-body" id="body_'+q.id+'">'+q.body+'<button class="done-btn" onclick="markDone(\''+q.id+'\',this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Mark Complete</button></div></div>'})}
+html+='</section>'}
+main.innerHTML=html}
+function toggleSub(btn){var isOpen=btn.classList.contains('open');document.querySelectorAll('.dd-head.open').forEach(function(h){h.classList.remove('open');h.nextElementSibling.classList.remove('open')});if(!isOpen){btn.classList.add('open');btn.nextElementSibling.classList.add('open')}}
+function markDone(subId,btn){if(prog[subId]){delete prog[subId];btn.classList.remove('ok');btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Mark Complete';var chk=document.getElementById('chk_'+subId);if(chk)chk.classList.remove('ok');var dd=btn.closest('.dd');if(dd)dd.classList.remove('done')}else{prog[subId]=1;btn.classList.add('ok');btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Completed ✓';var chk=document.getElementById('chk_'+subId);if(chk)chk.classList.add('ok');var dd=btn.closest('.dd');if(dd)dd.classList.add('done');showToast('✓ Marked complete!')}saveProg();updStats()}
+function applyDone(){for(var id in prog){var chk=document.getElementById('chk_'+id);if(chk){chk.classList.add('ok');var dd=chk.closest('.dd');if(dd)dd.classList.add('done');var btn=dd?dd.querySelector('.done-btn'):null;if(btn){btn.classList.add('ok');btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Completed ✓'}}}}
+function updStats(){var seen={};document.querySelectorAll('[data-sub-id]').forEach(function(s){seen[s.getAttribute('data-sub-id')]=true});var total=Object.keys(seen).length,done=0;for(var k in seen)if(prog[k])done++;document.getElementById('stDone').textContent=done;document.getElementById('stTotal').textContent=total;var pct=total?Math.round(done/total*100):0;document.getElementById('pbar').style.width=pct+'%';document.getElementById('pringBar').style.width=pct+'%';['ch1','ch2','ch3','ch4','ch5','ch6','ch7','ch8','ch9'].forEach(function(ch){var sec=document.getElementById(ch);if(!sec)return;var subs=sec.querySelectorAll('[data-sub-id]'),t=subs.length,d=0;subs.forEach(function(s){if(prog[s.getAttribute('data-sub-id')])d++});var np=document.getElementById('np_'+ch);if(np&&t)np.textContent=d+'/'+t});var np0=document.getElementById('np_ch0');if(np0)np0.textContent=done+'/'+total}
+function showSection(id){document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active')});var sec=document.getElementById(id);if(sec)sec.classList.add('active');document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.getAttribute('data-section')===id)});if(id==='mock')renderMockHome();if(window.innerWidth<768)toggleSidebar();window.scrollTo(0,0)}
+function handleSearch(q){if(!q){document.querySelectorAll('.dd').forEach(function(d){d.style.display=''});return}q=q.toLowerCase();document.querySelectorAll('.dd').forEach(function(d){var t=d.querySelector('.dd-t');d.style.display=t&&t.textContent.toLowerCase().includes(q)?'':'none'})}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open')}
+function toggleTheme(){var b=document.body;if(b.getAttribute('data-theme')==='light')b.removeAttribute('data-theme');else b.setAttribute('data-theme','light');document.getElementById('themeBtn').innerHTML=(b.getAttribute('data-theme')==='light')?'☀️ <span class="bl">Light</span>':'🌙 <span class="bl">Dark</span>'}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
+function resetProgress(){if(!confirm('Reset all progress?'))return;prog={};saveProg();document.querySelectorAll('.dd').forEach(function(d){d.classList.remove('done')});document.querySelectorAll('.dd-chk').forEach(function(c){c.classList.remove('ok')});document.querySelectorAll('.done-btn').forEach(function(b){b.classList.remove('ok');b.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Mark Complete'});updStats();showToast('Progress reset!')}
+// ═══ MOCK ENGINE ═══
+var mS={active:false,tI:0,qI:0,ans:{},sub:false,timer:0,tInt:null,scores:{},qs:[]};
+function renderMockHome(){var el=document.getElementById('mockArea');if(!el)return;var tests=[{n:"Test 1",d:"Linear & Logistic Regression",c:15},{n:"Test 2",d:"Trees, Ensembles & Boosting",c:15},{n:"Test 3",d:"SVM, KNN, NB & Clustering",c:15},{n:"Test 4",d:"Full Comprehensive",c:30}];var h='<div class="mg">';tests.forEach(function(t,i){var sc=mS.scores[i];h+='<div class="mc" onclick="startMock('+i+')"><div class="mn">'+t.n+'</div><div class="mt">'+t.d+'</div><div class="mi">'+t.c+' questions · 30 min</div>';if(sc!==undefined)h+='<div style="font-family:var(--fc);font-size:11px;color:var(--grn);margin-top:6px">Last: '+sc+'%</div>';h+='</div>'});h+='</div>';el.innerHTML=h}
+function getMQ(idx){var s=QB.slice().sort(function(){return Math.random()-0.5});if(idx===0)return s.filter(function(q){return q.tp==='Linear Models'}).slice(0,15);if(idx===1)return s.filter(function(q){return q.tp==='Trees'||q.tp==='Boosting'}).slice(0,15);if(idx===2)return s.filter(function(q){return q.tp==='SVM'||q.tp==='KNN'||q.tp==='NaiveBayes'||q.tp==='Clustering'}).slice(0,15);return s.slice(0,30)}
+function startMock(i){mS={active:true,tI:i,qI:0,ans:{},sub:false,timer:0,tInt:null,scores:mS.scores,qs:getMQ(i)};mS.tInt=setInterval(function(){mS.timer++;renderMQ()},1000);renderMQ()}
+function renderMQ(){var el=document.getElementById('mockArea');if(!el)return;var qs=mS.qs,q=qs[mS.qI],ci=mS.qI;var m=Math.floor(mS.timer/60),s=mS.timer%60;var h='<div class="qz-h"><span class="pg">Q'+(ci+1)+'/'+qs.length+'</span><span class="tm">⏱ '+m+':'+(('0'+s).slice(-2))+'</span><button onclick="endM()">✕ End</button></div>';h+='<div class="qc"><div class="qc-top"><span class="badge b0">'+q.tp+'</span><div class="diff">';for(var i=0;i<3;i++)h+='<i'+(i<q.d?' class="on"':'')+'></i>';h+='</div></div><div class="qt">'+q.q+'</div><div class="opts">';var L=['A','B','C','D'];q.o.forEach(function(opt,oi){var cls='opt';if(mS.sub){if(oi===q.a)cls+=' correct';else if(mS.ans[ci]===oi)cls+=' wrong'}else if(mS.ans[ci]===oi)cls+=' sel';h+='<div class="'+cls+'" onclick="selO('+ci+','+oi+')"><span class="olet">'+L[oi]+'</span><span>'+opt+'</span></div>'});h+='</div>';if(mS.sub)h+='<div class="exp show">'+q.x+'</div>';h+='<div class="qnav">';if(ci>0)h+='<button class="qb" onclick="mNav('+(ci-1)+')">← Prev</button>';else h+='<span></span>';if(ci<qs.length-1)h+='<button class="qb p" onclick="mNav('+(ci+1)+')">Next →</button>';else if(!mS.sub)h+='<button class="qb p" onclick="subM()">Submit</button>';else h+='<button class="qb p" onclick="renderMockHome()">Back</button>';h+='</div></div>';el.innerHTML=h}
+function selO(qi,oi){if(mS.sub)return;mS.ans[qi]=oi;renderMQ()}
+function mNav(i){mS.qI=i;renderMQ();window.scrollTo(0,0)}
+function endM(){if(mS.tInt)clearInterval(mS.tInt);renderMockHome()}
+function subM(){if(!confirm('Submit test?'))return;mS.sub=true;if(mS.tInt)clearInterval(mS.tInt);var qs=mS.qs,c=0;qs.forEach(function(q,i){if(mS.ans[i]===q.a)c++});var pct=Math.round(c/qs.length*100);mS.scores[mS.tI]=pct;var m=Math.floor(mS.timer/60),s=mS.timer%60,pass=pct>=60;document.getElementById('mockArea').innerHTML='<div class="rcard"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Test Complete</div><div class="rpct '+(pass?'pass':'fail')+'">'+pct+'%</div><div style="font-size:15px;font-weight:700;color:var(--tx);margin-bottom:10px">'+(pass?'🎉 Passed!':'📚 Keep Practicing!')+'</div><div class="rrow"><div class="ri"><div class="rv" style="color:var(--grn)">'+c+'</div><div class="rl">Correct</div></div><div class="ri"><div class="rv" style="color:var(--red)">'+(qs.length-c)+'</div><div class="rl">Wrong</div></div><div class="ri"><div class="rv" style="color:var(--ac)">'+m+':'+(('0'+s).slice(-2))+'</div><div class="rl">Time</div></div></div><div class="rbtns"><button class="qb" onclick="mS.qI=0;renderMQ()">📖 Review</button><button class="qb p" onclick="renderMockHome()">Back</button></div></div>'}
+// ═══ INIT ═══
+loadProg();renderQuestions();applyDone();updStats();
+window.addEventListener('scroll',function(){document.getElementById('sttBtn').classList.toggle('show',window.scrollY>400)});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('search').focus()}});
+</script>
+</body>
+</html>

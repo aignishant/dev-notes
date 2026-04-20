@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Fundamentals — Interview Mastery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06080f;--bg2:#0c1019;--bg3:#131825;--bg4:#1a2033;--bgcard:#111623;
+  --bdr:#1f2942;--bdr2:#2a3655;--tx:#e4e8f7;--tx2:#99a3c0;--tx3:#5e6a8a;
+  --ac:#6c8cff;--ac2:#8ba4ff;--grn:#34d399;--ylw:#fbbf24;--org:#fb923c;
+  --red:#f87171;--pur:#a78bfa;--pnk:#f472b6;--cyn:#22d3ee;--code-bg:#0a0e18;
+  --sw:300px;--hh:58px;
+  --ff:'Outfit',-apple-system,sans-serif;--fh:'Fraunces',Georgia,serif;--fc:'JetBrains Mono',monospace;
+  --rad:10px;--glow:0 0 30px rgba(108,140,255,0.12);
+}
+[data-theme="light"]{--bg:#f5f7fc;--bg2:#fff;--bg3:#edf0f8;--bg4:#e2e6f2;--bgcard:#fff;--bdr:#d4daf0;--bdr2:#c4cce6;--tx:#1a1e33;--tx2:#545b7a;--tx3:#8890ab;--ac:#4a6cf7;--ac2:#3b5ce4;--grn:#059669;--ylw:#d97706;--org:#ea580c;--red:#dc2626;--pur:#7c3aed;--pnk:#db2777;--cyn:#0891b2;--code-bg:#f0f3fc;--glow:0 0 20px rgba(74,108,247,0.06)}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:var(--ff);background:var(--bg);color:var(--tx);line-height:1.78;font-size:15px;overflow-x:hidden}
+::selection{background:rgba(108,140,255,0.3)}
+
+/* Header */
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);background:rgba(6,8,15,0.85);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 18px;z-index:1000;backdrop-filter:blur(20px);gap:12px}
+[data-theme="light"] .hdr{background:rgba(245,247,252,0.9)}
+.ham{display:none;background:none;border:none;color:var(--tx);font-size:22px;cursor:pointer;padding:6px;border-radius:8px}
+.ham:hover{background:var(--bg3)}
+.logo{font-family:var(--fh);font-size:18px;font-weight:800;white-space:nowrap;display:flex;align-items:center;gap:10px}
+.logo-grad{background:linear-gradient(135deg,var(--ac),var(--cyn),var(--pur));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sbox{flex:1;max-width:400px;position:relative;margin:0 14px}
+.sbox input{width:100%;padding:9px 14px 9px 38px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--tx);font-family:var(--ff);font-size:13.5px;outline:none;transition:all .25s}
+.sbox input:focus{border-color:var(--ac);box-shadow:var(--glow)}
+.sbox input::placeholder{color:var(--tx3)}
+.sbox .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none;font-size:14px}
+.hdr-acts{display:flex;gap:6px;align-items:center;margin-left:auto}
+.hbtn{background:none;border:1px solid var(--bdr);color:var(--tx2);height:36px;padding:0 12px;border-radius:9px;cursor:pointer;font-size:12px;font-family:var(--ff);font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap}
+.hbtn:hover{background:var(--bg3);color:var(--tx);border-color:var(--bdr2)}
+.ptrack{position:absolute;bottom:0;left:0;height:2px;background:var(--bg3);width:100%}
+.pbar{height:2px;background:linear-gradient(90deg,var(--ac),var(--cyn),var(--grn));width:0%;transition:width .5s ease;border-radius:1px}
+
+/* Sidebar */
+.side{position:fixed;top:var(--hh);left:0;width:var(--sw);height:calc(100vh - var(--hh));background:var(--bg2);border-right:1px solid var(--bdr);overflow-y:auto;padding:6px 0;z-index:900;transition:transform .3s ease}
+.side::-webkit-scrollbar{width:3px}.side::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.stats{margin:8px 10px 12px;padding:14px 16px;background:linear-gradient(135deg,rgba(108,140,255,0.08),rgba(167,139,250,0.06));border:1px solid var(--bdr);border-radius:var(--rad);position:relative;overflow:hidden}
+.stats::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:radial-gradient(circle,rgba(108,140,255,0.15),transparent);border-radius:50%}
+.stats-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:8px}
+.stats-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.stats-l{font-size:12px;color:var(--tx2)}.stats-v{font-family:var(--fc);font-size:14px;font-weight:700;color:var(--ac)}
+.stats-v.green{color:var(--grn)}
+.pring{width:100%;height:5px;background:var(--bg);border-radius:3px;margin-top:8px;overflow:hidden}
+.pring-f{height:100%;background:linear-gradient(90deg,var(--grn),var(--cyn));border-radius:3px;transition:width .6s ease}
+.nav-part{padding:18px 16px 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--tx3);display:flex;align-items:center;gap:8px}
+.np-badge{color:#fff;padding:1px 7px;border-radius:4px;font-size:9px;letter-spacing:0.8px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;text-decoration:none;color:var(--tx2);font-size:12.5px;font-weight:500;border-left:3px solid transparent;transition:all .15s;cursor:pointer}
+.nav-item:hover{background:var(--bg3);color:var(--tx)}
+.nav-item.active{color:var(--ac);background:rgba(108,140,255,0.06);border-left-color:var(--ac)}
+.ni{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.nt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.np{font-family:var(--fc);font-size:9px;color:var(--grn);min-width:28px;text-align:right;font-weight:700}
+.ov{display:none;position:fixed;inset:0;top:var(--hh);background:rgba(0,0,0,0.6);z-index:899;backdrop-filter:blur(4px)}
+.ov.open{display:block}
+
+/* Main */
+.main{margin-left:var(--sw);margin-top:var(--hh);min-height:calc(100vh - var(--hh));padding:32px 44px 80px;max-width:900px}
+.tab-bar{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+.tab-btn{padding:8px 18px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg2);color:var(--tx2);font-family:var(--ff);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s}
+.tab-btn:hover{background:var(--bg3);color:var(--tx)}
+.tab-btn.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.content-section{display:none;animation:fadeUp .4s ease}
+.content-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.content-section h1{font-family:var(--fh);font-size:2em;font-weight:800;color:var(--tx);margin:0 0 6px;line-height:1.2;letter-spacing:-0.03em}
+.content-section h1::after{content:'';display:block;width:50px;height:3px;background:linear-gradient(90deg,var(--ac),var(--pur));border-radius:2px;margin-top:14px;margin-bottom:10px}
+
+/* Accordion Q&A */
+.dd{margin:10px 0;border:1px solid var(--bdr);border-radius:var(--rad);overflow:hidden;transition:all .2s}
+.dd:hover{border-color:var(--bdr2)}
+.dd.done{border-left:3px solid var(--grn)}
+.dd.done .dd-head{background:linear-gradient(135deg,rgba(52,211,153,0.04),transparent)}
+.dd-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bgcard);border:none;color:var(--tx);font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;text-align:left;transition:all .15s}
+.dd-head:hover{background:var(--bg3)}
+.dd-chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--bdr2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s;font-size:0}
+.dd-chk.ok{border-color:var(--grn);background:var(--grn);font-size:10px;color:#fff}
+.dd-chk.ok::after{content:'✓'}
+.dd-t{flex:1;line-height:1.3}
+.dd-arr{color:var(--tx3);transition:transform .3s ease;flex-shrink:0}
+.dd-head.open .dd-arr{transform:rotate(90deg)}
+.dd-body{display:none;padding:6px 20px 20px;border-top:1px solid var(--bdr);background:var(--bg);animation:ddOpen .35s ease}
+.dd-body.open{display:block}
+@keyframes ddOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.dd-body h4{font-size:.95em;font-weight:700;color:var(--pur);margin:16px 0 6px}
+.dd-body h4:first-child{margin-top:10px}
+.dd-body p{margin:0 0 12px;color:var(--tx2)}
+.dd-body strong{color:var(--tx);font-weight:600}
+.dd-body em{color:var(--pur);font-style:italic}
+.dd-body ul,.dd-body ol{margin:0 0 12px 20px;color:var(--tx2)}
+.dd-body li{margin-bottom:3px}
+.dd-body li::marker{color:var(--ac)}
+.dd-body table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.dd-body thead th{background:var(--bg3);color:var(--tx);font-weight:600;text-align:left;padding:10px 14px;border:1px solid var(--bdr);white-space:nowrap}
+.dd-body tbody td{padding:8px 14px;border:1px solid var(--bdr);color:var(--tx2);vertical-align:top}
+.dd-body tbody tr:nth-child(even){background:rgba(108,140,255,0.02)}
+.dd-body code{font-family:var(--fc);font-size:0.85em;background:var(--bg3);color:var(--cyn);padding:2px 7px;border-radius:5px;border:1px solid var(--bdr)}
+.dd-body pre{background:var(--code-bg)!important;border:1px solid var(--bdr);border-radius:var(--rad);padding:18px!important;overflow-x:auto;margin:12px 0;position:relative;line-height:1.65}
+.dd-body pre code{background:none!important;border:none!important;padding:0!important;color:var(--tx)!important;font-size:12.5px;display:block;white-space:pre}
+.dd-body blockquote{border-left:3px solid var(--pur);padding:10px 18px;margin:12px 0;background:rgba(167,139,250,0.05);border-radius:0 var(--rad) var(--rad) 0;color:var(--tx2);font-style:italic}
+.done-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 16px;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx2);border-radius:8px;cursor:pointer;font-size:12px;font-family:var(--ff);font-weight:600;transition:all .2s}
+.done-btn:hover{border-color:var(--grn);color:var(--grn)}
+.done-btn.ok{background:rgba(52,211,153,0.1);border-color:var(--grn);color:var(--grn)}
+.scenario{background:linear-gradient(135deg,rgba(251,191,36,0.06),rgba(108,140,255,0.04));border:1px solid rgba(251,191,36,0.2);border-radius:var(--rad);padding:14px 16px;margin:12px 0}
+.scenario-tag{font-family:var(--fc);font-size:10px;font-weight:700;color:var(--ylw);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+
+/* Mock Test */
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}
+.mc{background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad);padding:16px;cursor:pointer;transition:all .2s}
+.mc:hover{border-color:var(--ac);transform:translateY(-2px);box-shadow:var(--glow)}
+.mn{font-family:var(--fc);font-size:11px;color:var(--ac);font-weight:700;margin-bottom:4px}
+.mt{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.mi{font-size:10px;color:var(--tx3)}
+.qz-h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:12px 16px;background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad);margin-bottom:16px;font-size:13px;font-weight:600}
+.qz-h button{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx2);padding:4px 12px;border-radius:6px;cursor:pointer;font-family:var(--ff);font-size:12px}
+.pg{font-family:var(--fc);color:var(--ac);font-size:12px}
+.tm{font-family:var(--fc);color:var(--cyn);font-size:12px}
+.qc{background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad);padding:20px;margin-bottom:12px}
+.qc-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.badge{font-family:var(--fc);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px}
+.b0{background:rgba(108,140,255,0.15);color:var(--ac)}
+.b1{background:rgba(52,211,153,0.15);color:var(--grn)}
+.b2{background:rgba(167,139,250,0.15);color:var(--pur)}
+.diff{display:flex;gap:3px;margin-left:auto}
+.diff i{width:8px;height:8px;border-radius:50%;background:var(--bg3)}
+.diff i.on{background:var(--ylw)}
+.qt{font-size:14px;color:var(--tx);line-height:1.7;margin-bottom:14px}
+.qt pre{margin:8px 0}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--bdr);border-radius:var(--rad);cursor:pointer;transition:all .15s;font-size:13px;color:var(--tx2);background:var(--bg)}
+.opt:hover{border-color:var(--ac);background:rgba(108,140,255,0.04)}
+.opt.sel{border-color:var(--ac);background:rgba(108,140,255,0.08);color:var(--tx)}
+.opt.correct{border-color:var(--grn);background:rgba(52,211,153,0.1);color:var(--grn)}
+.opt.wrong{border-color:var(--red);background:rgba(248,113,113,0.1);color:var(--red)}
+.olet{width:24px;height:24px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:var(--fc);font-size:11px;font-weight:700;flex-shrink:0;border:1.5px solid var(--bdr)}
+.opt.sel .olet{background:var(--ac);color:#fff;border-color:var(--ac)}
+.opt.correct .olet{background:var(--grn);color:#fff;border-color:var(--grn)}
+.opt.wrong .olet{background:var(--red);color:#fff;border-color:var(--red)}
+.exp{margin-top:12px;padding:12px 16px;background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.15);border-radius:var(--rad);font-size:12.5px;color:var(--tx2);line-height:1.7;display:none}
+.exp.show{display:block}
+.qnav{display:flex;gap:8px;margin-top:16px;justify-content:space-between}
+.qb{padding:8px 18px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg3);color:var(--tx2);cursor:pointer;font-family:var(--ff);font-size:12px;font-weight:600;transition:all .2s}
+.qb:hover{color:var(--tx);border-color:var(--bdr2)}
+.qb.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.rcard{text-align:center;padding:30px 20px;background:var(--bgcard);border:1px solid var(--bdr);border-radius:var(--rad)}
+.rpct{font-family:var(--fc);font-size:56px;font-weight:800;margin:12px 0}
+.rpct.pass{color:var(--grn)}.rpct.fail{color:var(--red)}
+.rrow{display:flex;justify-content:center;gap:30px;margin:16px 0}
+.ri{text-align:center}
+.rv{font-family:var(--fc);font-size:20px;font-weight:700}
+.rl{font-size:11px;color:var(--tx3);margin-top:2px}
+.rbtns{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.rtps{text-align:left;margin:0 auto;max-width:400px}
+.rtp{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--tx2)}
+
+/* Scroll top */
+.stt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;background:var(--ac);color:#fff;border:none;border-radius:50%;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(108,140,255,0.35);transition:all .2s;z-index:1001}
+.stt:hover{transform:scale(1.1)}.stt.show{display:flex}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--bgcard);border:1px solid var(--bdr);color:var(--tx);padding:10px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:2000;box-shadow:0 8px 30px rgba(0,0,0,0.3);opacity:0;transition:all .35s ease;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Responsive */
+@media(max-width:768px){
+  .ham{display:flex}
+  .side{transform:translateX(-100%)}.side.open{transform:translateX(0)}
+  .main{margin-left:0;padding:20px 16px 60px}
+  .sbox{display:none}
+  .hbtn .bl{display:none}
+  .logo{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+<button class="ham" onclick="toggleSidebar()">☰</button>
+<div class="logo"><span class="logo-grad">📊 ML Fundamentals</span></div>
+<div class="sbox"><span class="si">🔍</span><input type="text" id="search" placeholder="Search questions..." oninput="handleSearch(this.value)"></div>
+<div class="hdr-acts">
+<button class="hbtn" id="themeBtn" onclick="toggleTheme()">🌙 <span class="bl">Dark</span></button>
+<button class="hbtn" onclick="resetProgress()">↺ <span class="bl">Reset</span></button>
+</div>
+<div class="ptrack"><div class="pbar" id="pbar"></div></div>
+</header>
+
+<!-- Sidebar -->
+<div class="ov" id="overlay" onclick="toggleSidebar()"></div>
+<nav class="side" id="sidebar">
+<div class="stats">
+<div class="stats-t">Your Progress</div>
+<div class="stats-row"><span class="stats-l">Completed</span><span class="stats-v green" id="stDone">0</span></div>
+<div class="stats-row"><span class="stats-l">Total</span><span class="stats-v" id="stTotal">0</span></div>
+<div class="pring"><div class="pring-f" id="pringBar" style="width:0%"></div></div>
+</div>
+<div class="nav-part">CHAPTERS <span class="np-badge" style="background:var(--ac)">10</span></div>
+<a class="nav-item active" data-section="ch0" onclick="showSection('ch0')"><span class="ni">📖</span><span class="nt">All Questions</span><span class="np" id="np_ch0"></span></a>
+<a class="nav-item" data-section="ch1" onclick="showSection('ch1')"><span class="ni">🎯</span><span class="nt">Core ML Concepts</span><span class="np" id="np_ch1"></span></a>
+<a class="nav-item" data-section="ch2" onclick="showSection('ch2')"><span class="ni">📊</span><span class="nt">Bias-Variance & Evaluation</span><span class="np" id="np_ch2"></span></a>
+<a class="nav-item" data-section="ch3" onclick="showSection('ch3')"><span class="ni">⚙️</span><span class="nt">Training & Optimization</span><span class="np" id="np_ch3"></span></a>
+<a class="nav-item" data-section="ch4" onclick="showSection('ch4')"><span class="ni">🔧</span><span class="nt">Feature Engineering</span><span class="np" id="np_ch4"></span></a>
+<a class="nav-item" data-section="ch5" onclick="showSection('ch5')"><span class="ni">📈</span><span class="nt">Metrics & Loss Functions</span><span class="np" id="np_ch5"></span></a>
+<a class="nav-item" data-section="ch6" onclick="showSection('ch6')"><span class="ni">🔄</span><span class="nt">Regularization & Generalization</span><span class="np" id="np_ch6"></span></a>
+<a class="nav-item" data-section="ch7" onclick="showSection('ch7')"><span class="ni">🧪</span><span class="nt">Data Handling & Preprocessing</span><span class="np" id="np_ch7"></span></a>
+<a class="nav-item" data-section="ch8" onclick="showSection('ch8')"><span class="ni">🎭</span><span class="nt">Scenario-Based Questions</span><span class="np" id="np_ch8"></span></a>
+<a class="nav-item" data-section="ch9" onclick="showSection('ch9')"><span class="ni">🏗️</span><span class="nt">ML System Design</span><span class="np" id="np_ch9"></span></a>
+<div class="nav-part">PRACTICE <span class="np-badge" style="background:var(--grn)">MOCK</span></div>
+<a class="nav-item" data-section="mock" onclick="showSection('mock')"><span class="ni">🎯</span><span class="nt">Mock Tests</span></a>
+</nav>
+
+<!-- Main Content -->
+<main class="main" id="mainContent">
+</main>
+
+<button class="stt" id="sttBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// ML FUNDAMENTALS — 105 QUESTIONS DATABASE
+// ═══════════════════════════════════════════════════════════════
+
+var QDB = [
+// ── Chapter 1: Core ML Concepts (Q1-Q15) ──
+{id:"q1",ch:"ch1",title:"What is Machine Learning? How does it differ from traditional programming?",
+body:`<h4>Simple Explanation</h4>
+<p>In <strong>traditional programming</strong>, a developer writes explicit rules: "IF temperature > 30 THEN turn on AC." Every condition must be anticipated manually.</p>
+<p>In <strong>Machine Learning</strong>, you provide data with outcomes and the algorithm discovers the rules itself. You feed thousands of examples and the model finds patterns humans might miss.</p>
+<h4>Key Differences</h4>
+<table><thead><tr><th>Aspect</th><th>Traditional Programming</th><th>Machine Learning</th></tr></thead><tbody>
+<tr><td>Input</td><td>Rules + Data</td><td>Data + Outcomes</td></tr>
+<tr><td>Output</td><td>Results</td><td>Learned Rules (Model)</td></tr>
+<tr><td>Adaptability</td><td>Manual updates</td><td>Learns from new data</td></tr>
+<tr><td>Scalability</td><td>Limited by rule complexity</td><td>Scales with data</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your e-commerce company wants to predict which users will churn. How would you approach it?"</strong></p>
+<p><strong>Answer:</strong> This is a binary classification problem. I'd collect user behavioral data (login frequency, purchase recency, support tickets, session duration), label users as churned/retained based on 90-day inactivity window, engineer features like trend in engagement, train Logistic Regression as baseline then XGBoost, evaluate with precision-recall since churn is typically imbalanced (5-10% churn rate), and deploy with weekly retraining on new data.</p>
+</div>`},
+
+{id:"q2",ch:"ch1",title:"Explain Supervised, Unsupervised, and Reinforcement Learning with real examples.",
+body:`<h4>Supervised Learning — Learning with Answers</h4>
+<p><strong>Analogy:</strong> A student studying with answer keys. For every practice problem, they see the correct answer and learn the pattern.</p>
+<p><strong>Input:</strong> Labeled dataset — each example has features (X) and a known answer (Y).</p>
+<ul>
+<li><strong>Classification:</strong> Predict categories — email spam detection, disease diagnosis, sentiment analysis</li>
+<li><strong>Regression:</strong> Predict numbers — house price, temperature forecast, revenue prediction</li>
+</ul>
+<h4>Unsupervised Learning — Finding Hidden Patterns</h4>
+<p><strong>Analogy:</strong> Sorting a pile of mixed clothes without labels — you naturally group by color, size, type.</p>
+<p><strong>No labels provided.</strong> The algorithm discovers structure in data.</p>
+<ul>
+<li><strong>Clustering:</strong> Customer segmentation, document grouping</li>
+<li><strong>Dimensionality Reduction:</strong> PCA for visualization, feature compression</li>
+<li><strong>Anomaly Detection:</strong> Fraud detection, network intrusion</li>
+</ul>
+<h4>Reinforcement Learning — Learning by Trial & Error</h4>
+<p><strong>Analogy:</strong> Training a dog — reward good behavior, no treat for bad behavior. The dog figures out what gets treats.</p>
+<ul>
+<li><strong>Agent</strong> takes actions in an <strong>environment</strong>, receives <strong>rewards/penalties</strong></li>
+<li>Examples: Game-playing AI (AlphaGo), robotics, recommendation systems, RLHF for ChatGPT</li>
+</ul>
+<h4>Self-Supervised Learning (Modern Trend)</h4>
+<p>Creates its own labels from data structure. BERT masks words and predicts them; GPT predicts next token. This powers most modern LLMs.</p>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You have 1 million unlabeled customer transactions. How do you extract value?"</strong></p>
+<p><strong>Answer:</strong> Start with unsupervised approaches: (1) Clustering with K-Means or DBSCAN to segment customers into behavioral groups, (2) Anomaly detection with Isolation Forest to flag fraudulent transactions, (3) Use cluster labels as pseudo-labels for downstream supervised tasks. If we later get some labels, we can do semi-supervised learning.</p>
+</div>`},
+
+{id:"q3",ch:"ch1",title:"What is the ML pipeline? Walk through an end-to-end ML project.",
+body:`<h4>Complete ML Pipeline</h4>
+<ol>
+<li><strong>Problem Definition:</strong> Define the business goal, success metrics, and constraints. Is it classification, regression, ranking?</li>
+<li><strong>Data Collection:</strong> Gather data from databases, APIs, logs, web scraping. Assess data quality and volume.</li>
+<li><strong>Exploratory Data Analysis (EDA):</strong> Understand distributions, correlations, outliers, missing values. Visualize key patterns.</li>
+<li><strong>Data Preprocessing:</strong> Handle missing values, encode categoricals, scale numericals, handle class imbalance.</li>
+<li><strong>Feature Engineering:</strong> Create new features, select important ones, transform variables. This is where domain knowledge shines.</li>
+<li><strong>Model Selection:</strong> Start simple (Logistic Regression, Decision Trees), then try complex models (XGBoost, Neural Networks). Always have a baseline.</li>
+<li><strong>Training & Validation:</strong> Train-test split, cross-validation, hyperparameter tuning (Grid Search, Random Search, Bayesian optimization).</li>
+<li><strong>Evaluation:</strong> Choose metrics aligned with business goals. Accuracy for balanced, F1/AUC for imbalanced. Analyze errors.</li>
+<li><strong>Deployment:</strong> REST API, batch prediction, edge deployment. Monitor for data drift and model degradation.</li>
+<li><strong>Monitoring & Retraining:</strong> Track prediction quality, data drift, concept drift. Set up automated retraining pipelines.</li>
+</ol>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Walk me through how you would build a credit card fraud detection system."</strong></p>
+<p><strong>Answer:</strong> Problem: Binary classification with extreme imbalance (0.1% fraud). Data: Transaction amount, location, time, merchant category, user history. Preprocessing: Handle imbalance with SMOTE or class weights, normalize amounts. Features: Velocity features (transactions per hour), distance from usual location, deviation from spending patterns. Model: XGBoost with class_weight parameter or Isolation Forest for anomaly-based approach. Metrics: Precision-Recall AUC (not accuracy!), optimize for high recall to catch fraud while managing false positives. Deploy: Real-time inference < 50ms, with human review queue for borderline cases.</p>
+</div>`},
+
+{id:"q4",ch:"ch1",title:"What is the difference between parametric and non-parametric models?",
+body:`<h4>Parametric Models</h4>
+<p>Have a <strong>fixed number of parameters</strong> regardless of data size. The model structure is determined before seeing data.</p>
+<ul>
+<li><strong>Examples:</strong> Linear Regression (parameters = weights for each feature), Logistic Regression, Naive Bayes, Linear SVM</li>
+<li><strong>Pros:</strong> Fast inference, less memory, easier to interpret, less prone to overfitting with small data</li>
+<li><strong>Cons:</strong> Strong assumptions about data distribution, may underfit complex patterns</li>
+</ul>
+<h4>Non-Parametric Models</h4>
+<p>Number of parameters <strong>grows with data size</strong>. Model complexity adapts to the data.</p>
+<ul>
+<li><strong>Examples:</strong> KNN (stores all training data), Decision Trees (depth grows with data), Random Forest, Kernel SVM, Gaussian Processes</li>
+<li><strong>Pros:</strong> Flexible, fewer assumptions, can capture complex patterns</li>
+<li><strong>Cons:</strong> Slower inference, more memory, needs more data, risk of overfitting</li>
+</ul>
+<table><thead><tr><th>Aspect</th><th>Parametric</th><th>Non-Parametric</th></tr></thead><tbody>
+<tr><td>Parameters</td><td>Fixed</td><td>Grows with data</td></tr>
+<tr><td>Speed</td><td>Fast</td><td>Slower at inference</td></tr>
+<tr><td>Data needed</td><td>Less</td><td>More</td></tr>
+<tr><td>Flexibility</td><td>Lower</td><td>Higher</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You have 500 samples and 100 features. Which model type would you prefer?"</strong></p>
+<p><strong>Answer:</strong> With small data and many features, parametric models are safer — Linear Regression with L1 regularization (Lasso) for automatic feature selection. Non-parametric models like KNN would struggle due to the curse of dimensionality in 100-dimensional space. I would also apply PCA to reduce dimensions before modeling.</p>
+</div>`},
+
+{id:"q5",ch:"ch1",title:"Explain the difference between generative and discriminative models.",
+body:`<h4>Discriminative Models</h4>
+<p>Learn the <strong>decision boundary</strong> directly — P(Y|X). They focus on "what class does this input belong to?"</p>
+<ul>
+<li><strong>Examples:</strong> Logistic Regression, SVM, Decision Trees, Neural Networks, CRF</li>
+<li><strong>Pros:</strong> Generally better classification accuracy, less data needed, simpler</li>
+<li><strong>Cons:</strong> Cannot generate new data, cannot model missing features</li>
+</ul>
+<h4>Generative Models</h4>
+<p>Learn the <strong>full joint probability</strong> P(X, Y) or P(X). They model how data is generated.</p>
+<ul>
+<li><strong>Examples:</strong> Naive Bayes, Gaussian Mixture Models, Hidden Markov Models, GANs, VAEs, GPT</li>
+<li><strong>Pros:</strong> Can generate new data, handle missing features, useful for semi-supervised learning</li>
+<li><strong>Cons:</strong> Need more data, stronger assumptions, may have lower discriminative accuracy</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"When would you choose a generative model over a discriminative one?"</strong></p>
+<p><strong>Answer:</strong> When I need to: (1) Generate synthetic data for augmentation, (2) Handle missing features at inference time (Naive Bayes can marginalize over missing values), (3) Detect outliers (if P(X) is very low, it's an anomaly), (4) Do semi-supervised learning with lots of unlabeled data. For pure classification with enough labeled data, I'd prefer discriminative models for better accuracy.</p>
+</div>`},
+
+{id:"q6",ch:"ch1",title:"What is inductive bias and why is it important?",
+body:`<h4>Definition</h4>
+<p><strong>Inductive bias</strong> is the set of assumptions a learning algorithm makes to generalize from training data to unseen data. Without it, learning from finite data is impossible.</p>
+<h4>Examples of Inductive Bias</h4>
+<ul>
+<li><strong>Linear Regression:</strong> Assumes relationship is linear</li>
+<li><strong>KNN:</strong> Assumes similar points are nearby (smoothness)</li>
+<li><strong>Decision Trees:</strong> Assumes axis-aligned decision boundaries</li>
+<li><strong>Neural Networks:</strong> CNNs assume spatial locality and translation invariance; RNNs assume sequential dependencies</li>
+<li><strong>Random Forest:</strong> Assumes ensemble of weak learners improves generalization</li>
+</ul>
+<h4>Why It Matters</h4>
+<p>The <strong>No Free Lunch Theorem</strong> states no single algorithm works best on all problems. Choosing the right inductive bias for your problem is what separates good ML engineers from average ones. If data has spatial patterns, CNN's bias is perfect. If data is tabular with feature interactions, tree-based models' bias works better.</p>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Why do CNNs work so well for images but poorly for tabular data?"</strong></p>
+<p><strong>Answer:</strong> CNN's inductive biases — local connectivity, weight sharing, translation equivariance — perfectly match image properties where nearby pixels are related and a cat is a cat regardless of position. Tabular data lacks spatial structure; feature at column 1 has no spatial relationship with column 2. That's why tree-based models (XGBoost) dominate tabular data — their inductive bias of axis-aligned splits matches how tabular features interact.</p>
+</div>`},
+
+{id:"q7",ch:"ch1",title:"What is the No Free Lunch theorem and what does it mean practically?",
+body:`<h4>The Theorem</h4>
+<p>Averaged over all possible problems, no algorithm performs better than any other — including random guessing. Every algorithm has problems it excels at and problems where it fails.</p>
+<h4>Practical Implications</h4>
+<ul>
+<li><strong>No universal best model</strong> — you must always experiment and compare models on YOUR specific data</li>
+<li><strong>Domain knowledge matters</strong> — understanding your data helps you choose models with the right inductive bias</li>
+<li><strong>Always benchmark</strong> — start with simple baselines and compare against complex models</li>
+<li><strong>The algorithm that won a Kaggle competition on medical images won't necessarily win on your tabular fraud detection</strong></li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"A colleague says XGBoost is the best algorithm and should be used everywhere. How do you respond?"</strong></p>
+<p><strong>Answer:</strong> While XGBoost excels on tabular data competitions, the No Free Lunch theorem tells us no single algorithm is universally best. XGBoost struggles with: image/text data (deep learning wins), very small datasets (simpler models prevent overfitting), real-time inference where tree ensembles can be slow, and problems requiring smooth decision boundaries. I'd recommend always starting with a simple baseline and comparing at least 3-4 model families.</p>
+</div>`},
+
+{id:"q8",ch:"ch1",title:"Explain the difference between batch, online, and mini-batch learning.",
+body:`<h4>Batch Learning (Offline)</h4>
+<p>Trains on the <strong>entire dataset at once</strong>. Model is trained, deployed, and doesn't learn from new data until retrained from scratch.</p>
+<ul>
+<li><strong>Pros:</strong> Stable convergence, deterministic results</li>
+<li><strong>Cons:</strong> Slow for large data, requires full dataset in memory, doesn't adapt to new patterns</li>
+<li><strong>Example:</strong> Monthly retrained recommendation model</li>
+</ul>
+<h4>Online Learning (Streaming)</h4>
+<p>Learns from <strong>one sample at a time</strong>. Updates model incrementally as new data arrives.</p>
+<ul>
+<li><strong>Pros:</strong> Adapts quickly, handles infinite data streams, low memory</li>
+<li><strong>Cons:</strong> Sensitive to noisy data, can "forget" old patterns, harder to debug</li>
+<li><strong>Example:</strong> Stock price prediction, real-time ad bidding</li>
+</ul>
+<h4>Mini-Batch Learning</h4>
+<p>Compromise — learns from <strong>small batches</strong> (32, 64, 128 samples). Standard for deep learning.</p>
+<ul>
+<li><strong>Pros:</strong> GPU-friendly, smoother convergence than online, faster than full batch</li>
+<li><strong>Cons:</strong> Batch size is a hyperparameter to tune</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You're building a fraud detection system that needs to adapt to new fraud patterns immediately. What approach?"</strong></p>
+<p><strong>Answer:</strong> Online learning with a two-tier approach: (1) An online model (like online SGD or streaming random forest) that updates with each new labeled transaction for quick adaptation, (2) A periodically retrained batch model (weekly XGBoost) as the primary model for stability. Use the online model to catch emerging patterns while the batch model provides robustness. Combine predictions with a meta-learner.</p>
+</div>`},
+
+{id:"q9",ch:"ch1",title:"What is the curse of dimensionality? How do you handle it?",
+body:`<h4>The Problem</h4>
+<p>As the number of features (dimensions) increases:</p>
+<ul>
+<li><strong>Data becomes sparse:</strong> In 1000 dimensions, even millions of points are far apart from each other</li>
+<li><strong>Distances become meaningless:</strong> All points are roughly equidistant — KNN fails completely</li>
+<li><strong>Models need exponentially more data:</strong> To densely fill a 10D space, you need 10× the data per dimension</li>
+<li><strong>Spurious correlations increase:</strong> With 1000 random features, some will appear correlated with the target by pure chance</li>
+</ul>
+<h4>Solutions</h4>
+<ul>
+<li><strong>Feature Selection:</strong> Remove irrelevant features using mutual information, L1 regularization, or domain knowledge</li>
+<li><strong>Dimensionality Reduction:</strong> PCA, t-SNE, UMAP to project data to lower dimensions</li>
+<li><strong>Regularization:</strong> L1 (Lasso) automatically zeros out useless features; L2 (Ridge) shrinks all weights</li>
+<li><strong>Tree-based models:</strong> Random Forest, XGBoost naturally handle high dimensions via feature subsampling</li>
+<li><strong>Domain knowledge:</strong> The best dimensionality reduction is knowing which features matter</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your dataset has 10,000 features and 2,000 samples. How do you build a model?"</strong></p>
+<p><strong>Answer:</strong> With p >> n, direct modeling will overfit badly. My approach: (1) Filter: Remove zero-variance and near-constant features, (2) L1 (Lasso) regression to identify top 100-200 features, (3) Domain expert review of selected features, (4) PCA on the selected features if further reduction needed, (5) Use a regularized model (ElasticNet or regularized XGBoost). Also consider using Random Forest's feature importances as an alternative selection method. Always validate with cross-validation to ensure we're not overfitting the feature selection itself.</p>
+</div>`},
+
+{id:"q10",ch:"ch1",title:"What is hypothesis space and how does model complexity relate to it?",
+body:`<h4>Hypothesis Space</h4>
+<p>The <strong>set of all possible models</strong> that an algorithm can learn. It's defined by the algorithm's architecture and parameters.</p>
+<ul>
+<li><strong>Linear Regression:</strong> Hypothesis space = all linear functions (lines, planes, hyperplanes)</li>
+<li><strong>Decision Tree (depth 3):</strong> All possible decision boundaries with 3 splits</li>
+<li><strong>Neural Network (100 layers):</strong> Extremely large hypothesis space — nearly any function</li>
+</ul>
+<h4>Complexity Trade-off</h4>
+<p><strong>Too small hypothesis space</strong> (simple model) → Cannot represent the true relationship → Underfitting (high bias)</p>
+<p><strong>Too large hypothesis space</strong> (complex model) → Can memorize noise → Overfitting (high variance)</p>
+<p>The goal: Choose a hypothesis space just large enough to contain a good approximation of the true function, but small enough to avoid overfitting.</p>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You're choosing between a linear model, a decision tree with max depth 5, and a neural network with 10 layers for a dataset with 1,000 samples. How do you decide?"</strong></p>
+<p><strong>Answer:</strong> With 1,000 samples, I'd start with the linear model as baseline. If performance is poor, the relationship is likely non-linear, so I'd try the decision tree (moderate hypothesis space). The 10-layer neural network has too large a hypothesis space for just 1,000 samples — it would likely overfit. I'd use cross-validation to compare, but my expectation is the decision tree or a regularized linear model would win. If forced to use the neural network, I'd apply heavy regularization (dropout, weight decay, early stopping).</p>
+</div>`},
+
+{id:"q11",ch:"ch1",title:"What is data leakage? Give examples and how to prevent it.",
+body:`<h4>Definition</h4>
+<p><strong>Data leakage</strong> occurs when information from outside the training dataset is used to create the model, leading to overly optimistic performance estimates that fail in production.</p>
+<h4>Types of Data Leakage</h4>
+<ul>
+<li><strong>Target Leakage:</strong> Features that contain information about the target that wouldn't be available at prediction time. Example: Including "treatment outcome" when predicting "disease diagnosis" — you wouldn't know treatment outcome before diagnosis.</li>
+<li><strong>Train-Test Contamination:</strong> Information from the test set bleeds into training. Example: Fitting a scaler on the entire dataset before splitting — test data statistics influence training.</li>
+<li><strong>Temporal Leakage:</strong> Using future data to predict the past. Example: Using tomorrow's stock price features to predict today's price.</li>
+</ul>
+<h4>Prevention</h4>
+<ul>
+<li><strong>Always split data FIRST</strong>, then preprocess (scale, encode, impute) on training set only</li>
+<li><strong>Use Pipeline objects</strong> (sklearn Pipeline) to ensure transformations happen within cross-validation folds</li>
+<li><strong>Think about time:</strong> For time-series, never use future data — use temporal train/test splits</li>
+<li><strong>Review features critically:</strong> Would this feature be available at prediction time?</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your model shows 99.5% accuracy in development but only 60% in production. What happened?"</strong></p>
+<p><strong>Answer:</strong> Classic data leakage symptoms. I would investigate: (1) Check if any feature perfectly correlates with target — likely a proxy or derived from the target, (2) Check if preprocessing was done before splitting, (3) Check for temporal leakage — if test data came from the same time period as training, (4) Check if production data distribution differs (data drift vs leakage). I'd rebuild the pipeline with strict separation, use sklearn Pipeline, and validate with time-based splits.</p>
+</div>`},
+
+{id:"q12",ch:"ch1",title:"What is the difference between classification and regression?",
+body:`<h4>Classification</h4>
+<p>Predicts a <strong>discrete category/label</strong>. Output is one of a finite set of classes.</p>
+<ul>
+<li><strong>Binary:</strong> Spam/Not-Spam, Fraud/Legitimate, Churn/Retain</li>
+<li><strong>Multi-class:</strong> Image recognition (cat/dog/bird), sentiment (positive/neutral/negative)</li>
+<li><strong>Multi-label:</strong> A movie can be Action AND Comedy AND Sci-Fi simultaneously</li>
+<li><strong>Algorithms:</strong> Logistic Regression, Random Forest, SVM, Neural Networks</li>
+<li><strong>Metrics:</strong> Accuracy, Precision, Recall, F1-Score, AUC-ROC</li>
+</ul>
+<h4>Regression</h4>
+<p>Predicts a <strong>continuous numerical value</strong>. Output is a real number.</p>
+<ul>
+<li><strong>Examples:</strong> House price ($350,000), temperature (72.5°F), revenue ($1.2M)</li>
+<li><strong>Algorithms:</strong> Linear Regression, Ridge, Lasso, Random Forest Regressor, Neural Networks</li>
+<li><strong>Metrics:</strong> RMSE, MAE, R², MAPE</li>
+</ul>
+<h4>Gray Areas</h4>
+<p>Some problems can be framed either way. Predicting customer rating (1-5 stars) can be ordinal classification or regression. Age prediction can be regression (exact age) or classification (age group). The framing depends on business needs.</p>`},
+
+{id:"q13",ch:"ch1",title:"Explain the concept of generalization in ML.",
+body:`<h4>What is Generalization?</h4>
+<p>A model's ability to perform well on <strong>new, unseen data</strong> — not just the data it was trained on. This is the ultimate goal of ML.</p>
+<h4>Generalization Error</h4>
+<p>The gap between training performance and true (population) performance. Measured approximately via held-out test sets or cross-validation.</p>
+<p><strong>Generalization Error = Bias² + Variance + Irreducible Noise</strong></p>
+<ul>
+<li><strong>Good generalization:</strong> Model captures the true underlying pattern, ignores noise</li>
+<li><strong>Poor generalization (overfitting):</strong> Model memorizes training noise, fails on new data</li>
+<li><strong>Poor generalization (underfitting):</strong> Model is too simple to capture the pattern</li>
+</ul>
+<h4>How to Improve Generalization</h4>
+<ul>
+<li>More training data (the single most effective strategy)</li>
+<li>Regularization (L1, L2, Dropout, Early Stopping)</li>
+<li>Cross-validation for model selection</li>
+<li>Feature selection (reduce noise features)</li>
+<li>Data augmentation</li>
+<li>Ensemble methods (combine multiple models)</li>
+</ul>`},
+
+{id:"q14",ch:"ch1",title:"What is the difference between a model parameter and a hyperparameter?",
+body:`<h4>Model Parameters</h4>
+<p>Values <strong>learned from data during training</strong>. The model optimizes these automatically.</p>
+<ul>
+<li>Linear Regression: weights (coefficients) and bias (intercept)</li>
+<li>Neural Network: weights and biases of each layer</li>
+<li>SVM: support vectors and their coefficients</li>
+<li>You do NOT set these manually — the learning algorithm finds them</li>
+</ul>
+<h4>Hyperparameters</h4>
+<p>Values <strong>set before training</strong>. They control the learning process and model architecture.</p>
+<ul>
+<li>Learning rate, batch size, number of epochs</li>
+<li>Number of trees in Random Forest, max depth of decision tree</li>
+<li>Regularization strength (lambda), dropout rate</li>
+<li>Number of hidden layers, neurons per layer</li>
+</ul>
+<h4>Tuning Strategies</h4>
+<table><thead><tr><th>Method</th><th>Pros</th><th>Cons</th></tr></thead><tbody>
+<tr><td>Grid Search</td><td>Exhaustive, simple</td><td>Exponentially expensive</td></tr>
+<tr><td>Random Search</td><td>Often better than grid</td><td>No guarantee of optimum</td></tr>
+<tr><td>Bayesian Optimization</td><td>Efficient, learns from history</td><td>Complex setup</td></tr>
+<tr><td>Optuna/Hyperopt</td><td>Smart sampling, pruning</td><td>Requires more code</td></tr>
+</tbody></table>`},
+
+{id:"q15",ch:"ch1",title:"What is transfer learning and when should you use it?",
+body:`<h4>Concept</h4>
+<p>Using a model <strong>pre-trained on a large dataset</strong> as a starting point for a new, related task. Instead of training from scratch, you leverage knowledge already learned.</p>
+<h4>How It Works</h4>
+<ol>
+<li><strong>Pre-training:</strong> Train a large model on a massive dataset (ImageNet for vision, Wikipedia for text)</li>
+<li><strong>Fine-tuning:</strong> Take the pre-trained model, replace the final layer(s), and train on your specific (smaller) dataset</li>
+<li>Early layers learn general features (edges, textures for images; grammar, semantics for text)</li>
+<li>Later layers learn task-specific features</li>
+</ol>
+<h4>When to Use</h4>
+<ul>
+<li>Your dataset is small (hundreds to thousands of samples)</li>
+<li>A pre-trained model exists for a related domain</li>
+<li>Training from scratch would take too long or too much compute</li>
+<li>Almost always for NLP (use BERT, GPT) and Computer Vision (use ResNet, EfficientNet)</li>
+</ul>
+<h4>When NOT to Use</h4>
+<ul>
+<li>Your domain is vastly different from pre-training data (e.g., medical X-rays vs Instagram photos — though even here it often helps)</li>
+<li>You have massive amounts of domain-specific data</li>
+<li>Tabular data (transfer learning is less established here)</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You need to classify 500 medical images into 5 disease categories. How would you approach this?"</strong></p>
+<p><strong>Answer:</strong> 500 images is far too few to train a CNN from scratch. I'd use transfer learning: take a pre-trained ResNet-50 or EfficientNet (trained on ImageNet), freeze early layers, replace the final classification head with a 5-class output, fine-tune with a low learning rate (1e-4 to 1e-5), use data augmentation (rotation, flipping, color jitter) to effectively increase the dataset size, and apply early stopping to prevent overfitting. I'd also consider using a medical-domain pretrained model like CheXNet if available.</p>
+</div>`},
+
+// ── Chapter 2: Bias-Variance & Evaluation (Q16-Q30) ──
+{id:"q16",ch:"ch2",title:"Explain the Bias-Variance trade-off in detail.",
+body:`<h4>Decomposition of Error</h4>
+<p><strong>Total Error = Bias² + Variance + Irreducible Error</strong></p>
+<ul>
+<li><strong>Bias:</strong> Error from wrong assumptions. High bias = model is too simple, misses patterns (underfitting). A linear model fitting quadratic data has high bias.</li>
+<li><strong>Variance:</strong> Error from sensitivity to training data fluctuations. High variance = model changes dramatically with different training sets (overfitting). A deep decision tree memorizes noise.</li>
+<li><strong>Irreducible Error:</strong> Noise inherent in the data. Even a perfect model can't eliminate this.</li>
+</ul>
+<h4>The Trade-off</h4>
+<p>As model complexity increases: bias decreases (model captures more patterns) but variance increases (model becomes sensitive to noise). The sweet spot minimizes total error.</p>
+<table><thead><tr><th>Signal</th><th>High Bias</th><th>High Variance</th></tr></thead><tbody>
+<tr><td>Training error</td><td>High</td><td>Low</td></tr>
+<tr><td>Test error</td><td>High</td><td>High</td></tr>
+<tr><td>Gap</td><td>Small</td><td>Large</td></tr>
+<tr><td>Fix</td><td>More features, complex model</td><td>More data, regularization, simpler model</td></tr>
+</tbody></table>`},
+
+{id:"q17",ch:"ch2",title:"What is overfitting? How do you detect and prevent it?",
+body:`<h4>Definition</h4>
+<p>Model <strong>memorizes training data noise</strong> instead of learning the true pattern. Performs great on training data, poorly on new data.</p>
+<h4>Detection</h4>
+<ul>
+<li><strong>Large gap</strong> between training accuracy (98%) and validation accuracy (70%)</li>
+<li><strong>Validation loss starts increasing</strong> while training loss keeps decreasing</li>
+<li><strong>Model performance varies wildly</strong> across cross-validation folds</li>
+</ul>
+<h4>Prevention Strategies</h4>
+<ol>
+<li><strong>More training data</strong> — single most effective solution</li>
+<li><strong>Regularization:</strong> L1 (feature selection), L2 (weight shrinkage), Elastic Net (both)</li>
+<li><strong>Early stopping:</strong> Stop training when validation loss stops improving</li>
+<li><strong>Dropout (neural nets):</strong> Randomly disable neurons during training</li>
+<li><strong>Cross-validation:</strong> Use K-fold to get robust performance estimates</li>
+<li><strong>Feature selection:</strong> Remove noisy, irrelevant features</li>
+<li><strong>Data augmentation:</strong> Create variations of existing data</li>
+<li><strong>Ensemble methods:</strong> Average predictions from multiple models (bagging reduces variance)</li>
+<li><strong>Simpler model architecture:</strong> Reduce layers, trees, polynomial degree</li>
+</ol>`},
+
+{id:"q18",ch:"ch2",title:"What is underfitting? How do you detect and fix it?",
+body:`<h4>Definition</h4>
+<p>Model is <strong>too simple</strong> to capture the underlying data patterns. Performs poorly on BOTH training and test data.</p>
+<h4>Detection</h4>
+<ul>
+<li>Low training accuracy AND low test accuracy</li>
+<li>Model performs barely better than random/baseline</li>
+<li>Learning curve shows training error plateaus at a high value</li>
+</ul>
+<h4>Fixes</h4>
+<ul>
+<li><strong>Increase model complexity:</strong> More features, more layers, higher polynomial degree, deeper trees</li>
+<li><strong>Better feature engineering:</strong> Create interaction terms, polynomial features, domain-specific features</li>
+<li><strong>Reduce regularization:</strong> Lower lambda, increase dropout keep probability</li>
+<li><strong>Train longer:</strong> More epochs, lower learning rate</li>
+<li><strong>Use a different algorithm:</strong> Switch from linear to non-linear models</li>
+<li><strong>Ensure data quality:</strong> Check for data processing bugs, missing patterns in data</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your model has 60% accuracy on both training and test sets. What's wrong?"</strong></p>
+<p><strong>Answer:</strong> This is underfitting — the model can't even learn training patterns. Steps: (1) Add more features, especially non-linear ones, (2) Try a more complex model (e.g., switch from Logistic Regression to Random Forest), (3) Reduce regularization if applied, (4) Check if data has enough signal — maybe the features genuinely don't predict the target, (5) Verify there are no data bugs (wrong labels, corrupted features).</p>
+</div>`},
+
+{id:"q19",ch:"ch2",title:"Explain cross-validation. What are the different types?",
+body:`<h4>Why Cross-Validation?</h4>
+<p>A single train/test split can be misleading — you might get a lucky or unlucky split. Cross-validation gives a <strong>robust estimate</strong> of model performance by testing on multiple different subsets.</p>
+<h4>Types</h4>
+<ul>
+<li><strong>K-Fold CV:</strong> Split data into K parts, train on K-1, test on 1, repeat K times. Standard choice: K=5 or K=10.</li>
+<li><strong>Stratified K-Fold:</strong> Preserves class distribution in each fold. Essential for imbalanced data.</li>
+<li><strong>Leave-One-Out (LOO):</strong> K = number of samples. Expensive but low bias. Use for very small datasets.</li>
+<li><strong>Time Series CV:</strong> Always train on past, test on future. Expanding or sliding window. Never shuffle time-series data!</li>
+<li><strong>Group K-Fold:</strong> Ensures all samples from same group (e.g., patient) stay in same fold. Prevents data leakage when samples aren't independent.</li>
+<li><strong>Repeated K-Fold:</strong> Run K-fold multiple times with different random splits. Reduces variance of the estimate.</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You have medical data where multiple readings come from the same patient. How do you cross-validate?"</strong></p>
+<p><strong>Answer:</strong> Use GroupKFold with patient_id as the group. This ensures all readings from one patient are in the same fold, preventing the model from seeing the same patient's data in both training and testing. Regular K-Fold would leak patient-specific patterns and inflate performance estimates. This is critical because in production, the model will see entirely new patients.</p>
+</div>`},
+
+{id:"q20",ch:"ch2",title:"What are learning curves and how do you interpret them?",
+body:`<h4>Definition</h4>
+<p>Plots of training and validation performance as a function of <strong>training set size</strong> or <strong>training iterations</strong>.</p>
+<h4>Interpretation</h4>
+<ul>
+<li><strong>Overfitting:</strong> Training curve is excellent, validation curve is much worse and stagnant. The gap is large. → Need more data or regularization.</li>
+<li><strong>Underfitting:</strong> Both curves converge at a poor performance level. → Need a more complex model.</li>
+<li><strong>Good fit:</strong> Both curves converge near each other at an acceptable performance level.</li>
+<li><strong>More data would help:</strong> Validation curve is still improving and hasn't plateaued.</li>
+<li><strong>More data won't help:</strong> Validation curve has plateaued. Need better features or a different model.</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your learning curve shows training accuracy at 95% and validation at 85%, both still improving. What do you do?"</strong></p>
+<p><strong>Answer:</strong> The 10% gap suggests moderate overfitting, but both curves are still improving, meaning more data would likely help. I'd: (1) Collect more training data since the validation curve hasn't plateaued, (2) Apply mild regularization to close the gap, (3) Try data augmentation if more data isn't available, (4) Current performance may already be acceptable depending on business requirements.</p>
+</div>`},
+
+{id:"q21",ch:"ch2",title:"Explain train/validation/test split. Why do we need three sets?",
+body:`<h4>Three-Way Split</h4>
+<ul>
+<li><strong>Training Set (60-70%):</strong> Used to TRAIN the model — it learns parameters from this data.</li>
+<li><strong>Validation Set (15-20%):</strong> Used to TUNE hyperparameters and select the best model. You repeatedly evaluate on this set while trying different configurations.</li>
+<li><strong>Test Set (15-20%):</strong> Used ONCE at the very end to estimate real-world performance. Never used for any decision-making during development.</li>
+</ul>
+<h4>Why Not Just Train/Test?</h4>
+<p>If you use the test set to tune hyperparameters, you're effectively training on the test set — you'll overfit to it. Your reported "test accuracy" becomes an optimistic estimate. The validation set absorbs this overfitting, keeping the test set truly unseen.</p>
+<h4>Common Mistake</h4>
+<p>Repeatedly checking test set performance during development and adjusting the model based on it. This information leakage makes test results unreliable. The test set should be a "sealed envelope" opened once at the very end.</p>`},
+
+{id:"q22",ch:"ch2",title:"What is stratified sampling and when is it crucial?",
+body:`<h4>Definition</h4>
+<p>Splitting data so that each subset (train/val/test) maintains the <strong>same class distribution</strong> as the original dataset.</p>
+<h4>When It's Crucial</h4>
+<ul>
+<li><strong>Imbalanced datasets:</strong> If fraud is 1% of data, a random split might put 0% fraud in one fold</li>
+<li><strong>Small datasets:</strong> Random splits can easily create unrepresentative subsets</li>
+<li><strong>Multi-class problems:</strong> Rare classes might be entirely missing from some splits</li>
+</ul>
+<h4>Implementation</h4>
+<pre><code>from sklearn.model_selection import train_test_split, StratifiedKFold
+
+# Stratified train/test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Stratified K-Fold
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+for train_idx, val_idx in skf.split(X, y):
+    X_train, X_val = X[train_idx], X[val_idx]</code></pre>`},
+
+{id:"q23",ch:"ch2",title:"What is ensemble learning? Explain Bagging vs Boosting.",
+body:`<h4>Ensemble Learning</h4>
+<p>Combining <strong>multiple models</strong> to produce better predictions than any single model. "Wisdom of crowds" applied to ML.</p>
+<h4>Bagging (Bootstrap Aggregating)</h4>
+<ul>
+<li>Train multiple models on <strong>random subsets</strong> (bootstrap samples) of training data</li>
+<li>Each model is trained <strong>independently and in parallel</strong></li>
+<li>Combine predictions: <strong>voting</strong> (classification) or <strong>averaging</strong> (regression)</li>
+<li><strong>Reduces variance</strong> — makes unstable models stable</li>
+<li><strong>Example:</strong> Random Forest = bagged decision trees + random feature subsets</li>
+</ul>
+<h4>Boosting</h4>
+<ul>
+<li>Train models <strong>sequentially</strong> — each new model focuses on errors of previous models</li>
+<li>Each model is trained on <strong>weighted</strong> data — misclassified samples get higher weight</li>
+<li><strong>Reduces bias</strong> — turns weak learners into strong ones</li>
+<li><strong>Examples:</strong> AdaBoost, Gradient Boosting, XGBoost, LightGBM, CatBoost</li>
+</ul>
+<table><thead><tr><th>Aspect</th><th>Bagging</th><th>Boosting</th></tr></thead><tbody>
+<tr><td>Training</td><td>Parallel</td><td>Sequential</td></tr>
+<tr><td>Focus</td><td>Reduce variance</td><td>Reduce bias</td></tr>
+<tr><td>Risk</td><td>Less prone to overfit</td><td>Can overfit if too many iterations</td></tr>
+<tr><td>Speed</td><td>Parallelizable</td><td>Slower (sequential)</td></tr>
+</tbody></table>`},
+
+{id:"q24",ch:"ch2",title:"What is Random Forest? Why does it work so well?",
+body:`<h4>Architecture</h4>
+<p>An ensemble of <strong>decision trees</strong> where each tree is trained on a bootstrap sample with random feature subsets at each split.</p>
+<h4>Two Sources of Randomness</h4>
+<ol>
+<li><strong>Bagging:</strong> Each tree sees a different random subset of training data (with replacement)</li>
+<li><strong>Feature Randomization:</strong> At each split, only consider a random subset of features (typically √p for classification, p/3 for regression)</li>
+</ol>
+<h4>Why It Works</h4>
+<ul>
+<li><strong>Decorrelation:</strong> The two randomness sources make trees diverse — they make different errors</li>
+<li><strong>Variance reduction:</strong> Averaging many uncorrelated predictions reduces overall variance dramatically</li>
+<li><strong>Robust to outliers:</strong> Individual trees may be fooled, but the majority vote is robust</li>
+<li><strong>No feature scaling needed:</strong> Tree-based splits are scale-invariant</li>
+<li><strong>Handles missing values and mixed feature types</strong> naturally</li>
+</ul>
+<h4>Hyperparameters That Matter</h4>
+<ul>
+<li><strong>n_estimators:</strong> More trees = better but diminishing returns after 200-500</li>
+<li><strong>max_depth:</strong> Controls tree complexity. None = fully grown trees (default, relies on bagging to prevent overfitting)</li>
+<li><strong>max_features:</strong> How many features per split. Lower = more diversity = less overfitting</li>
+<li><strong>min_samples_leaf:</strong> Minimum samples in a leaf. Higher = smoother model</li>
+</ul>`},
+
+{id:"q25",ch:"ch2",title:"Explain XGBoost. Why does it dominate tabular data competitions?",
+body:`<h4>What is XGBoost?</h4>
+<p><strong>Extreme Gradient Boosting</strong> — an optimized gradient boosting framework that trains decision trees sequentially, each correcting errors of previous trees.</p>
+<h4>Key Innovations</h4>
+<ul>
+<li><strong>Regularized objective:</strong> Adds L1 and L2 penalties on leaf weights to prevent overfitting</li>
+<li><strong>Second-order optimization:</strong> Uses both gradient AND Hessian (curvature) for better splits</li>
+<li><strong>Column subsampling:</strong> Like Random Forest, uses random feature subsets</li>
+<li><strong>Missing value handling:</strong> Learns optimal direction for missing values at each split</li>
+<li><strong>Parallelism:</strong> Parallelized tree construction despite sequential boosting</li>
+<li><strong>Cache-aware access:</strong> Optimized for CPU cache, much faster than naive implementations</li>
+</ul>
+<h4>Why It Dominates Tabular Data</h4>
+<ul>
+<li>Tree-based models capture feature interactions naturally (no need for manual feature crossing)</li>
+<li>Handles mixed feature types, missing values, and varying scales without preprocessing</li>
+<li>Regularization prevents overfitting even with many trees</li>
+<li>Feature importance built-in for interpretability</li>
+</ul>
+<h4>Key Hyperparameters</h4>
+<pre><code>import xgboost as xgb
+model = xgb.XGBClassifier(
+    n_estimators=500,       # Number of trees
+    max_depth=6,            # Tree depth (3-10 typical)
+    learning_rate=0.1,      # Shrinkage (0.01-0.3)
+    subsample=0.8,          # Row subsampling
+    colsample_bytree=0.8,   # Feature subsampling
+    reg_alpha=0.1,          # L1 regularization
+    reg_lambda=1.0,         # L2 regularization
+    early_stopping_rounds=50
+)</code></pre>`},
+
+{id:"q26",ch:"ch2",title:"What is stacking in ensemble learning?",
+body:`<h4>Concept</h4>
+<p><strong>Stacking (Stacked Generalization)</strong> trains a meta-model that learns how to best combine predictions from multiple base models.</p>
+<h4>How It Works</h4>
+<ol>
+<li><strong>Level 0 (Base learners):</strong> Train diverse models — e.g., Logistic Regression, Random Forest, XGBoost, KNN</li>
+<li><strong>Generate meta-features:</strong> Use cross-validation to get out-of-fold predictions from each base model</li>
+<li><strong>Level 1 (Meta-learner):</strong> Train a simple model (usually Logistic Regression or Linear Regression) on the base model predictions</li>
+</ol>
+<h4>Why Stacking Works</h4>
+<ul>
+<li>Different models capture different patterns in data</li>
+<li>The meta-learner learns which models are reliable for which types of inputs</li>
+<li>Can outperform any individual model, especially when base models are diverse</li>
+</ul>
+<h4>Key Rule</h4>
+<p>Use <strong>out-of-fold predictions</strong> to train the meta-learner — never use the same data for both base models and meta-model, or you'll overfit.</p>`},
+
+{id:"q27",ch:"ch2",title:"How do you handle class imbalance in classification?",
+body:`<h4>The Problem</h4>
+<p>When one class dominates (e.g., 99% negative, 1% positive), models tend to predict the majority class and achieve high accuracy while being useless for the minority class.</p>
+<h4>Strategies</h4>
+<ul>
+<li><strong>Data-Level:</strong>
+  <ul>
+  <li>Oversampling minority class (SMOTE — creates synthetic samples)</li>
+  <li>Undersampling majority class (Random, Tomek Links, NearMiss)</li>
+  <li>Combination: SMOTE + Tomek Links</li>
+  </ul>
+</li>
+<li><strong>Algorithm-Level:</strong>
+  <ul>
+  <li>Class weights: Give higher penalty for misclassifying minority class (<code>class_weight='balanced'</code>)</li>
+  <li>Cost-sensitive learning: Adjust loss function weights</li>
+  <li>Threshold tuning: Don't use 0.5 default — optimize threshold on precision-recall curve</li>
+  </ul>
+</li>
+<li><strong>Evaluation:</strong>
+  <ul>
+  <li>NEVER use accuracy — use Precision, Recall, F1, AUC-PR</li>
+  <li>Use Stratified K-Fold to maintain class ratios</li>
+  </ul>
+</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You're building a cancer detection model. False negatives (missing cancer) are much worse than false positives. How do you optimize?"</strong></p>
+<p><strong>Answer:</strong> Optimize for high recall (sensitivity) to catch as many cancer cases as possible, accepting more false positives. Steps: (1) Use class weights to penalize false negatives heavily, (2) Lower the classification threshold (e.g., 0.3 instead of 0.5), (3) Use Recall or F2-score (weights recall higher than precision) as the optimization metric, (4) Apply SMOTE for training data augmentation, (5) Have a human review queue for predicted positives to handle false positives.</p>
+</div>`},
+
+{id:"q28",ch:"ch2",title:"What is AUC-ROC? When should you use AUC-PR instead?",
+body:`<h4>ROC Curve</h4>
+<p>Plots <strong>True Positive Rate (Recall)</strong> vs <strong>False Positive Rate</strong> at various classification thresholds. AUC-ROC is the area under this curve (0.5 = random, 1.0 = perfect).</p>
+<h4>When to Use AUC-ROC</h4>
+<ul>
+<li>Balanced or moderately imbalanced datasets</li>
+<li>When you care equally about both classes</li>
+<li>Comparing models across different thresholds</li>
+</ul>
+<h4>When to Use AUC-PR (Precision-Recall)</h4>
+<ul>
+<li><strong>Heavily imbalanced datasets</strong> (1% positive) — AUC-ROC can be misleadingly high</li>
+<li>When the positive (minority) class is what you care about</li>
+<li>AUC-PR better reflects model performance on the rare class</li>
+</ul>
+<h4>Why AUC-ROC Can Be Misleading</h4>
+<p>With 99% negatives, even a mediocre model has a low false positive rate (most predictions on negatives are correct). AUC-ROC looks great but the model may still miss most positives. AUC-PR exposes this by focusing on how well the model identifies the positive class.</p>`},
+
+{id:"q29",ch:"ch2",title:"Explain Precision, Recall, and F1-Score with a real example.",
+body:`<h4>Definitions</h4>
+<ul>
+<li><strong>Precision:</strong> Of all PREDICTED positives, how many are actually positive? Precision = TP / (TP + FP)</li>
+<li><strong>Recall (Sensitivity):</strong> Of all ACTUAL positives, how many did we find? Recall = TP / (TP + FP)</li>
+<li><strong>F1-Score:</strong> Harmonic mean of Precision and Recall = 2 × (P × R) / (P + R)</li>
+</ul>
+<h4>Real Example: Email Spam Filter</h4>
+<p>You send 100 emails. 10 are actual spam. Your model flags 12 as spam.</p>
+<ul>
+<li>8 of the 12 flagged are actually spam (TP=8)</li>
+<li>4 are legitimate emails wrongly flagged (FP=4)</li>
+<li>2 actual spam were missed (FN=2)</li>
+</ul>
+<p><strong>Precision = 8/12 = 67%</strong> — "67% of what we flagged is actually spam"</p>
+<p><strong>Recall = 8/10 = 80%</strong> — "We caught 80% of spam"</p>
+<p><strong>F1 = 2×(0.67×0.80)/(0.67+0.80) = 73%</strong></p>
+<h4>When to Prioritize Which</h4>
+<table><thead><tr><th>Metric</th><th>Prioritize When</th><th>Example</th></tr></thead><tbody>
+<tr><td>Precision</td><td>False positives are costly</td><td>Recommending surgery, spam that blocks important emails</td></tr>
+<tr><td>Recall</td><td>False negatives are costly</td><td>Cancer screening, fraud detection</td></tr>
+<tr><td>F1</td><td>Balance needed, imbalanced data</td><td>General classification on imbalanced datasets</td></tr>
+</tbody></table>`},
+
+{id:"q30",ch:"ch2",title:"What is the confusion matrix? How do you read it?",
+body:`<h4>Structure</h4>
+<p>A table showing actual vs predicted classes:</p>
+<table><thead><tr><th></th><th>Predicted Positive</th><th>Predicted Negative</th></tr></thead><tbody>
+<tr><td><strong>Actual Positive</strong></td><td>True Positive (TP)</td><td>False Negative (FN) — Type II Error</td></tr>
+<tr><td><strong>Actual Negative</strong></td><td>False Positive (FP) — Type I Error</td><td>True Negative (TN)</td></tr>
+</tbody></table>
+<h4>Derived Metrics</h4>
+<ul>
+<li><strong>Accuracy:</strong> (TP+TN) / Total — misleading for imbalanced data</li>
+<li><strong>Precision:</strong> TP / (TP+FP) — how precise are positive predictions</li>
+<li><strong>Recall:</strong> TP / (TP+FN) — how many positives did we catch</li>
+<li><strong>Specificity:</strong> TN / (TN+FP) — how well do we identify negatives</li>
+<li><strong>F1:</strong> Harmonic mean of Precision and Recall</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your confusion matrix shows TP=900, FP=50, FN=100, TN=8950. Evaluate the model."</strong></p>
+<p><strong>Answer:</strong> Accuracy = (900+8950)/10000 = 98.5% — looks great! But let's dig deeper. Precision = 900/(900+50) = 94.7%, Recall = 900/(900+100) = 90.0%, F1 = 92.3%. The 100 false negatives (missed positives) might be critical depending on the application. If this is disease detection, missing 10% of cases is unacceptable — we'd need to improve recall by lowering the threshold, even at the cost of more false positives.</p>
+</div>`},
+
+// ── Chapter 3: Training & Optimization (Q31-Q45) ──
+{id:"q31",ch:"ch3",title:"What is gradient descent? Explain the different variants.",
+body:`<h4>Core Idea</h4>
+<p>An optimization algorithm that iteratively adjusts model parameters by moving in the direction of <strong>steepest decrease</strong> of the loss function. Like walking downhill in a foggy mountain — take small steps in the steepest downward direction.</p>
+<h4>Update Rule</h4>
+<p><code>θ = θ - α × ∇L(θ)</code> where α is learning rate and ∇L is the gradient of the loss.</p>
+<h4>Variants</h4>
+<table><thead><tr><th>Variant</th><th>Data Per Update</th><th>Pros</th><th>Cons</th></tr></thead><tbody>
+<tr><td>Batch GD</td><td>Entire dataset</td><td>Stable convergence</td><td>Slow, needs all data in memory</td></tr>
+<tr><td>Stochastic GD (SGD)</td><td>1 sample</td><td>Fast updates, can escape local minima</td><td>Noisy, unstable</td></tr>
+<tr><td>Mini-batch GD</td><td>Small batch (32-256)</td><td>Balance of speed and stability, GPU-friendly</td><td>Batch size is a hyperparameter</td></tr>
+</tbody></table>
+<h4>Advanced Optimizers</h4>
+<ul>
+<li><strong>Momentum:</strong> Adds "velocity" — accelerates in consistent directions, dampens oscillations</li>
+<li><strong>RMSProp:</strong> Adapts learning rate per parameter — divides by running average of gradient magnitudes</li>
+<li><strong>Adam:</strong> Combines Momentum + RMSProp. Default choice for deep learning. Adapts learning rate per parameter with momentum.</li>
+<li><strong>AdamW:</strong> Adam with decoupled weight decay. Preferred for transformer training.</li>
+</ul>`},
+
+{id:"q32",ch:"ch3",title:"What is the learning rate? What happens if it's too high or too low?",
+body:`<h4>Definition</h4>
+<p>Controls <strong>step size</strong> during gradient descent. How much parameters change in each update.</p>
+<h4>Too High</h4>
+<ul>
+<li>Steps overshoot the minimum</li>
+<li>Loss oscillates wildly or even diverges to infinity</li>
+<li>Model never converges</li>
+</ul>
+<h4>Too Low</h4>
+<ul>
+<li>Extremely slow convergence</li>
+<li>Gets stuck in local minima or saddle points</li>
+<li>Wastes compute time</li>
+</ul>
+<h4>Learning Rate Schedules</h4>
+<ul>
+<li><strong>Step Decay:</strong> Reduce LR by factor every N epochs</li>
+<li><strong>Cosine Annealing:</strong> Smoothly decreases LR following a cosine curve</li>
+<li><strong>Warmup + Decay:</strong> Start low, increase linearly for N steps, then decay. Used in transformers.</li>
+<li><strong>ReduceOnPlateau:</strong> Monitor validation loss, reduce LR when it stagnates</li>
+<li><strong>One Cycle:</strong> Ramp up then ramp down. Often finds better solutions faster.</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your training loss is oscillating wildly and not converging. What do you do?"</strong></p>
+<p><strong>Answer:</strong> Primary suspect is learning rate too high. I'd: (1) Reduce learning rate by 10x, (2) Use a learning rate finder to find the optimal range, (3) Switch to Adam optimizer which adapts per-parameter, (4) If using SGD, add momentum for smoother updates, (5) Implement a warmup schedule to start with a tiny LR and gradually increase.</p>
+</div>`},
+
+{id:"q33",ch:"ch3",title:"Explain batch normalization. Why does it help training?",
+body:`<h4>What It Does</h4>
+<p>Normalizes the inputs to each layer to have <strong>zero mean and unit variance</strong>, then applies learnable scale (γ) and shift (β) parameters.</p>
+<h4>Benefits</h4>
+<ul>
+<li><strong>Faster training:</strong> Allows higher learning rates without divergence</li>
+<li><strong>Reduces internal covariate shift:</strong> Layer inputs don't shift as previous layers update</li>
+<li><strong>Regularization effect:</strong> Mini-batch statistics add noise, acting like mild regularization</li>
+<li><strong>Less sensitivity to initialization:</strong> Normalizing inputs makes weight initialization less critical</li>
+</ul>
+<h4>During Training vs Inference</h4>
+<ul>
+<li><strong>Training:</strong> Uses mini-batch mean and variance</li>
+<li><strong>Inference:</strong> Uses running average of mean and variance computed during training</li>
+</ul>
+<h4>Alternatives</h4>
+<ul>
+<li><strong>Layer Normalization:</strong> Normalizes across features (not batch). Used in transformers because it doesn't depend on batch size.</li>
+<li><strong>Group Normalization:</strong> Divides channels into groups, normalizes within each. Good for small batch sizes.</li>
+<li><strong>Instance Normalization:</strong> Used in style transfer — normalizes per sample, per channel.</li>
+</ul>`},
+
+{id:"q34",ch:"ch3",title:"What is early stopping and how do you implement it?",
+body:`<h4>Concept</h4>
+<p>Stop training when <strong>validation performance stops improving</strong>, even if training loss is still decreasing. Prevents the model from memorizing training noise.</p>
+<h4>Implementation</h4>
+<pre><code>best_val_loss = float('inf')
+patience = 10  # epochs to wait
+counter = 0
+
+for epoch in range(max_epochs):
+    train_loss = train_one_epoch(model, train_loader)
+    val_loss = evaluate(model, val_loader)
+    
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
+        save_checkpoint(model)  # Save best model
+        counter = 0
+    else:
+        counter += 1
+        if counter >= patience:
+            print(f"Early stopping at epoch {epoch}")
+            break
+
+# Load best model for final evaluation
+model = load_checkpoint()</code></pre>
+<h4>Key Considerations</h4>
+<ul>
+<li><strong>Patience:</strong> How many epochs to wait. Too low = stop prematurely. Too high = waste compute.</li>
+<li><strong>Monitor metric:</strong> Usually validation loss, but can be any metric (F1, accuracy)</li>
+<li><strong>Save best model:</strong> Always save the checkpoint at the best validation score</li>
+<li>Early stopping is a form of regularization — it limits model complexity by limiting training time</li>
+</ul>`},
+
+{id:"q35",ch:"ch3",title:"What is gradient vanishing and exploding? How do you solve them?",
+body:`<h4>Vanishing Gradients</h4>
+<p>In deep networks, gradients become <strong>exponentially small</strong> as they propagate backward through layers. Early layers barely learn.</p>
+<ul>
+<li><strong>Cause:</strong> Sigmoid/Tanh activations squash gradients into small ranges; multiplying many small numbers → nearly zero</li>
+<li><strong>Solutions:</strong> ReLU activation, residual connections (skip connections), proper initialization (He/Xavier), batch normalization, LSTM/GRU gates for sequences</li>
+</ul>
+<h4>Exploding Gradients</h4>
+<p>Gradients become <strong>exponentially large</strong>, causing weight updates to be enormous and training to diverge.</p>
+<ul>
+<li><strong>Cause:</strong> Deep networks with large weights; multiplying many large numbers</li>
+<li><strong>Solutions:</strong> Gradient clipping (cap gradient norm), proper initialization, batch normalization, lower learning rate</li>
+</ul>
+<pre><code># Gradient clipping in PyTorch
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)</code></pre>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your 20-layer neural network trains well for the last 5 layers but early layers don't improve. Why?"</strong></p>
+<p><strong>Answer:</strong> Classic vanishing gradient problem. The gradient signal decays as it propagates back through 20 layers. Solutions: (1) Use residual connections (ResNet-style skip connections) so gradients can flow directly to early layers, (2) Switch from Sigmoid to ReLU or GELU activations, (3) Add batch normalization after each layer, (4) Use He initialization for ReLU networks. With these changes, even 100+ layer networks can be trained effectively.</p>
+</div>`},
+
+{id:"q36",ch:"ch3",title:"Explain weight initialization. Why can't you initialize all weights to zero?",
+body:`<h4>Why Not Zero?</h4>
+<p>If all weights are zero (or the same value), all neurons in a layer compute the <strong>same output</strong> and receive the <strong>same gradient</strong>. They update identically and remain identical forever. This is called the <strong>symmetry problem</strong> — the network effectively has only one neuron per layer.</p>
+<h4>Initialization Strategies</h4>
+<ul>
+<li><strong>Random Small Values:</strong> Break symmetry but can cause vanishing/exploding gradients in deep networks</li>
+<li><strong>Xavier/Glorot:</strong> For Sigmoid/Tanh. Variance = 2/(fan_in + fan_out). Keeps signal variance roughly constant across layers.</li>
+<li><strong>He/Kaiming:</strong> For ReLU. Variance = 2/fan_in. Accounts for ReLU killing half the values.</li>
+<li><strong>Orthogonal:</strong> Initialize weight matrix as orthogonal. Good for RNNs.</li>
+</ul>
+<p>Modern frameworks (PyTorch, TensorFlow) use appropriate defaults, but knowing this matters for debugging training issues.</p>`},
+
+{id:"q37",ch:"ch3",title:"What is the difference between convex and non-convex optimization?",
+body:`<h4>Convex Optimization</h4>
+<ul>
+<li>Loss function has a <strong>single global minimum</strong> (bowl-shaped)</li>
+<li>Gradient descent <strong>guaranteed</strong> to find the global minimum</li>
+<li>Examples: Linear Regression (MSE loss), Logistic Regression (cross-entropy loss), SVM</li>
+</ul>
+<h4>Non-Convex Optimization</h4>
+<ul>
+<li>Loss function has <strong>many local minima, saddle points, and plateaus</strong></li>
+<li>Gradient descent may get stuck in suboptimal solutions</li>
+<li>Examples: Neural networks (virtually all deep learning)</li>
+</ul>
+<h4>Why Deep Learning Still Works</h4>
+<ul>
+<li>In high dimensions, most local minima have similar loss values to the global minimum</li>
+<li>Saddle points (not local minima) are the bigger problem — SGD's noise helps escape them</li>
+<li>Overparameterized networks have many good solutions</li>
+<li>Techniques like learning rate schedules, momentum, and Adam help navigate the loss landscape</li>
+</ul>`},
+
+{id:"q38",ch:"ch3",title:"What is the difference between SGD, Adam, and AdamW?",
+body:`<h4>SGD (Stochastic Gradient Descent)</h4>
+<p><code>θ = θ - lr × gradient</code></p>
+<ul>
+<li>Simple, memory-efficient</li>
+<li>With momentum: adds exponential moving average of past gradients</li>
+<li>Often generalizes better than Adam (finds flatter minima)</li>
+<li>Requires careful learning rate tuning</li>
+</ul>
+<h4>Adam (Adaptive Moment Estimation)</h4>
+<p>Maintains per-parameter learning rates using first moment (mean) and second moment (variance) of gradients.</p>
+<ul>
+<li>Converges faster, less sensitive to learning rate choice</li>
+<li>Default choice for most deep learning tasks</li>
+<li>Can generalize worse than SGD in some cases</li>
+</ul>
+<h4>AdamW (Adam with Decoupled Weight Decay)</h4>
+<ul>
+<li>Fixes a subtle bug in Adam's weight decay implementation</li>
+<li>Separates weight decay from the adaptive learning rate mechanism</li>
+<li>Standard for training transformers (BERT, GPT)</li>
+<li>Generally better generalization than vanilla Adam</li>
+</ul>`},
+
+{id:"q39",ch:"ch3",title:"Explain dropout. How does it prevent overfitting?",
+body:`<h4>Mechanism</h4>
+<p>During training, randomly <strong>"drop" (set to zero)</strong> a fraction of neurons at each layer with probability p (typically 0.1-0.5). During inference, use all neurons but scale outputs by (1-p).</p>
+<h4>Why It Works</h4>
+<ul>
+<li><strong>Prevents co-adaptation:</strong> Neurons can't rely on specific other neurons, forcing each to learn useful features independently</li>
+<li><strong>Implicit ensemble:</strong> Each training step uses a different "sub-network" — like training 2^n different networks and averaging</li>
+<li><strong>Adds noise:</strong> Acts as a regularizer by adding stochasticity during training</li>
+</ul>
+<h4>Key Details</h4>
+<ul>
+<li>Only applied during <strong>training</strong> — never during inference/evaluation</li>
+<li>Typical rates: 0.1-0.3 for inputs, 0.3-0.5 for hidden layers</li>
+<li>Alternative: <strong>DropConnect</strong> drops connections (weights) instead of neurons</li>
+<li>Not commonly used in modern transformers (replaced by other regularization)</li>
+</ul>`},
+
+{id:"q40",ch:"ch3",title:"What is the learning rate warmup and why is it used?",
+body:`<h4>Concept</h4>
+<p>Start training with a <strong>very small learning rate</strong> and linearly increase it to the target value over the first few hundred/thousand steps. Then apply normal LR schedule (decay).</p>
+<h4>Why It's Needed</h4>
+<ul>
+<li><strong>Stabilizes early training:</strong> At the start, weights are random and gradients are large and unreliable. A high LR can send weights into bad regions.</li>
+<li><strong>Helps Adam/AdamW:</strong> Adaptive optimizers need a few steps to estimate gradient statistics. Starting with a high LR before these estimates are reliable causes instability.</li>
+<li><strong>Essential for transformers:</strong> The original Transformer paper uses warmup + inverse square root decay.</li>
+</ul>
+<h4>Common Schedule</h4>
+<pre><code># Linear warmup for 1000 steps, then cosine decay
+warmup_steps = 1000
+total_steps = 50000
+
+for step in range(total_steps):
+    if step < warmup_steps:
+        lr = max_lr * (step / warmup_steps)
+    else:
+        progress = (step - warmup_steps) / (total_steps - warmup_steps)
+        lr = max_lr * 0.5 * (1 + math.cos(math.pi * progress))</code></pre>`},
+
+{id:"q41",ch:"ch3",title:"What is gradient clipping and when do you need it?",
+body:`<h4>Definition</h4>
+<p>Limit the magnitude of gradients during backpropagation to prevent <strong>exploding gradients</strong>.</p>
+<h4>Two Approaches</h4>
+<ul>
+<li><strong>Clip by value:</strong> Clip each gradient element to [-max_val, max_val]. Simple but can change gradient direction.</li>
+<li><strong>Clip by norm:</strong> If gradient norm > max_norm, scale the entire gradient vector down. Preserves direction — preferred method.</li>
+</ul>
+<h4>When to Use</h4>
+<ul>
+<li><strong>RNNs/LSTMs:</strong> Long sequences cause gradient accumulation — clipping is essential</li>
+<li><strong>Transformers:</strong> Commonly clipped to norm 1.0 during training</li>
+<li><strong>Any deep network:</strong> Where you observe NaN losses or loss spikes</li>
+</ul>`},
+
+{id:"q42",ch:"ch3",title:"What is mixed precision training? Why is it used?",
+body:`<h4>Concept</h4>
+<p>Use <strong>16-bit floats (FP16/BF16)</strong> for forward pass and gradient computation, but keep a <strong>32-bit (FP32) master copy</strong> of weights for updates.</p>
+<h4>Benefits</h4>
+<ul>
+<li><strong>2x memory reduction:</strong> Fit larger models or bigger batch sizes</li>
+<li><strong>2-3x faster training:</strong> Modern GPUs have dedicated FP16 tensor cores</li>
+<li><strong>Same accuracy:</strong> When implemented correctly, no quality loss</li>
+</ul>
+<h4>Key Component: Loss Scaling</h4>
+<p>FP16 has limited range — small gradients underflow to zero. Solution: multiply loss by a large scalar before backprop, then divide gradients by the same scalar.</p>
+<pre><code># PyTorch Automatic Mixed Precision
+scaler = torch.cuda.amp.GradScaler()
+for data, target in dataloader:
+    with torch.cuda.amp.autocast():
+        output = model(data)
+        loss = criterion(output, target)
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()</code></pre>`},
+
+{id:"q43",ch:"ch3",title:"What is knowledge distillation?",
+body:`<h4>Concept</h4>
+<p>Train a <strong>small "student" model</strong> to mimic a <strong>large "teacher" model</strong>. The student learns from the teacher's soft probability outputs, not just hard labels.</p>
+<h4>Why Soft Labels Are Better</h4>
+<p>A teacher's output like [0.7, 0.2, 0.1] for cat/dog/bird contains more information than the hard label "cat." It tells the student that this image looks a bit like a dog — this "dark knowledge" helps the student generalize better.</p>
+<h4>Applications</h4>
+<ul>
+<li><strong>Model compression:</strong> Deploy a small, fast model that's nearly as good as the large one</li>
+<li><strong>Edge deployment:</strong> Run on phones/IoT devices with limited compute</li>
+<li><strong>Faster inference:</strong> 10x smaller model with 95% of the performance</li>
+</ul>`},
+
+{id:"q44",ch:"ch3",title:"What is curriculum learning?",
+body:`<h4>Concept</h4>
+<p>Train the model on <strong>easy examples first, then gradually increase difficulty</strong>. Mimics how humans learn — you don't start calculus with advanced theorems.</p>
+<h4>Why It Works</h4>
+<ul>
+<li>Model builds strong foundations on easy patterns first</li>
+<li>Avoids getting stuck in bad local minima from noisy/hard examples early on</li>
+<li>Can lead to faster convergence and better generalization</li>
+</ul>
+<h4>Approaches</h4>
+<ul>
+<li><strong>Self-paced learning:</strong> Model itself decides what's "easy" based on current loss</li>
+<li><strong>Predefined curriculum:</strong> Human expert defines easy → hard ordering</li>
+<li><strong>Anti-curriculum:</strong> Sometimes training on hard examples first works better (depends on the problem)</li>
+</ul>`},
+
+{id:"q45",ch:"ch3",title:"What are hyperparameter tuning strategies? Compare Grid, Random, Bayesian.",
+body:`<h4>Grid Search</h4>
+<ul>
+<li>Try every combination of predefined parameter values</li>
+<li>Exhaustive but <strong>exponentially expensive</strong> — 5 params × 10 values each = 100,000 combinations</li>
+<li>Wastes compute on unimportant parameters</li>
+</ul>
+<h4>Random Search</h4>
+<ul>
+<li>Randomly sample parameter combinations from defined ranges</li>
+<li><strong>Surprisingly effective</strong> — research shows it often finds good configs faster than grid search</li>
+<li>Works well because most hyperparameters have low effective dimensionality</li>
+</ul>
+<h4>Bayesian Optimization</h4>
+<ul>
+<li>Builds a probabilistic model of the objective function</li>
+<li>Intelligently picks next parameters based on past results</li>
+<li>Most sample-efficient — fewer trials needed</li>
+<li>Tools: Optuna, Hyperopt, Weights & Biases Sweeps</li>
+</ul>
+<pre><code>import optuna
+
+def objective(trial):
+    lr = trial.suggest_float('lr', 1e-5, 1e-1, log=True)
+    n_layers = trial.suggest_int('n_layers', 1, 5)
+    dropout = trial.suggest_float('dropout', 0.1, 0.5)
+    # ... train model ...
+    return val_accuracy
+
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=100)</code></pre>`},
+
+// ── Chapter 4: Feature Engineering (Q46-Q58) ──
+{id:"q46",ch:"ch4",title:"What is feature engineering? Why is it considered the most important step?",
+body:`<h4>Definition</h4>
+<p>The process of using domain knowledge to <strong>create, transform, and select features</strong> that make ML algorithms work better. It bridges raw data and model performance.</p>
+<h4>Why It Matters Most</h4>
+<ul>
+<li><strong>"Better data beats better algorithms."</strong> A simple model with great features outperforms a complex model with raw features.</li>
+<li>Models can only learn from the information present in features. If the signal isn't there, no algorithm can find it.</li>
+<li>Kaggle winners consistently credit feature engineering as the biggest factor in their success.</li>
+</ul>
+<h4>Categories</h4>
+<ul>
+<li><strong>Creation:</strong> Combine existing features (ratios, interactions, polynomials)</li>
+<li><strong>Transformation:</strong> Log, square root, binning, encoding</li>
+<li><strong>Selection:</strong> Remove irrelevant or redundant features</li>
+<li><strong>Extraction:</strong> PCA, autoencoders, word embeddings</li>
+</ul>`},
+
+{id:"q47",ch:"ch4",title:"How do you handle missing values? What are the strategies?",
+body:`<h4>Understanding Missingness</h4>
+<ul>
+<li><strong>MCAR (Missing Completely At Random):</strong> No pattern to missingness. Safe to drop or impute.</li>
+<li><strong>MAR (Missing At Random):</strong> Missingness depends on observed data. Can impute using other features.</li>
+<li><strong>MNAR (Missing Not At Random):</strong> Missingness depends on the missing value itself. Most challenging — missingness itself is informative.</li>
+</ul>
+<h4>Strategies</h4>
+<ul>
+<li><strong>Deletion:</strong> Drop rows (if few missing) or columns (if >50% missing). Simple but loses information.</li>
+<li><strong>Mean/Median/Mode Imputation:</strong> Replace with column statistics. Simple but ignores relationships.</li>
+<li><strong>KNN Imputation:</strong> Fill with average of K nearest neighbors. Captures local patterns.</li>
+<li><strong>Iterative Imputation (MICE):</strong> Model each missing feature as a function of other features. Most sophisticated.</li>
+<li><strong>Indicator feature:</strong> Add a binary column "is_missing" — the fact that a value is missing can be predictive.</li>
+<li><strong>Domain-specific:</strong> Sometimes 0, -1, or a special value makes sense (e.g., years_of_experience = 0 for fresh graduates).</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your income feature is missing for 30% of records in a loan default prediction model. What do you do?"</strong></p>
+<p><strong>Answer:</strong> Income is likely MNAR — high earners and very low earners may both avoid reporting. Steps: (1) Add a binary 'income_missing' indicator feature — the fact someone didn't report income is predictive, (2) Use iterative imputation using correlated features (occupation, education, zip code, loan amount) to estimate income, (3) Create income bins and treat missing as its own category if using tree-based models, (4) Never use the target variable (default) for imputation — that's data leakage.</p>
+</div>`},
+
+{id:"q48",ch:"ch4",title:"Explain one-hot encoding vs label encoding. When to use which?",
+body:`<h4>Label Encoding</h4>
+<p>Assigns each category an integer: Red=0, Blue=1, Green=2.</p>
+<ul>
+<li><strong>Problem:</strong> Implies an ordering (Green > Blue > Red) that may not exist</li>
+<li><strong>Use when:</strong> Category has natural order (Low=0, Medium=1, High=2), or with tree-based models (they can handle it)</li>
+</ul>
+<h4>One-Hot Encoding</h4>
+<p>Creates binary columns for each category: is_Red=[1,0,0], is_Blue=[0,1,0].</p>
+<ul>
+<li><strong>No false ordering</strong> imposed</li>
+<li><strong>Problem:</strong> High-cardinality features create many columns (1000 cities = 1000 columns)</li>
+<li><strong>Use when:</strong> Nominal categories with linear models, low-to-medium cardinality</li>
+</ul>
+<h4>Other Encoding Methods</h4>
+<ul>
+<li><strong>Target Encoding:</strong> Replace category with mean of target variable. Good for high cardinality but risks leakage — use with cross-validation.</li>
+<li><strong>Frequency Encoding:</strong> Replace with count of occurrences. Simple, no leakage.</li>
+<li><strong>Binary/Hashing:</strong> Hash categories to fixed-size vectors. Memory efficient for high cardinality.</li>
+<li><strong>Embeddings:</strong> Learn dense vector representations. Best for neural networks with high cardinality features.</li>
+</ul>`},
+
+{id:"q49",ch:"ch4",title:"What is feature scaling? When is it required?",
+body:`<h4>Why Scale?</h4>
+<p>Features with larger ranges dominate distance calculations and gradient-based optimization. Age (0-100) and income (0-1,000,000) without scaling means income dominates everything.</p>
+<h4>Methods</h4>
+<table><thead><tr><th>Method</th><th>Formula</th><th>When to Use</th></tr></thead><tbody>
+<tr><td>StandardScaler</td><td>(x - mean) / std</td><td>Default choice. Gaussian-like data.</td></tr>
+<tr><td>MinMaxScaler</td><td>(x - min) / (max - min)</td><td>When you need [0,1] range. Neural nets, image pixels.</td></tr>
+<tr><td>RobustScaler</td><td>(x - median) / IQR</td><td>When data has outliers. Uses median instead of mean.</td></tr>
+<tr><td>MaxAbsScaler</td><td>x / max(|x|)</td><td>Sparse data. Doesn't center (preserves zeros).</td></tr>
+</tbody></table>
+<h4>When Scaling is Required</h4>
+<ul>
+<li><strong>Distance-based:</strong> KNN, SVM, K-Means — distances are meaningless without scaling</li>
+<li><strong>Gradient-based:</strong> Neural Networks, Logistic Regression — unscaled features cause slow convergence</li>
+<li><strong>Regularized models:</strong> L1/L2 penalties treat all weights equally — features must be on same scale</li>
+</ul>
+<h4>When Scaling is NOT Required</h4>
+<ul>
+<li><strong>Tree-based models:</strong> Decision Trees, Random Forest, XGBoost — splits are based on thresholds, not distances</li>
+<li><strong>Naive Bayes:</strong> Works with probabilities, not distances</li>
+</ul>`},
+
+{id:"q50",ch:"ch4",title:"What is feature selection? Compare Filter, Wrapper, and Embedded methods.",
+body:`<h4>Why Select Features?</h4>
+<p>Remove irrelevant and redundant features to reduce overfitting, improve interpretability, speed up training, and combat the curse of dimensionality.</p>
+<h4>Filter Methods</h4>
+<ul>
+<li>Score features independently using statistical measures</li>
+<li>Fast, model-agnostic</li>
+<li>Techniques: Correlation, Mutual Information, Chi-squared, ANOVA F-test, Variance Threshold</li>
+<li>Con: Ignores feature interactions</li>
+</ul>
+<h4>Wrapper Methods</h4>
+<ul>
+<li>Use a model to evaluate feature subsets</li>
+<li>Forward selection, backward elimination, recursive feature elimination (RFE)</li>
+<li>Better results but very slow (exponential combinations)</li>
+</ul>
+<h4>Embedded Methods</h4>
+<ul>
+<li>Feature selection happens during model training</li>
+<li>L1 regularization (Lasso) drives unimportant weights to zero</li>
+<li>Tree-based feature importance (Random Forest, XGBoost)</li>
+<li>Best balance of performance and efficiency</li>
+</ul>`},
+
+{id:"q51",ch:"ch4",title:"What is PCA? When and how do you use it?",
+body:`<h4>Principal Component Analysis</h4>
+<p>An <strong>unsupervised</strong> linear dimensionality reduction technique that finds new axes (principal components) along which data has maximum variance.</p>
+<h4>How It Works</h4>
+<ol>
+<li>Standardize the data (mean=0, std=1)</li>
+<li>Compute covariance matrix</li>
+<li>Find eigenvectors (directions) and eigenvalues (variance explained)</li>
+<li>Sort by eigenvalue and keep top K components</li>
+<li>Project data onto the K-dimensional subspace</li>
+</ol>
+<h4>When to Use</h4>
+<ul>
+<li>Reduce high-dimensional data for visualization (reduce to 2D/3D)</li>
+<li>Remove multicollinearity (correlated features)</li>
+<li>Speed up training by reducing dimensions</li>
+<li>Noise reduction (small components often represent noise)</li>
+</ul>
+<h4>Limitations</h4>
+<ul>
+<li>Assumes linear relationships (use kernel PCA or autoencoders for non-linear)</li>
+<li>Loses interpretability — components are linear combinations of original features</li>
+<li>Must scale data first — PCA is sensitive to feature scales</li>
+</ul>`},
+
+{id:"q52",ch:"ch4",title:"How do you handle categorical features with high cardinality?",
+body:`<h4>The Problem</h4>
+<p>Features like city (10,000+ values), product_id (100,000+), or user_id are too large for one-hot encoding.</p>
+<h4>Solutions</h4>
+<ul>
+<li><strong>Target Encoding:</strong> Replace each category with the mean target value. Must use cross-validation to avoid leakage.</li>
+<li><strong>Frequency/Count Encoding:</strong> Replace with how often each category appears. No leakage risk.</li>
+<li><strong>Embedding Layer:</strong> Learn dense vector representations. Best for neural networks.</li>
+<li><strong>Hashing Trick:</strong> Hash categories to a fixed number of buckets. Collisions happen but usually manageable.</li>
+<li><strong>Grouping/Binning:</strong> Combine rare categories into "Other." Keep only top-N by frequency.</li>
+<li><strong>Leave as-is for tree models:</strong> CatBoost handles categorical features natively with ordered target encoding.</li>
+</ul>`},
+
+{id:"q53",ch:"ch4",title:"What are interaction features and polynomial features?",
+body:`<h4>Interaction Features</h4>
+<p>Multiply two features together to capture their <strong>combined effect</strong>. Example: height × width = area. The combined feature may be more predictive than either alone.</p>
+<h4>Polynomial Features</h4>
+<p>Create powers and cross-terms of existing features. Degree 2 for features [a, b] creates: [a, b, a², ab, b²].</p>
+<h4>When to Use</h4>
+<ul>
+<li>Linear models that need to capture non-linear patterns</li>
+<li>When you suspect features interact (price × quantity = revenue)</li>
+<li>When domain knowledge suggests non-linear relationships</li>
+</ul>
+<h4>Caution</h4>
+<ul>
+<li>Polynomial features grow combinatorially — degree 3 with 100 features = ~170,000 features</li>
+<li>Always pair with regularization to prevent overfitting</li>
+<li>Tree-based models learn interactions automatically — don't need manual interaction features</li>
+</ul>`},
+
+{id:"q54",ch:"ch4",title:"How do you detect and handle outliers?",
+body:`<h4>Detection Methods</h4>
+<ul>
+<li><strong>Statistical:</strong> Z-score > 3, IQR method (below Q1-1.5×IQR or above Q3+1.5×IQR)</li>
+<li><strong>Visual:</strong> Box plots, scatter plots, histograms</li>
+<li><strong>Model-based:</strong> Isolation Forest, DBSCAN, Local Outlier Factor</li>
+</ul>
+<h4>Handling Strategies</h4>
+<ul>
+<li><strong>Remove:</strong> If clearly data errors (age=500, negative prices)</li>
+<li><strong>Cap/Winsorize:</strong> Clip values at percentiles (1st and 99th)</li>
+<li><strong>Transform:</strong> Log transform, square root — compress extreme values</li>
+<li><strong>Robust models:</strong> Use models that handle outliers (tree-based, Huber loss for regression)</li>
+<li><strong>Investigate:</strong> Outliers might be the most interesting data points (fraud, anomalies)</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your salary prediction model is heavily influenced by a few CEO-level salaries. What do you do?"</strong></p>
+<p><strong>Answer:</strong> These aren't errors — they're legitimate extreme values. I'd: (1) Apply log transformation to salary to compress the range, (2) Use Huber loss or MAE instead of MSE (less sensitive to outliers), (3) Consider separate models for different salary tiers, (4) Use RobustScaler instead of StandardScaler for preprocessing. Removing valid data points is generally a last resort.</p>
+</div>`},
+
+{id:"q55",ch:"ch4",title:"What is target encoding and how do you prevent leakage?",
+body:`<h4>Concept</h4>
+<p>Replace each category with the <strong>mean of the target variable</strong> for that category. "City=Mumbai" → average house price in Mumbai.</p>
+<h4>Leakage Risk</h4>
+<p>If you compute target means on the full training set, the encoding uses the same labels it's trying to predict — this is leakage. The model sees target information during feature creation.</p>
+<h4>Prevention</h4>
+<ul>
+<li><strong>K-Fold target encoding:</strong> For each fold, compute target means from the OTHER K-1 folds. Each sample's encoding is calculated from data it wasn't in.</li>
+<li><strong>Smoothing:</strong> Blend category mean with global mean to handle rare categories: encoded = α × category_mean + (1-α) × global_mean, where α depends on category count.</li>
+<li><strong>Add noise:</strong> Add small random noise to encoded values to prevent overfitting.</li>
+<li><strong>CatBoost's ordered encoding:</strong> Uses only preceding samples' target values — no future information.</li>
+</ul>`},
+
+{id:"q56",ch:"ch4",title:"Explain feature importance. How do you calculate it?",
+body:`<h4>Methods</h4>
+<ul>
+<li><strong>Tree-based importance:</strong> How much each feature reduces impurity (Gini, entropy) across all trees. Fast but biased toward high-cardinality features.</li>
+<li><strong>Permutation importance:</strong> Shuffle one feature and measure accuracy drop. Model-agnostic, unbiased, but slow.</li>
+<li><strong>SHAP values:</strong> Game-theoretic approach — measures each feature's contribution to each prediction. Gold standard but computationally expensive.</li>
+<li><strong>Coefficient magnitudes:</strong> For linear models with standardized features, larger |coefficient| = more important.</li>
+<li><strong>Mutual Information:</strong> Measures statistical dependency between feature and target. Non-linear, model-agnostic.</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"Your Random Forest says 'user_id' is the most important feature. Is this right?"</strong></p>
+<p><strong>Answer:</strong> This is almost certainly an artifact, not real importance. High-cardinality features like user_id have many unique values, giving trees more split opportunities and inflating Gini-based importance. I'd: (1) Use permutation importance instead, which would likely show user_id has near-zero true importance, (2) Verify with SHAP values, (3) Remove user_id — it shouldn't be a feature (it's an identifier, not a pattern). If user-level patterns matter, engineer proper features from user behavior.</p>
+</div>`},
+
+{id:"q57",ch:"ch4",title:"What is multicollinearity and how does it affect models?",
+body:`<h4>Definition</h4>
+<p>When two or more features are <strong>highly correlated</strong> with each other (e.g., height in cm and height in inches).</p>
+<h4>Problems</h4>
+<ul>
+<li><strong>Linear models:</strong> Coefficient estimates become unstable — small data changes cause wild swings. Can't interpret individual feature effects.</li>
+<li><strong>Inflated standard errors:</strong> Makes statistical significance tests unreliable</li>
+<li><strong>Redundancy:</strong> Multiple features carrying the same information waste model capacity</li>
+</ul>
+<h4>Detection</h4>
+<ul>
+<li><strong>Correlation matrix:</strong> Check pairwise correlations > 0.8</li>
+<li><strong>VIF (Variance Inflation Factor):</strong> VIF > 5-10 indicates problematic multicollinearity</li>
+<li><strong>Eigenvalue analysis:</strong> Very small eigenvalues in the feature correlation matrix</li>
+</ul>
+<h4>Solutions</h4>
+<ul>
+<li>Remove one of the correlated features</li>
+<li>PCA to combine correlated features</li>
+<li>Ridge regression (L2) handles multicollinearity by shrinking correlated coefficients</li>
+<li>Tree-based models are mostly unaffected by multicollinearity</li>
+</ul>`},
+
+{id:"q58",ch:"ch4",title:"How do you handle time-series features in ML?",
+body:`<h4>Time-Based Features</h4>
+<ul>
+<li><strong>Calendar features:</strong> Day of week, month, quarter, is_weekend, is_holiday</li>
+<li><strong>Cyclical encoding:</strong> sin(2π × hour/24), cos(2π × hour/24) — captures cyclical nature</li>
+<li><strong>Lag features:</strong> Previous values: value_t-1, value_t-2, ..., value_t-n</li>
+<li><strong>Rolling statistics:</strong> Moving averages, rolling std, rolling min/max over windows</li>
+<li><strong>Trend features:</strong> Slope of recent values, change from N days ago</li>
+<li><strong>Difference features:</strong> value_t - value_t-1 (captures momentum)</li>
+</ul>
+<h4>Critical Rules</h4>
+<ul>
+<li><strong>Never shuffle time-series data</strong> for train/test split — always split by time</li>
+<li><strong>Use expanding or sliding window</strong> cross-validation</li>
+<li><strong>Features must only use past data</strong> — no future information</li>
+<li><strong>Account for seasonality</strong> — yearly, weekly, daily patterns</li>
+</ul>`},
+
+// ── Chapter 5: Metrics & Loss Functions (Q59-Q70) ──
+{id:"q59",ch:"ch5",title:"What loss function do you use for classification? Explain cross-entropy.",
+body:`<h4>Binary Cross-Entropy (Log Loss)</h4>
+<p><code>L = -[y·log(p) + (1-y)·log(1-p)]</code></p>
+<p>Measures how well predicted probabilities match actual labels. Heavily penalizes confident wrong predictions (predicting 0.99 when truth is 0).</p>
+<h4>Categorical Cross-Entropy</h4>
+<p>Extension to multi-class: <code>L = -Σ yᵢ·log(pᵢ)</code> where only the true class contributes to the loss.</p>
+<h4>Why Not MSE for Classification?</h4>
+<ul>
+<li>MSE with sigmoid creates non-convex loss landscape — gradient descent gets stuck</li>
+<li>Cross-entropy produces larger gradients for wrong predictions — faster learning</li>
+<li>Cross-entropy is the natural loss for probability outputs from softmax/sigmoid</li>
+</ul>`},
+
+{id:"q60",ch:"ch5",title:"What loss function do you use for regression? Compare MSE, MAE, Huber.",
+body:`<h4>MSE (Mean Squared Error)</h4>
+<p><code>L = (1/n) Σ(yᵢ - ŷᵢ)²</code></p>
+<ul>
+<li>Penalizes large errors heavily (squared term)</li>
+<li>Sensitive to outliers</li>
+<li>Differentiable everywhere — smooth gradients</li>
+</ul>
+<h4>MAE (Mean Absolute Error)</h4>
+<p><code>L = (1/n) Σ|yᵢ - ŷᵢ|</code></p>
+<ul>
+<li>Robust to outliers (linear penalty)</li>
+<li>Not differentiable at zero — can cause optimization issues</li>
+<li>Predicts the median, not the mean</li>
+</ul>
+<h4>Huber Loss</h4>
+<p>MSE for small errors, MAE for large errors. Combines the best of both.</p>
+<ul>
+<li>Robust to outliers like MAE</li>
+<li>Smooth gradients like MSE</li>
+<li>Has a hyperparameter δ controlling the threshold</li>
+</ul>
+<table><thead><tr><th>Situation</th><th>Best Loss</th></tr></thead><tbody>
+<tr><td>No outliers</td><td>MSE</td></tr>
+<tr><td>Many outliers</td><td>MAE or Huber</td></tr>
+<tr><td>Need smooth optimization + outlier robustness</td><td>Huber</td></tr>
+</tbody></table>`},
+
+{id:"q61",ch:"ch5",title:"What is R² score? Can it be negative?",
+body:`<h4>Definition</h4>
+<p><code>R² = 1 - (SS_res / SS_total)</code></p>
+<p>Measures the <strong>proportion of variance explained</strong> by the model. How much better is the model than simply predicting the mean?</p>
+<h4>Interpretation</h4>
+<ul>
+<li><strong>R² = 1:</strong> Perfect predictions</li>
+<li><strong>R² = 0:</strong> Model is as good as predicting the mean</li>
+<li><strong>R² < 0:</strong> Model is WORSE than predicting the mean. Yes, it can be negative! This means the model is actively harmful.</li>
+</ul>
+<h4>Adjusted R²</h4>
+<p>Penalizes for adding more features. Regular R² always increases with more features (even random ones). Adjusted R² only increases if the feature genuinely improves the model.</p>
+<p><code>Adjusted R² = 1 - (1-R²)(n-1)/(n-k-1)</code> where k = number of features.</p>`},
+
+{id:"q62",ch:"ch5",title:"What is RMSE vs MAE? When do you prefer each?",
+body:`<h4>RMSE (Root Mean Squared Error)</h4>
+<p><code>RMSE = √(Σ(yᵢ - ŷᵢ)² / n)</code></p>
+<ul>
+<li>Gives <strong>higher weight to large errors</strong> due to squaring</li>
+<li>In the same units as the target variable</li>
+<li>More sensitive to outliers</li>
+</ul>
+<h4>MAE (Mean Absolute Error)</h4>
+<p><code>MAE = Σ|yᵢ - ŷᵢ| / n</code></p>
+<ul>
+<li><strong>Equal weight to all errors</strong></li>
+<li>More interpretable — "average error in original units"</li>
+<li>Robust to outliers</li>
+</ul>
+<h4>When to Choose</h4>
+<ul>
+<li><strong>RMSE:</strong> When large errors are disproportionately bad (predicting building structural loads, drug dosages)</li>
+<li><strong>MAE:</strong> When you want average error size and outliers exist (house price prediction, delivery time estimation)</li>
+<li><strong>Rule:</strong> If RMSE >> MAE, you have a few predictions with very large errors</li>
+</ul>`},
+
+{id:"q63",ch:"ch5",title:"What is log loss and why is it used in classification?",
+body:`<h4>Definition</h4>
+<p>Log loss (logarithmic loss) measures the <strong>uncertainty of predictions based on probability</strong>, not just the predicted class.</p>
+<h4>Key Property</h4>
+<p>It distinguishes between a confident correct prediction (p=0.99 for true class → low loss) and an uncertain correct prediction (p=0.51 for true class → higher loss). Models that produce well-calibrated probabilities get lower log loss.</p>
+<h4>Why It Matters</h4>
+<ul>
+<li><strong>Encourages calibration:</strong> Models learn to output probabilities that match true frequencies</li>
+<li><strong>Differentiable:</strong> Works well with gradient-based optimization</li>
+<li><strong>Punishes confidence in wrong predictions:</strong> Predicting 0.99 for the wrong class gets extremely penalized</li>
+</ul>`},
+
+{id:"q64",ch:"ch5",title:"What is MAPE and when should you avoid it?",
+body:`<h4>Mean Absolute Percentage Error</h4>
+<p><code>MAPE = (1/n) Σ |yᵢ - ŷᵢ| / |yᵢ| × 100</code></p>
+<h4>When to Use</h4>
+<ul>
+<li>Easy to interpret: "predictions are off by X% on average"</li>
+<li>Scale-independent — good for comparing across datasets</li>
+<li>Business stakeholders understand percentages</li>
+</ul>
+<h4>When to AVOID</h4>
+<ul>
+<li><strong>Target values near zero:</strong> Division by near-zero values → infinity or extreme values</li>
+<li><strong>Asymmetric:</strong> Penalizes over-predictions differently from under-predictions at the same absolute error</li>
+<li><strong>Biased:</strong> Favors predictions that are too low (underpredictions have a lower denominator)</li>
+</ul>
+<h4>Alternative: SMAPE</h4>
+<p>Symmetric MAPE uses the average of actual and predicted in the denominator, reducing the asymmetry. Still has issues near zero.</p>`},
+
+{id:"q65",ch:"ch5",title:"What is Cohen's Kappa? When is accuracy not enough?",
+body:`<h4>Definition</h4>
+<p>Measures agreement between predictions and actuals, <strong>adjusted for chance agreement</strong>.</p>
+<p><code>κ = (accuracy - expected_accuracy) / (1 - expected_accuracy)</code></p>
+<h4>Interpretation</h4>
+<ul>
+<li>κ = 1: Perfect agreement</li>
+<li>κ = 0: No better than random</li>
+<li>κ < 0: Worse than random</li>
+</ul>
+<h4>When Accuracy Fails</h4>
+<p>With 95% class imbalance, a model predicting the majority class gets 95% accuracy but κ ≈ 0 (no better than random). Cohen's Kappa exposes this by accounting for the expected accuracy from random guessing given the class distribution.</p>`},
+
+{id:"q66",ch:"ch5",title:"What is a calibration curve? Why does probability calibration matter?",
+body:`<h4>Concept</h4>
+<p>A calibration curve plots predicted probability vs actual fraction of positives. A perfectly calibrated model has predicted P(positive) = actual fraction of positives.</p>
+<h4>Why It Matters</h4>
+<ul>
+<li><strong>Decision-making:</strong> If your model says "80% chance of fraud," stakeholders want that to mean 80 out of 100 such predictions are actually fraud</li>
+<li><strong>Threshold selection:</strong> Poorly calibrated probabilities make threshold optimization unreliable</li>
+<li><strong>Combining models:</strong> Ensemble predictions are meaningless if constituent probabilities aren't calibrated</li>
+</ul>
+<h4>Which Models Need Calibration?</h4>
+<ul>
+<li><strong>Already calibrated:</strong> Logistic Regression (by design), well-trained neural networks</li>
+<li><strong>Need calibration:</strong> SVM, Naive Bayes, Random Forest, Gradient Boosting</li>
+<li><strong>Methods:</strong> Platt Scaling (sigmoid), Isotonic Regression</li>
+</ul>`},
+
+{id:"q67",ch:"ch5",title:"What is the difference between micro, macro, and weighted F1 in multi-class?",
+body:`<h4>Micro F1</h4>
+<p>Aggregate TP, FP, FN across all classes, then compute F1. <strong>Treats every sample equally.</strong> Biased toward the majority class.</p>
+<h4>Macro F1</h4>
+<p>Compute F1 per class, then average. <strong>Treats every class equally.</strong> Good when all classes matter regardless of size.</p>
+<h4>Weighted F1</h4>
+<p>Compute F1 per class, then weighted average by class support (number of samples). <strong>Compromise between micro and macro.</strong></p>
+<h4>When to Use Which</h4>
+<ul>
+<li><strong>Macro:</strong> When rare classes matter as much as common ones (disease subtypes)</li>
+<li><strong>Micro:</strong> When you want overall performance across all samples</li>
+<li><strong>Weighted:</strong> When you want class-aware but support-proportional evaluation</li>
+</ul>`},
+
+{id:"q68",ch:"ch5",title:"What is focal loss and when do you use it?",
+body:`<h4>Motivation</h4>
+<p>In heavily imbalanced datasets, the model spends most of its "learning effort" on easy-to-classify majority examples. Focal loss <strong>down-weights easy examples</strong> so the model focuses on hard, misclassified ones.</p>
+<h4>Formula</h4>
+<p><code>FL(p) = -α(1-p)^γ · log(p)</code></p>
+<ul>
+<li><strong>γ (focusing parameter):</strong> When γ > 0, easy examples (p close to 1) get very low loss. Typical γ = 2.</li>
+<li><strong>α (class weighting):</strong> Additional class-level weighting</li>
+</ul>
+<h4>When to Use</h4>
+<ul>
+<li>Object detection (RetinaNet — where focal loss was invented — most anchor boxes are background)</li>
+<li>Extreme class imbalance where class weighting alone isn't enough</li>
+<li>When you want the model to focus on hard examples</li>
+</ul>`},
+
+{id:"q69",ch:"ch5",title:"How do you choose the right evaluation metric for a business problem?",
+body:`<h4>Framework</h4>
+<ol>
+<li><strong>Understand the cost of errors:</strong> What's worse — false positive or false negative?</li>
+<li><strong>Check class distribution:</strong> Balanced → accuracy works. Imbalanced → F1, AUC-PR.</li>
+<li><strong>Consider the business action:</strong> What decisions are made based on predictions?</li>
+<li><strong>Talk to stakeholders:</strong> Technical metrics must map to business KPIs.</li>
+</ol>
+<h4>Mapping Business Problems to Metrics</h4>
+<table><thead><tr><th>Problem</th><th>Priority</th><th>Metric</th></tr></thead><tbody>
+<tr><td>Cancer screening</td><td>Don't miss cancer (FN costly)</td><td>Recall, F2-score</td></tr>
+<tr><td>Spam filter</td><td>Don't block good emails (FP costly)</td><td>Precision</td></tr>
+<tr><td>Fraud detection</td><td>Catch fraud + minimize investigation cost</td><td>F1, AUC-PR, precision@K</td></tr>
+<tr><td>Recommendation</td><td>Show relevant items</td><td>NDCG, MAP, recall@K</td></tr>
+<tr><td>House pricing</td><td>Accurate price estimates</td><td>RMSE, MAPE</td></tr>
+<tr><td>Balanced classification</td><td>Overall correctness</td><td>Accuracy, F1</td></tr>
+</tbody></table>`},
+
+{id:"q70",ch:"ch5",title:"What is NDCG and when is it used?",
+body:`<h4>Normalized Discounted Cumulative Gain</h4>
+<p>A ranking metric that evaluates how well a model orders items by relevance. <strong>Position matters:</strong> relevant items ranked higher are worth more.</p>
+<h4>How It Works</h4>
+<ul>
+<li><strong>CG:</strong> Sum of relevance scores</li>
+<li><strong>DCG:</strong> Sum of relevance scores discounted by position: Σ (relᵢ / log₂(i+1))</li>
+<li><strong>NDCG:</strong> DCG normalized by ideal DCG (perfect ranking): NDCG = DCG / IDCG</li>
+</ul>
+<h4>When to Use</h4>
+<ul>
+<li>Search engine ranking (most relevant results first)</li>
+<li>Recommendation systems (best items at the top)</li>
+<li>Any problem where ORDER of predictions matters, not just correctness</li>
+</ul>`},
+
+// ── Chapter 6: Regularization & Generalization (Q71-Q80) ──
+{id:"q71",ch:"ch6",title:"What is regularization? Why is it needed?",
+body:`<h4>Definition</h4>
+<p>Technique to <strong>constrain model complexity</strong> to prevent overfitting. Adds a penalty term to the loss function that discourages large or unnecessary parameters.</p>
+<h4>Intuition</h4>
+<p>Without regularization, a model is free to create arbitrarily complex decision boundaries to fit training noise. Regularization says: "Yes, you can fit the data well, but try to do it with small, simple weights."</p>
+<h4>Types</h4>
+<ul>
+<li><strong>Explicit:</strong> L1 (Lasso), L2 (Ridge), Elastic Net, Dropout, Weight Decay</li>
+<li><strong>Implicit:</strong> Early stopping, data augmentation, batch normalization, ensembling, reducing model size</li>
+</ul>`},
+
+{id:"q72",ch:"ch6",title:"Compare L1 (Lasso) and L2 (Ridge) regularization.",
+body:`<h4>L1 Regularization (Lasso)</h4>
+<p><code>Loss = Original Loss + λ × Σ|wᵢ|</code></p>
+<ul>
+<li>Drives some weights <strong>exactly to zero</strong> → automatic feature selection</li>
+<li>Produces <strong>sparse models</strong> — only important features remain</li>
+<li>Non-differentiable at zero (uses subgradient)</li>
+<li>Use when: you suspect many features are irrelevant</li>
+</ul>
+<h4>L2 Regularization (Ridge)</h4>
+<p><code>Loss = Original Loss + λ × Σwᵢ²</code></p>
+<ul>
+<li><strong>Shrinks all weights toward zero</strong> but never exactly to zero</li>
+<li>Distributes weight across correlated features (handles multicollinearity well)</li>
+<li>Smooth, differentiable everywhere</li>
+<li>Use when: all features might be relevant, or features are correlated</li>
+</ul>
+<h4>Elastic Net</h4>
+<p>Combines both: <code>Loss + λ₁ × Σ|wᵢ| + λ₂ × Σwᵢ²</code></p>
+<p>Gets feature selection from L1 and stability from L2. Best of both worlds. Use when features are correlated AND you want selection.</p>
+<table><thead><tr><th>Aspect</th><th>L1 (Lasso)</th><th>L2 (Ridge)</th></tr></thead><tbody>
+<tr><td>Weight behavior</td><td>Some become exactly zero</td><td>All shrink, none zero</td></tr>
+<tr><td>Feature selection</td><td>Yes (built-in)</td><td>No</td></tr>
+<tr><td>Multicollinearity</td><td>Picks one of correlated features</td><td>Shrinks both equally</td></tr>
+<tr><td>Sparsity</td><td>Sparse solution</td><td>Dense solution</td></tr>
+</tbody></table>`},
+
+{id:"q73",ch:"ch6",title:"What is Elastic Net and when should you use it?",
+body:`<h4>Concept</h4>
+<p>Combination of L1 and L2 regularization with mixing parameter α ∈ [0,1]:</p>
+<p><code>Loss + λ[α × Σ|wᵢ| + (1-α) × Σwᵢ²]</code></p>
+<h4>When to Use</h4>
+<ul>
+<li>Features are correlated (L1 alone arbitrarily picks one, L2 keeps both)</li>
+<li>You want feature selection AND stability</li>
+<li>Number of features > number of samples (Lasso selects at most n features; Elastic Net doesn't have this limitation)</li>
+</ul>
+<pre><code>from sklearn.linear_model import ElasticNet
+model = ElasticNet(alpha=0.1, l1_ratio=0.5)
+# l1_ratio = 1.0 → pure L1 (Lasso)
+# l1_ratio = 0.0 → pure L2 (Ridge)
+# l1_ratio = 0.5 → equal mix</code></pre>`},
+
+{id:"q74",ch:"ch6",title:"What is data augmentation? Give examples for different data types.",
+body:`<h4>Concept</h4>
+<p>Create new training samples by applying <strong>label-preserving transformations</strong> to existing data. Effectively increases dataset size and diversity.</p>
+<h4>Image Augmentation</h4>
+<ul>
+<li>Rotation, flipping, cropping, scaling</li>
+<li>Color jitter, brightness/contrast adjustment</li>
+<li>CutOut, MixUp, CutMix (modern techniques)</li>
+<li>Random erasing</li>
+</ul>
+<h4>Text Augmentation</h4>
+<ul>
+<li>Synonym replacement, random insertion/deletion/swap</li>
+<li>Back translation (English → French → English)</li>
+<li>Paraphrasing using LLMs</li>
+</ul>
+<h4>Tabular Data</h4>
+<ul>
+<li>SMOTE for minority class oversampling</li>
+<li>Adding Gaussian noise to continuous features</li>
+<li>Feature-level mixup</li>
+</ul>
+<h4>Audio</h4>
+<ul>
+<li>Time stretching, pitch shifting</li>
+<li>Adding background noise</li>
+<li>SpecAugment (mask frequency/time bands in spectrograms)</li>
+</ul>`},
+
+{id:"q75",ch:"ch6",title:"What is weight decay? How is it different from L2 regularization?",
+body:`<h4>Standard L2 Regularization</h4>
+<p>Adds L2 penalty to the loss. For Adam optimizer, the adaptive learning rate interacts with the L2 penalty in unexpected ways — the effective regularization varies per parameter.</p>
+<h4>Decoupled Weight Decay (AdamW)</h4>
+<p>Subtracts a fraction of the weight directly: <code>w = w - lr × gradient - lr × λ × w</code></p>
+<p>The decay is applied <strong>independently</strong> from the gradient update. This gives consistent regularization regardless of the adaptive learning rate.</p>
+<h4>Key Difference</h4>
+<p>For SGD, L2 regularization and weight decay are mathematically equivalent. For adaptive optimizers (Adam), they are NOT — AdamW's decoupled approach is theoretically better and empirically confirmed.</p>`},
+
+{id:"q76",ch:"ch6",title:"How does data augmentation act as regularization?",
+body:`<h4>Mechanism</h4>
+<p>Data augmentation effectively <strong>tells the model what invariances to learn</strong>. By showing rotated, flipped, and color-shifted versions of the same image, the model learns that these transformations don't change the label — this is a form of prior knowledge injection.</p>
+<h4>Why It's Regularization</h4>
+<ul>
+<li>Increases effective training set size → reduces overfitting</li>
+<li>Forces model to learn robust features instead of memorizing specific pixel patterns</li>
+<li>Smooths the learned function — augmented neighbors have the same label</li>
+</ul>`},
+
+{id:"q77",ch:"ch6",title:"What is label smoothing and why is it used?",
+body:`<h4>Concept</h4>
+<p>Instead of training with hard labels (0 or 1), use soft labels: y_smooth = (1-ε)×y + ε/K, where ε is typically 0.1 and K is the number of classes.</p>
+<p>So a true label of [0, 0, 1] becomes [0.033, 0.033, 0.933] with ε=0.1 and K=3.</p>
+<h4>Benefits</h4>
+<ul>
+<li><strong>Prevents overconfidence:</strong> Model doesn't try to predict exact 0 or 1, which requires infinite logits</li>
+<li><strong>Regularization:</strong> Reduces overfitting by penalizing extreme predictions</li>
+<li><strong>Better calibration:</strong> Predicted probabilities are more meaningful</li>
+<li><strong>Used in:</strong> Transformers, image classification (ResNet, EfficientNet training recipes)</li>
+</ul>`},
+
+{id:"q78",ch:"ch6",title:"What is double descent and what does it tell us about model complexity?",
+body:`<h4>Classical View</h4>
+<p>The traditional bias-variance trade-off suggests error follows a U-curve: decreasing with complexity then increasing after the sweet spot.</p>
+<h4>Double Descent</h4>
+<p>Modern research shows that BEYOND the interpolation threshold (where model can perfectly fit training data), test error <strong>decreases again</strong> with more parameters. The curve has a second descent.</p>
+<h4>Implications</h4>
+<ul>
+<li>Very large, overparameterized models (deep networks) can generalize well despite fitting training data perfectly</li>
+<li>The "sweet spot" might be either before the peak (classical regime) or way past it (overparameterized regime)</li>
+<li>This partially explains why huge neural networks work — they're in the "benign overfitting" regime</li>
+</ul>`},
+
+{id:"q79",ch:"ch6",title:"What is Mixup training? How does it regularize?",
+body:`<h4>Concept</h4>
+<p>Create new training samples by <strong>linearly interpolating between two random training samples</strong> and their labels:</p>
+<p><code>x_new = λ × x_i + (1-λ) × x_j</code><br><code>y_new = λ × y_i + (1-λ) × y_j</code></p>
+<p>where λ ~ Beta(α, α), typically α = 0.2-0.4.</p>
+<h4>Why It Works</h4>
+<ul>
+<li>Encourages linear behavior between training examples → smoother decision boundaries</li>
+<li>Reduces memorization of individual training examples</li>
+<li>Implicitly adds regularization through virtual data augmentation</li>
+<li>Improves calibration and robustness to adversarial examples</li>
+</ul>`},
+
+{id:"q80",ch:"ch6",title:"What is the lottery ticket hypothesis?",
+body:`<h4>Hypothesis</h4>
+<p>A randomly initialized dense neural network contains a <strong>sub-network (the "winning ticket")</strong> that, when trained in isolation from the same initialization, matches the full network's performance.</p>
+<h4>Implications</h4>
+<ul>
+<li>Most parameters in large networks are unnecessary — we just don't know which ones in advance</li>
+<li>Pruning 90-95% of parameters is possible with minimal accuracy loss IF you find the right sub-network</li>
+<li>Initialization matters — the same architecture with different random init may not contain a good sub-network</li>
+<li>Practical applications: model compression, efficient deployment on edge devices</li>
+</ul>`},
+
+// ── Chapter 7: Data Handling & Preprocessing (Q81-Q90) ──
+{id:"q81",ch:"ch7",title:"How do you handle imbalanced datasets? Compare SMOTE, undersampling, and class weights.",
+body:`<h4>SMOTE (Synthetic Minority Oversampling)</h4>
+<ul>
+<li>Creates <strong>synthetic minority samples</strong> by interpolating between existing minority points and their KNN neighbors</li>
+<li>Increases minority class size without duplicating existing data</li>
+<li>Variants: Borderline-SMOTE (focuses on boundary), ADASYN (adaptive), SMOTE-NC (handles categoricals)</li>
+<li><strong>Warning:</strong> Only apply to training set, NEVER to validation/test</li>
+</ul>
+<h4>Undersampling</h4>
+<ul>
+<li>Remove majority class samples to balance classes</li>
+<li>Fast but <strong>loses information</strong></li>
+<li>Methods: Random, Tomek Links (remove borderline majority), NearMiss</li>
+</ul>
+<h4>Class Weights</h4>
+<ul>
+<li>Adjust loss function to penalize minority class errors more</li>
+<li>No data modification needed — works within the algorithm</li>
+<li><code>class_weight='balanced'</code> in sklearn</li>
+<li>Often the simplest and most effective approach</li>
+</ul>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You have 1 million transactions, only 500 are fraud (0.05%). How do you train an effective model?"</strong></p>
+<p><strong>Answer:</strong> Multi-pronged approach: (1) Use class_weight='balanced' or scale_pos_weight in XGBoost as the first step, (2) Apply SMOTE on training data only to bring fraud to ~5-10%, not 50% — extreme oversampling can hurt, (3) Use AUC-PR as the primary metric, not accuracy, (4) Try Isolation Forest as an unsupervised anomaly detector — doesn't need balanced data, (5) Ensemble: combine supervised (XGBoost with class weights) and unsupervised (Isolation Forest) predictions, (6) Lower classification threshold to increase recall.</p>
+</div>`},
+
+{id:"q82",ch:"ch7",title:"What is data drift? How do you detect and handle it?",
+body:`<h4>Types of Drift</h4>
+<ul>
+<li><strong>Data Drift (Covariate Shift):</strong> Input data distribution changes. Model trained on summer data gets winter data.</li>
+<li><strong>Concept Drift:</strong> The relationship between inputs and outputs changes. Customer behavior shifts after a competitor launches a new product.</li>
+<li><strong>Label Drift:</strong> The distribution of labels changes. Fraud patterns evolve over time.</li>
+</ul>
+<h4>Detection</h4>
+<ul>
+<li><strong>Statistical tests:</strong> KS test, Population Stability Index (PSI), Chi-squared test on feature distributions</li>
+<li><strong>Model performance monitoring:</strong> Track accuracy, F1, AUC over time windows</li>
+<li><strong>Feature monitoring:</strong> Track mean, std, missing rates of each feature</li>
+</ul>
+<h4>Handling</h4>
+<ul>
+<li><strong>Scheduled retraining:</strong> Retrain weekly/monthly on recent data</li>
+<li><strong>Online learning:</strong> Continuously update model with new data</li>
+<li><strong>Windowed training:</strong> Only train on last N months of data</li>
+<li><strong>Alerts:</strong> Trigger retraining when drift exceeds threshold</li>
+</ul>`},
+
+{id:"q83",ch:"ch7",title:"What is SMOTE and how does it work internally?",
+body:`<h4>Algorithm</h4>
+<ol>
+<li>Pick a minority class sample</li>
+<li>Find its K nearest neighbors (typically K=5) in the minority class</li>
+<li>Randomly choose one of the K neighbors</li>
+<li>Create a synthetic sample along the line between the original and the neighbor: <code>x_new = x + rand(0,1) × (x_neighbor - x)</code></li>
+<li>Repeat until desired balance is achieved</li>
+</ol>
+<h4>Variants</h4>
+<ul>
+<li><strong>Borderline-SMOTE:</strong> Only oversample minority points near the decision boundary (more useful for learning)</li>
+<li><strong>ADASYN:</strong> Creates more synthetic data for minority samples that are harder to learn</li>
+<li><strong>SMOTE-NC:</strong> Handles mixed numeric and categorical features</li>
+<li><strong>SMOTE-Tomek:</strong> Apply SMOTE then remove Tomek Links (overlapping boundary pairs) for cleaner boundaries</li>
+</ul>
+<h4>Pitfalls</h4>
+<ul>
+<li>Can create synthetic samples in majority class regions → noise</li>
+<li>Doesn't work well with very high-dimensional data</li>
+<li>Must be applied ONLY on training data — never on validation or test</li>
+</ul>`},
+
+{id:"q84",ch:"ch7",title:"How do you split time-series data for training and testing?",
+body:`<h4>Critical Rule: Never Shuffle Time-Series Data</h4>
+<p>Shuffling destroys temporal relationships and causes data leakage (future data in training set).</p>
+<h4>Splitting Strategies</h4>
+<ul>
+<li><strong>Simple temporal split:</strong> Train on first 80% of time, test on last 20%</li>
+<li><strong>Expanding window CV:</strong> Train on [0, t₁], test on [t₁, t₂]; then train on [0, t₂], test on [t₂, t₃]; etc. Training window grows.</li>
+<li><strong>Sliding window CV:</strong> Fixed-size training window slides forward. Train on [t₁, t₂], test on [t₂, t₃]; then train on [t₃, t₄], test on [t₄, t₅].</li>
+<li><strong>Gap strategy:</strong> Leave a gap between training and test to avoid lookahead bias. Train on [0, t₁], skip [t₁, t₁+gap], test on [t₁+gap, t₂].</li>
+</ul>
+<pre><code>from sklearn.model_selection import TimeSeriesSplit
+tscv = TimeSeriesSplit(n_splits=5)
+for train_idx, test_idx in tscv.split(X):
+    X_train, X_test = X[train_idx], X[test_idx]
+    # train_idx is always BEFORE test_idx</code></pre>`},
+
+{id:"q85",ch:"ch7",title:"What is data versioning and why is it important for ML?",
+body:`<h4>The Problem</h4>
+<p>Unlike software where code alone determines behavior, ML models depend on <strong>code + data + hyperparameters + environment</strong>. Changing data changes the model. Without versioning, you can't reproduce results or debug regressions.</p>
+<h4>What to Version</h4>
+<ul>
+<li><strong>Training data:</strong> Which data snapshot was used</li>
+<li><strong>Feature definitions:</strong> How features were computed</li>
+<li><strong>Labels:</strong> Labeling guidelines and annotator information</li>
+<li><strong>Data splits:</strong> Which samples were in train/val/test</li>
+<li><strong>Preprocessing:</strong> Transformations applied</li>
+</ul>
+<h4>Tools</h4>
+<ul>
+<li><strong>DVC (Data Version Control):</strong> Git-like versioning for data and models</li>
+<li><strong>Delta Lake / Lakehouse:</strong> Version-controlled data tables</li>
+<li><strong>MLflow:</strong> Tracks experiments, data versions, and model artifacts</li>
+<li><strong>Weights & Biases:</strong> Experiment tracking with data versioning</li>
+</ul>`},
+
+{id:"q86",ch:"ch7",title:"What is data labeling? What are the challenges and strategies?",
+body:`<h4>Challenges</h4>
+<ul>
+<li><strong>Cost:</strong> Manual labeling is expensive — medical image labeling requires domain experts</li>
+<li><strong>Quality:</strong> Inter-annotator disagreement, human errors, inconsistent guidelines</li>
+<li><strong>Scale:</strong> ML models need thousands to millions of labeled examples</li>
+<li><strong>Bias:</strong> Annotator biases get baked into the model</li>
+</ul>
+<h4>Strategies</h4>
+<ul>
+<li><strong>Active Learning:</strong> Model selects the most informative samples to label → maximizes learning per label dollar</li>
+<li><strong>Semi-supervised Learning:</strong> Use a small labeled set to label the large unlabeled set</li>
+<li><strong>Weak Supervision:</strong> Use heuristic labeling functions (Snorkel framework)</li>
+<li><strong>Crowdsourcing:</strong> Amazon Mechanical Turk, Scale AI — use multiple annotators and majority voting</li>
+<li><strong>Self-supervised Pre-training:</strong> Pre-train on unlabeled data, fine-tune on small labeled set</li>
+<li><strong>LLM-assisted Labeling:</strong> Use GPT/Claude to generate labels with human verification</li>
+</ul>`},
+
+{id:"q87",ch:"ch7",title:"What is data preprocessing pipeline and why use sklearn Pipeline?",
+body:`<h4>Why Pipelines?</h4>
+<ul>
+<li><strong>Prevents data leakage:</strong> Ensures preprocessing steps use ONLY training data statistics</li>
+<li><strong>Reproducibility:</strong> Same transformations applied consistently to train, val, test, and production data</li>
+<li><strong>Clean code:</strong> Single object encapsulates the entire workflow</li>
+<li><strong>Hyperparameter tuning:</strong> Can grid-search over preprocessing AND model parameters together</li>
+</ul>
+<pre><code>from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+
+numeric_transformer = Pipeline([
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', StandardScaler())
+])
+
+categorical_transformer = Pipeline([
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('encoder', OneHotEncoder(handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer([
+    ('num', numeric_transformer, numeric_features),
+    ('cat', categorical_transformer, categorical_features)
+])
+
+full_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', RandomForestClassifier())
+])
+
+# This ensures no data leakage during cross-validation
+cross_val_score(full_pipeline, X, y, cv=5)</code></pre>`},
+
+{id:"q88",ch:"ch7",title:"What is synthetic data generation? When and how is it used?",
+body:`<h4>Concept</h4>
+<p>Creating artificial data that mimics the statistical properties of real data without containing actual individual records.</p>
+<h4>Methods</h4>
+<ul>
+<li><strong>Statistical sampling:</strong> Fit distributions to real data and sample from them</li>
+<li><strong>GANs:</strong> Generate realistic synthetic data (images, tabular data)</li>
+<li><strong>VAEs:</strong> Learn latent representations and sample new data points</li>
+<li><strong>Rule-based:</strong> Domain-specific rules to generate realistic scenarios</li>
+<li><strong>LLM-generated:</strong> Use GPT/Claude to generate text data with specific properties</li>
+</ul>
+<h4>Use Cases</h4>
+<ul>
+<li><strong>Privacy:</strong> Share synthetic data instead of real PII</li>
+<li><strong>Data augmentation:</strong> When real data is scarce</li>
+<li><strong>Testing:</strong> Generate edge cases for model robustness testing</li>
+<li><strong>Simulation:</strong> Train autonomous driving models in virtual environments</li>
+</ul>`},
+
+{id:"q89",ch:"ch7",title:"How do you handle text data for ML? Explain vectorization methods.",
+body:`<h4>Text Preprocessing</h4>
+<ul>
+<li>Lowercasing, removing punctuation/special characters</li>
+<li>Tokenization (splitting into words/subwords)</li>
+<li>Stopword removal, stemming/lemmatization</li>
+</ul>
+<h4>Vectorization Methods</h4>
+<table><thead><tr><th>Method</th><th>Approach</th><th>Pros</th><th>Cons</th></tr></thead><tbody>
+<tr><td>Bag of Words</td><td>Count word occurrences</td><td>Simple</td><td>No word order, sparse</td></tr>
+<tr><td>TF-IDF</td><td>Term frequency × inverse document frequency</td><td>Weights important words</td><td>Still no semantics</td></tr>
+<tr><td>Word2Vec</td><td>Dense vectors from context prediction</td><td>Captures semantics</td><td>No context (polysemy)</td></tr>
+<tr><td>BERT Embeddings</td><td>Contextual representations</td><td>State-of-art, context-aware</td><td>Heavy compute</td></tr>
+</tbody></table>
+<div class="scenario"><div class="scenario-tag">🎯 Interview Scenario</div>
+<p><strong>"You need to classify 50,000 customer reviews into positive/negative. What approach?"</strong></p>
+<p><strong>Answer:</strong> Two viable paths depending on resources: (1) Fast/simple: TF-IDF vectorization + Logistic Regression or XGBoost — surprisingly strong baseline that's fast to train and deploy. (2) Best accuracy: Fine-tune a pre-trained BERT model. With 50K labeled samples, fine-tuning will work well. Use learning rate 2e-5, batch size 32, 3-5 epochs. This typically gives 3-5% improvement over TF-IDF approaches. Start with option 1, move to 2 if accuracy isn't sufficient.</p>
+</div>`},
+
+{id:"q90",ch:"ch7",title:"What is A/B testing for ML models? How do you set it up?",
+body:`<h4>Concept</h4>
+<p>Randomly split users into groups: control (existing model) and treatment (new model). Compare business metrics to determine if the new model is truly better.</p>
+<h4>Key Components</h4>
+<ul>
+<li><strong>Hypothesis:</strong> "New model will increase click-through rate by 5%"</li>
+<li><strong>Metrics:</strong> Primary (business KPI) and guardrail (ensure no degradation)</li>
+<li><strong>Sample size:</strong> Calculate using power analysis — enough users for statistical significance</li>
+<li><strong>Duration:</strong> Run long enough to capture weekly patterns (typically 1-4 weeks)</li>
+<li><strong>Randomization:</strong> Users randomly assigned, not self-selected</li>
+</ul>
+<h4>ML-Specific Considerations</h4>
+<ul>
+<li>Online metrics (CTR, conversion) may differ from offline metrics (AUC, F1)</li>
+<li>Watch for novelty effects — users may initially engage more just because something is different</li>
+<li>Consider network effects if users interact with each other</li>
+<li>Use interleaving for ranking models — more sensitive than A/B for search/recommendation</li>
+</ul>`},
+
+// ── Chapter 8: Scenario-Based Questions (Q91-Q100) ──
+{id:"q91",ch:"ch8",title:"Scenario: Your model performance drops suddenly in production. How do you debug?",
+body:`<h4>Systematic Debugging Framework</h4>
+<ol>
+<li><strong>Verify the monitoring signal:</strong> Is the performance drop real or a monitoring bug? Check multiple metrics.</li>
+<li><strong>Check data pipeline:</strong> Has the input data format changed? Missing features? Schema changes?</li>
+<li><strong>Analyze data distributions:</strong> Compare recent data distributions to training data using PSI or KS test. Look for data drift.</li>
+<li><strong>Check upstream services:</strong> Did a feature provider change their API? Are feature values coming through correctly?</li>
+<li><strong>Segment analysis:</strong> Is the performance drop across all segments or specific subgroups? Time-based, region-based, device-based?</li>
+<li><strong>Check for concept drift:</strong> Has the relationship between features and target changed? (e.g., pandemic changed shopping behavior)</li>
+<li><strong>Review recent deployments:</strong> Did anyone push a code change? New preprocessing logic? Library update?</li>
+<li><strong>Examine error cases:</strong> Sample predictions that are wrong — do they share common characteristics?</li>
+</ol>
+<h4>Remediation</h4>
+<ul>
+<li>Immediate: Roll back to previous model version if production impact is severe</li>
+<li>Short-term: Retrain on recent data, fix data pipeline issues</li>
+<li>Long-term: Set up automated drift detection, add data quality checks, implement model monitoring dashboards</li>
+</ul>`},
+
+{id:"q92",ch:"ch8",title:"Scenario: You need to build a recommendation system from scratch. Walk through your approach.",
+body:`<h4>Step-by-Step Approach</h4>
+<ol>
+<li><strong>Define objectives:</strong> What are we recommending? Products, content, users to follow? What's the business KPI? Click-through rate, conversion, engagement time?</li>
+<li><strong>Data inventory:</strong> Explicit feedback (ratings, purchases), implicit feedback (clicks, views, time spent), user features (demographics, preferences), item features (category, price, description)</li>
+<li><strong>Baseline — Most Popular:</strong> Always start here. Recommend popular items. Surprisingly hard to beat for new users.</li>
+<li><strong>Collaborative Filtering:</strong> "Users who liked X also liked Y." Matrix factorization (ALS, SVD) for user-item interactions.</li>
+<li><strong>Content-Based:</strong> Use item features to find similar items. TF-IDF or BERT embeddings for text, image embeddings for visual similarity.</li>
+<li><strong>Hybrid:</strong> Combine collaborative and content-based. Two-tower neural networks: user tower + item tower → similarity score.</li>
+<li><strong>Cold Start:</strong> New users: use popular items, ask preferences, or use demographic-based recommendations. New items: use content features.</li>
+<li><strong>Serving:</strong> Candidate generation (fast, recall-focused) → Ranking (accurate, precision-focused) → Business rules (diversity, freshness).</li>
+<li><strong>Evaluation:</strong> Offline: NDCG, MAP, Hit Rate. Online: A/B test on CTR, conversion, revenue.</li>
+</ol>`},
+
+{id:"q93",ch:"ch8",title:"Scenario: Your model has great offline metrics but poor real-world performance. Why?",
+body:`<h4>Common Causes</h4>
+<ul>
+<li><strong>Data leakage:</strong> Training data contained information not available at prediction time</li>
+<li><strong>Distribution mismatch:</strong> Training data doesn't represent production data (selection bias, temporal gap)</li>
+<li><strong>Metric mismatch:</strong> Optimizing F1 offline but business cares about revenue — need metric alignment</li>
+<li><strong>Serving bugs:</strong> Different preprocessing in training vs serving (different library versions, rounding)</li>
+<li><strong>Feature staleness:</strong> Features that are real-time in training but delayed in production</li>
+<li><strong>Feedback loops:</strong> Model's own predictions influence future data (recommendation creates popularity bias)</li>
+<li><strong>Missing features:</strong> Some features unavailable at inference time (timeout, API failure)</li>
+</ul>
+<h4>Prevention</h4>
+<ul>
+<li>Use the same preprocessing pipeline for training and serving</li>
+<li>Always validate with time-based splits, not random splits</li>
+<li>Align offline metrics with business KPIs</li>
+<li>Shadow testing: run new model alongside old one before switching</li>
+<li>Monitor feature distributions in production</li>
+</ul>`},
+
+{id:"q94",ch:"ch8",title:"Scenario: Stakeholder says 'Make the model more accurate.' How do you respond?",
+body:`<h4>Clarifying Questions</h4>
+<ol>
+<li><strong>"What does 'accurate' mean to you?"</strong> — Different stakeholders have different definitions. Fewer missed positives? Fewer false alarms? Higher revenue?</li>
+<li><strong>"What's the current pain point?"</strong> — Are we missing too many cases? Getting too many false positives? Both?</li>
+<li><strong>"What's the acceptable error rate?"</strong> — Perfect accuracy is impossible. Where's the threshold?</li>
+<li><strong>"What's the constraint?"</strong> — Latency requirements? Cost budget? Team size?</li>
+</ol>
+<h4>Action Plan</h4>
+<ul>
+<li><strong>Define success metric:</strong> Convert "more accurate" to a specific measurable goal (e.g., increase recall from 80% to 90% while keeping precision above 85%)</li>
+<li><strong>Error analysis:</strong> Examine what the model gets wrong — are there patterns? Missing features? Specific segments?</li>
+<li><strong>Data improvements:</strong> More data, better labels, additional features — usually highest ROI</li>
+<li><strong>Model improvements:</strong> Try different algorithms, ensemble, hyperparameter tuning</li>
+<li><strong>Report trade-offs:</strong> "I can increase recall to 95% but precision will drop to 70% — here's the business impact of each option"</li>
+</ul>`},
+
+{id:"q95",ch:"ch8",title:"Scenario: You have only 200 labeled samples. How do you build a useful model?",
+body:`<h4>Strategies for Low-Data Regimes</h4>
+<ol>
+<li><strong>Transfer learning:</strong> Use a pre-trained model (BERT, ResNet) and fine-tune on your 200 samples — this is the most powerful technique for small data.</li>
+<li><strong>Data augmentation:</strong> Create variations of existing samples (rotation, noise, synonym replacement). Can 2-10x your effective dataset.</li>
+<li><strong>Simple models:</strong> Logistic Regression or Naive Bayes — fewer parameters means less need for data. Complex models will overfit.</li>
+<li><strong>Feature engineering:</strong> Strong domain features > more data. Each good feature is worth hundreds of samples.</li>
+<li><strong>Active learning:</strong> Use the model to identify which unlabeled samples to label next — maximize information per label.</li>
+<li><strong>Few-shot learning:</strong> Techniques designed for tiny datasets — prototypical networks, siamese networks, metric learning.</li>
+<li><strong>Semi-supervised:</strong> If you have unlabeled data, use pseudo-labeling or consistency regularization.</li>
+<li><strong>Strong regularization:</strong> L1/L2, high dropout, aggressive early stopping.</li>
+<li><strong>Cross-validation:</strong> With 200 samples, use 10-fold or LOO-CV for reliable estimates.</li>
+</ol>`},
+
+{id:"q96",ch:"ch8",title:"Scenario: Your dataset has 500 features. How do you decide which ones to keep?",
+body:`<h4>Systematic Feature Selection Pipeline</h4>
+<ol>
+<li><strong>Remove obvious noise (5 min):</strong> Drop constant/near-constant features, duplicates, and identifiers (IDs, timestamps).</li>
+<li><strong>Check correlation (10 min):</strong> Remove one from each pair with correlation > 0.95. They carry redundant information.</li>
+<li><strong>Statistical tests (30 min):</strong> Mutual information or chi-squared to measure association with target. Remove features with near-zero association.</li>
+<li><strong>Model-based selection (1-2 hr):</strong> Train Random Forest, rank by permutation importance. Train Lasso, see which features get non-zero weights. Take the intersection of important features from both methods.</li>
+<li><strong>Domain expert review (ongoing):</strong> Present the selected features to a domain expert. They may spot irrelevant features or suggest missing ones.</li>
+<li><strong>Validate (critical):</strong> Train model with selected features using cross-validation. Compare to model with all features. Selected features should perform similarly or better.</li>
+</ol>`},
+
+{id:"q97",ch:"ch8",title:"Scenario: Your model takes 30 seconds to return a prediction. How do you speed it up?",
+body:`<h4>Diagnosis — Where's the Bottleneck?</h4>
+<ul>
+<li><strong>Feature computation:</strong> Are features expensive to compute? Aggregations, API calls?</li>
+<li><strong>Model inference:</strong> Is the model itself slow? Large ensemble, deep network?</li>
+<li><strong>Data loading:</strong> Reading from slow storage? Large input size?</li>
+</ul>
+<h4>Optimization Strategies</h4>
+<ul>
+<li><strong>Model simplification:</strong> Distill large model into smaller one (knowledge distillation). Replace ensemble with single model.</li>
+<li><strong>Model optimization:</strong> Quantization (FP32 → INT8), pruning, ONNX Runtime for inference optimization.</li>
+<li><strong>Feature caching:</strong> Pre-compute and cache expensive features. Use materialized feature stores.</li>
+<li><strong>Batch prediction:</strong> If real-time not needed, run predictions in batch overnight.</li>
+<li><strong>Hardware:</strong> Use GPU for inference, optimize memory layout, use TensorRT for GPU models.</li>
+<li><strong>Architecture:</strong> Async feature fetching, parallel computation, reduce input dimensions.</li>
+</ul>`},
+
+{id:"q98",ch:"ch8",title:"Scenario: Explain ML to a non-technical CEO in 2 minutes.",
+body:`<h4>The Pitch</h4>
+<p>"Think of ML as teaching computers the way we teach employees — through examples, not instruction manuals.</p>
+<p>Instead of writing detailed rules for every situation, we show the computer thousands of examples: 'This is a fraudulent transaction... this is legitimate... this is fraud...' And the computer learns the patterns — patterns so subtle that we humans might miss them.</p>
+<p>The result? A system that can process millions of transactions in seconds, catching fraud that our manual rules would miss, while flagging fewer legitimate transactions than before.</p>
+<p>The key investment: clean, labeled data. The more good examples we give it, the better it gets. Think of it as training a very fast, very consistent employee who never sleeps and never forgets."</p>
+<h4>Key CEO Concerns to Address</h4>
+<ul>
+<li><strong>ROI:</strong> "It will reduce fraud losses by X% and save Y hours of manual review per week"</li>
+<li><strong>Risk:</strong> "We deploy gradually — the system assists humans initially, doesn't replace them"</li>
+<li><strong>Timeline:</strong> "MVP in 6-8 weeks, production-ready in 3 months"</li>
+<li><strong>Maintenance:</strong> "It needs ongoing monitoring and periodic retraining — it's not set-and-forget"</li>
+</ul>`},
+
+{id:"q99",ch:"ch8",title:"Scenario: Two team members disagree — one wants deep learning, the other wants XGBoost. How do you decide?",
+body:`<h4>Decision Framework</h4>
+<table><thead><tr><th>Factor</th><th>Favors XGBoost</th><th>Favors Deep Learning</th></tr></thead><tbody>
+<tr><td>Data type</td><td>Tabular/structured</td><td>Images, text, audio, sequences</td></tr>
+<tr><td>Data size</td><td>Small to medium (&lt;100K)</td><td>Large (&gt;100K+)</td></tr>
+<tr><td>Interpretability</td><td>Feature importance built-in</td><td>Black box (needs SHAP/LIME)</td></tr>
+<tr><td>Training time</td><td>Minutes to hours</td><td>Hours to days</td></tr>
+<tr><td>Infrastructure</td><td>CPU is fine</td><td>Needs GPU</td></tr>
+<tr><td>Preprocessing</td><td>Handles missing values, scales</td><td>Requires careful preprocessing</td></tr>
+<tr><td>Team expertise</td><td>ML engineer sufficient</td><td>Needs DL expertise</td></tr>
+</tbody></table>
+<h4>My Recommendation</h4>
+<p>"Let's not argue theoretically — let's experiment. Allocate one week: each person implements their approach with a fair evaluation setup. Compare on the same test set with the same metrics. The data decides, not opinions. In my experience, XGBoost wins on tabular data 80% of the time, and deep learning wins on unstructured data 95% of the time."</p>`},
+
+{id:"q100",ch:"ch8",title:"Scenario: You joined a team and found their model has no monitoring. What do you set up?",
+body:`<h4>ML Monitoring Checklist</h4>
+<ol>
+<li><strong>Model Performance Metrics:</strong> Track accuracy/F1/AUC over time. Set up alerts when they drop below thresholds.</li>
+<li><strong>Data Quality:</strong> Missing value rates, feature value distributions, schema validation. Alert on anomalies.</li>
+<li><strong>Data Drift:</strong> Statistical tests (PSI, KS test) comparing production data to training data distribution. Weekly or daily checks.</li>
+<li><strong>Prediction Distribution:</strong> Track distribution of model outputs. Sudden shift = something changed.</li>
+<li><strong>Latency:</strong> P50, P95, P99 inference time. Alert if latency exceeds SLA.</li>
+<li><strong>Resource Usage:</strong> CPU/GPU utilization, memory, disk. Prevent resource exhaustion.</li>
+<li><strong>Business Metrics:</strong> Track the downstream business KPI that the model serves. If model metrics are stable but business metrics drop, there's a gap.</li>
+<li><strong>Retraining Pipeline:</strong> Automate retraining triggers based on drift detection or performance degradation.</li>
+</ol>
+<h4>Tools</h4>
+<ul>
+<li>Evidently AI, WhyLabs, Arize for ML monitoring</li>
+<li>Prometheus + Grafana for infrastructure metrics</li>
+<li>PagerDuty/Slack alerts for notifications</li>
+</ul>`},
+
+// ── Chapter 9: ML System Design (Q101-Q105) ──
+{id:"q101",ch:"ch9",title:"Design an ML system for real-time fraud detection.",
+body:`<h4>Requirements</h4>
+<ul>
+<li>Process millions of transactions per day</li>
+<li>Sub-100ms latency for real-time blocking</li>
+<li>Handle extreme class imbalance (0.01-0.1% fraud)</li>
+<li>Adapt to evolving fraud patterns</li>
+</ul>
+<h4>Architecture</h4>
+<ol>
+<li><strong>Feature Store:</strong> Pre-computed features (user profile, transaction history, device fingerprint) + real-time features (velocity, unusual amounts)</li>
+<li><strong>Two-Stage Model:</strong>
+  <ul>
+  <li>Stage 1 (Fast): Rules engine + simple model (logistic regression) → pass/block/review in &lt;20ms</li>
+  <li>Stage 2 (Accurate): XGBoost/deep model for "review" cases → detailed analysis in &lt;100ms</li>
+  </ul>
+</li>
+<li><strong>Training Pipeline:</strong> Daily retraining on labeled data. Online model for immediate pattern adaptation.</li>
+<li><strong>Feedback Loop:</strong> Human reviewers label flagged transactions → feeds back into training data.</li>
+<li><strong>Monitoring:</strong> Track false positive rate, detection rate, model latency. Alert on drift.</li>
+</ol>`},
+
+{id:"q102",ch:"ch9",title:"Design an ML system for dynamic pricing (e.g., Uber surge pricing).",
+body:`<h4>Key Components</h4>
+<ol>
+<li><strong>Demand Prediction:</strong> Time series model predicting demand by region and time slot. Features: historical demand, weather, events, day of week, holidays.</li>
+<li><strong>Supply Prediction:</strong> Estimate available drivers/inventory using geolocation data and shift patterns.</li>
+<li><strong>Price Optimization:</strong> Balance supply and demand to maximize: (a) total rides completed, (b) driver utilization, (c) rider satisfaction. Use reinforcement learning or constrained optimization.</li>
+<li><strong>Constraints:</strong> Price floors/ceilings, fairness (no discriminatory pricing), regulatory compliance, user trust (transparent surge reasons).</li>
+<li><strong>Evaluation:</strong> A/B test pricing strategies. Metrics: ride completion rate, revenue, driver earnings, rider cancellation rate, long-term rider retention.</li>
+</ol>`},
+
+{id:"q103",ch:"ch9",title:"Design an ML system for content moderation at scale.",
+body:`<h4>Architecture</h4>
+<ol>
+<li><strong>Multi-Modal Pipeline:</strong> Text classifier (BERT-based), image classifier (ResNet), video frame sampler + classifier, audio transcription + text classification.</li>
+<li><strong>Cascading System:</strong>
+  <ul>
+  <li>Level 1 (Automated): High-confidence predictions auto-remove or auto-approve. Fast, cheap.</li>
+  <li>Level 2 (Human Review): Borderline cases go to content moderators. Model provides recommended action + explanation.</li>
+  <li>Level 3 (Appeals): Users can appeal decisions. Escalated to senior reviewers.</li>
+  </ul>
+</li>
+<li><strong>Challenges:</strong> Multilingual support, cultural context, adversarial attacks (text in images, subtle modifications), moderator wellbeing.</li>
+<li><strong>Training:</strong> Active learning to prioritize labeling of edge cases. Regular retraining to handle new abuse patterns. Diverse annotator pool to reduce bias.</li>
+</ol>`},
+
+{id:"q104",ch:"ch9",title:"How do you handle feature stores in production ML systems?",
+body:`<h4>What is a Feature Store?</h4>
+<p>A centralized system for <strong>storing, serving, and managing ML features</strong>. Bridges the gap between feature engineering and model serving.</p>
+<h4>Two Components</h4>
+<ul>
+<li><strong>Offline Store:</strong> Historical features for training. Batch-computed, stored in a data warehouse (BigQuery, Snowflake).</li>
+<li><strong>Online Store:</strong> Real-time features for inference. Low-latency, stored in Redis/DynamoDB. Sub-10ms retrieval.</li>
+</ul>
+<h4>Benefits</h4>
+<ul>
+<li><strong>Reusability:</strong> Features computed once, used by many models</li>
+<li><strong>Consistency:</strong> Same feature computation for training and serving (no training-serving skew)</li>
+<li><strong>Time-travel:</strong> Get features as they existed at a specific point in time (prevents leakage)</li>
+</ul>
+<h4>Tools</h4>
+<p>Feast (open-source), Tecton, Hopsworks, AWS SageMaker Feature Store, Vertex AI Feature Store</p>`},
+
+{id:"q105",ch:"ch9",title:"What is model registry and why is it essential for production ML?",
+body:`<h4>Concept</h4>
+<p>A <strong>central repository</strong> for storing, versioning, and managing ML models throughout their lifecycle (development → staging → production → retirement).</p>
+<h4>What It Tracks</h4>
+<ul>
+<li>Model artifacts (serialized model files)</li>
+<li>Model metadata (algorithm, hyperparameters, training data version)</li>
+<li>Performance metrics (training, validation, production)</li>
+<li>Model lineage (which data and code produced this model)</li>
+<li>Stage transitions (who approved production deployment, when)</li>
+</ul>
+<h4>Workflow</h4>
+<ol>
+<li>Train model → register in registry with metrics and metadata</li>
+<li>Automated tests → promote to staging</li>
+<li>A/B test → promote to production with approval</li>
+<li>Monitor → trigger retraining or rollback if needed</li>
+</ol>
+<h4>Tools</h4>
+<p>MLflow Model Registry, AWS SageMaker Model Registry, Vertex AI Model Registry, Weights & Biases</p>`}
+];
+
+// ═══ MOCK TEST QUESTION BANK ═══
+var QB = [
+{tp:"Core ML",d:1,q:"What is the main goal of supervised learning?",o:["Find clusters in data","Learn mapping from inputs to known outputs","Generate new data samples","Reduce feature dimensions"],a:1,x:"Supervised learning uses labeled data to learn a function mapping inputs to correct outputs."},
+{tp:"Core ML",d:2,q:"A model achieves 98% train accuracy but 55% test accuracy. What's happening?",o:["Underfitting","Data leakage","Overfitting — memorized training data","Class imbalance"],a:2,x:"Large train-test gap = overfitting. Model memorized noise instead of learning patterns."},
+{tp:"Core ML",d:2,q:"Which metric is best for datasets with 99% negative class?",o:["Accuracy","F1-Score or AUC-PR","R² Score","Mean Absolute Error"],a:1,x:"Accuracy is misleading at 99% imbalance. F1 and AUC-PR account for both precision and recall."},
+{tp:"Core ML",d:1,q:"High bias in a model indicates:",o:["Overfitting","Underfitting — too simple","Noisy data","Too much training data"],a:1,x:"High bias = model too simple, can't capture patterns. Poor on both train and test."},
+{tp:"Core ML",d:2,q:"What is the purpose of cross-validation?",o:["Speed up training","Get robust performance estimates via multiple splits","Reduce features","Handle missing data"],a:1,x:"CV prevents reliance on a single split. Average over K folds gives reliable estimates."},
+{tp:"Core ML",d:2,q:"Which regularization drives some weights to exactly zero?",o:["L2 (Ridge)","L1 (Lasso)","Dropout","Batch Normalization"],a:1,x:"L1 adds |w| penalty — some weights become exactly zero, enabling feature selection."},
+{tp:"Core ML",d:2,q:"What is data leakage?",o:["Data breach by hackers","Training data containing info unavailable at prediction time","Missing values in data","Corrupted file formats"],a:1,x:"Leakage inflates metrics. Common causes: future data, target info in features, scaling before splitting."},
+{tp:"Evaluation",d:1,q:"Feature scaling is required for which type of algorithm?",o:["Decision Trees","KNN and SVM (distance-based)","Random Forest","Naive Bayes"],a:1,x:"Distance-based algorithms need scaling so all features contribute equally."},
+{tp:"Evaluation",d:2,q:"Ensemble methods combine multiple models. The main benefit is:",o:["Faster training","Better generalization by reducing bias and/or variance","Simpler code","Easier interpretation"],a:1,x:"Bagging reduces variance (Random Forest). Boosting reduces bias (XGBoost)."},
+{tp:"Evaluation",d:2,q:"What is the curse of dimensionality?",o:["Too many data rows","More features make data sparse, distances meaningless","Slow hardware","Memory overflow"],a:1,x:"In high dimensions, all points are roughly equidistant. KNN fails. Need PCA or feature selection."},
+{tp:"Training",d:2,q:"Why do neural networks need activation functions?",o:["Speed optimization","Without them, stacking layers equals one linear transformation","Parameter reduction","Better visualization"],a:1,x:"Without activations: f(g(x)) = Wx — just linear. Non-linearity lets networks learn complex patterns."},
+{tp:"Training",d:1,q:"What does the learning rate control?",o:["Model complexity","Step size during gradient descent","Number of features","Batch size"],a:1,x:"Learning rate controls how much parameters change per update. Too high = diverge, too low = slow."},
+{tp:"Training",d:2,q:"Adam optimizer combines which two techniques?",o:["Bagging + Boosting","Momentum + RMSProp","L1 + L2","Dropout + BatchNorm"],a:1,x:"Adam maintains per-parameter learning rates using momentum (first moment) and RMSProp (second moment)."},
+{tp:"Training",d:2,q:"What is the vanishing gradient problem?",o:["Gradients become too large","Gradients become exponentially small in deep networks","Weights become negative","Loss function is flat"],a:1,x:"Gradients shrink through layers, preventing early layers from learning. Fix: ReLU, skip connections, BatchNorm."},
+{tp:"Features",d:1,q:"One-hot encoding is preferred over label encoding when:",o:["Categories have natural order","Categories have no inherent order and model is linear","Data is numerical","Features are binary"],a:1,x:"Label encoding implies false ordering. One-hot creates binary columns with no ordinal relationship."},
+{tp:"Features",d:2,q:"SMOTE is used to handle:",o:["Missing values","Class imbalance by creating synthetic minority samples","Feature scaling","Dimensionality reduction"],a:1,x:"SMOTE creates synthetic minority samples by interpolating between existing minority points."},
+{tp:"Features",d:2,q:"What is target encoding's main risk?",o:["Slow computation","Data leakage if not done with cross-validation","Increases dimensionality","Only works for binary targets"],a:1,x:"Target encoding uses label information during feature creation — requires K-fold encoding to prevent leakage."},
+{tp:"Metrics",d:2,q:"AUC-PR is preferred over AUC-ROC when:",o:["Data is balanced","Data is heavily imbalanced","Model is linear","Features are scaled"],a:1,x:"AUC-ROC can be misleadingly high with imbalanced data. AUC-PR focuses on minority class performance."},
+{tp:"Metrics",d:1,q:"R² score can be negative when:",o:["Never — it's always 0 to 1","Model is worse than predicting the mean","Data has outliers","Features are correlated"],a:1,x:"R² < 0 means the model's predictions are worse than simply predicting the mean value."},
+{tp:"Metrics",d:2,q:"Focal loss is designed to address:",o:["Regression problems","Easy examples dominating the loss in imbalanced datasets","Vanishing gradients","Overfitting"],a:1,x:"Focal loss down-weights easy examples so the model focuses on hard, misclassified ones."},
+{tp:"Regularization",d:2,q:"Elastic Net combines:",o:["Bagging and Boosting","L1 and L2 regularization","Dropout and BatchNorm","PCA and feature selection"],a:1,x:"Elastic Net gets feature selection from L1 and stability from L2."},
+{tp:"Regularization",d:2,q:"Dropout works as regularization because it:",o:["Reduces learning rate","Forces neurons to learn independently, preventing co-adaptation","Removes features permanently","Increases batch size"],a:1,x:"Random neuron deactivation prevents co-adaptation and acts like training an ensemble of sub-networks."},
+{tp:"Regularization",d:1,q:"Label smoothing replaces hard labels (0 or 1) with:",o:["Random values","Soft values like 0.1 and 0.9 to prevent overconfidence","Negative values","Logarithmic values"],a:1,x:"Label smoothing prevents the model from becoming overconfident, improving calibration and generalization."},
+{tp:"Data",d:2,q:"For time-series cross-validation, you should:",o:["Use random K-fold","Always train on past data, test on future data","Shuffle data first","Use stratified sampling"],a:1,x:"Shuffling time-series causes data leakage. Always respect temporal ordering."},
+{tp:"Data",d:2,q:"Population Stability Index (PSI) is used to detect:",o:["Overfitting","Data drift between training and production distributions","Missing values","Feature importance"],a:1,x:"PSI compares distributions to detect if production data has shifted from training data."},
+{tp:"System Design",d:2,q:"A feature store's main purpose is:",o:["Store model weights","Centralize feature computation for consistency between training and serving","Visualize data","Compress features"],a:1,x:"Feature stores ensure the same feature logic is used in training and production, preventing skew."},
+{tp:"System Design",d:2,q:"Knowledge distillation involves:",o:["Removing features","Training a small student model to mimic a large teacher model","Data augmentation","Hyperparameter tuning"],a:1,x:"The student learns from the teacher's soft probability outputs, capturing dark knowledge."},
+{tp:"Scenario",d:2,q:"Model has 99.5% accuracy in dev but 60% in production. Most likely cause:",o:["Underfitting","Data leakage during development","Hardware difference","Too many features"],a:1,x:"Massive dev-production gap is a hallmark of data leakage. Features available in dev weren't available in production."},
+{tp:"Scenario",d:2,q:"You have 200 labeled samples. Best first approach:",o:["Train a deep neural network","Transfer learning with a pre-trained model","Build a GAN to generate data","Use unsupervised clustering"],a:1,x:"Transfer learning leverages knowledge from large datasets. Fine-tuning a pre-trained model works best with small data."},
+{tp:"Scenario",d:2,q:"RMSE is much higher than MAE. This indicates:",o:["Model is perfect","A few predictions have very large errors","Data is normalized","Too many features"],a:1,x:"RMSE penalizes large errors more due to squaring. RMSE >> MAE means outlier predictions exist."}
+];
+
+// ═══ RENDER ENGINE ═══
+var prog = {};
+var PROG_KEY = "ml_fund_progress";
+
+function loadProg(){ try{ var d=localStorage.getItem(PROG_KEY); if(d) prog=JSON.parse(d); }catch(e){ prog={}; } }
+function saveProg(){ try{ localStorage.setItem(PROG_KEY, JSON.stringify(prog)); }catch(e){} }
+
+function renderQuestions(){
+  var main = document.getElementById('mainContent');
+  var chapters = {
+    ch0:{title:"📊 ML Fundamentals — Complete Interview Guide",desc:"105 conceptual and scenario-based questions with detailed explanations, real-world examples, and interview scenarios."},
+    ch1:{title:"🎯 Core ML Concepts",desc:"Foundational concepts every ML engineer must know."},
+    ch2:{title:"📊 Bias-Variance & Evaluation",desc:"Model evaluation, cross-validation, ensemble methods, and metrics."},
+    ch3:{title:"⚙️ Training & Optimization",desc:"Gradient descent, optimizers, learning schedules, and training techniques."},
+    ch4:{title:"🔧 Feature Engineering",desc:"Feature creation, selection, transformation, and preprocessing."},
+    ch5:{title:"📈 Metrics & Loss Functions",desc:"Choosing and understanding evaluation metrics and loss functions."},
+    ch6:{title:"🔄 Regularization & Generalization",desc:"Preventing overfitting and improving model robustness."},
+    ch7:{title:"🧪 Data Handling & Preprocessing",desc:"Data pipelines, imbalance, drift, versioning, and preprocessing."},
+    ch8:{title:"🎭 Scenario-Based Questions",desc:"Real interview scenarios with structured answers."},
+    ch9:{title:"🏗️ ML System Design",desc:"Designing production ML systems end-to-end."},
+    mock:{title:"🎯 Mock Tests",desc:"Test your knowledge with timed quizzes."}
+  };
+
+  var html = '';
+  for(var ch in chapters){
+    var info = chapters[ch];
+    var qs = ch === 'ch0' ? QDB : (ch === 'mock' ? [] : QDB.filter(function(q){return q.ch===ch}));
+    html += '<section id="'+ch+'" class="content-section'+(ch==='ch0'?' active':'')+'">';
+    html += '<h1>'+info.title+'</h1>';
+    html += '<p style="color:var(--tx2);margin-bottom:20px">'+info.desc+'</p>';
+    if(ch === 'mock'){
+      html += '<div id="mockArea"></div>';
+    } else {
+      qs.forEach(function(q, i){
+        var num = ch === 'ch0' ? (i+1) : (qs.indexOf(q)+1);
+        html += '<div class="dd" data-sub-id="'+q.id+'">';
+        html += '<button class="dd-head" onclick="toggleSub(this)">';
+        html += '<span class="dd-chk" id="chk_'+q.id+'"></span>';
+        html += '<span class="dd-t">Q'+num+': '+q.title+'</span>';
+        html += '<svg class="dd-arr" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+        html += '</button>';
+        html += '<div class="dd-body" id="body_'+q.id+'">';
+        html += q.body;
+        html += '<button class="done-btn" onclick="markDone(\''+q.id+'\',this)"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Mark Complete</button>';
+        html += '</div></div>';
+      });
+    }
+    html += '</section>';
+  }
+  main.innerHTML = html;
+}
+
+function toggleSub(btn){
+  var isOpen = btn.classList.contains('open');
+  document.querySelectorAll('.dd-head.open').forEach(function(h){h.classList.remove('open');h.nextElementSibling.classList.remove('open')});
+  if(!isOpen){btn.classList.add('open');btn.nextElementSibling.classList.add('open')}
+}
+
+function markDone(subId, btn){
+  if(prog[subId]){
+    delete prog[subId]; btn.classList.remove('ok');
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Mark Complete';
+    var chk=document.getElementById('chk_'+subId); if(chk)chk.classList.remove('ok');
+    var dd=btn.closest('.dd'); if(dd)dd.classList.remove('done');
+  } else {
+    prog[subId]=1; btn.classList.add('ok');
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Completed ✓';
+    var chk=document.getElementById('chk_'+subId); if(chk)chk.classList.add('ok');
+    var dd=btn.closest('.dd'); if(dd)dd.classList.add('done');
+    showToast('✓ Marked complete!');
+  }
+  saveProg(); updStats();
+}
+
+function applyDone(){
+  for(var id in prog){
+    var chk=document.getElementById('chk_'+id);
+    if(chk){chk.classList.add('ok');var dd=chk.closest('.dd');if(dd)dd.classList.add('done');
+    var btn=dd?dd.querySelector('.done-btn'):null;
+    if(btn){btn.classList.add('ok');btn.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Completed ✓'}}
+  }
+}
+
+function updStats(){
+  var allSubs=document.querySelectorAll('[data-sub-id]');
+  // Count unique question IDs (ch0 has all questions duplicated)
+  var seen={};
+  allSubs.forEach(function(s){
+    var sid=s.getAttribute('data-sub-id');
+    if(!seen[sid])seen[sid]=true;
+  });
+  var total=Object.keys(seen).length;
+  var done=0;
+  for(var k in seen){if(prog[k])done++}
+  document.getElementById('stDone').textContent=done;
+  document.getElementById('stTotal').textContent=total;
+  var pct=total?Math.round(done/total*100):0;
+  document.getElementById('pbar').style.width=pct+'%';
+  document.getElementById('pringBar').style.width=pct+'%';
+  // Update nav counts
+  var chs=['ch1','ch2','ch3','ch4','ch5','ch6','ch7','ch8','ch9'];
+  chs.forEach(function(ch){
+    var sec=document.getElementById(ch);
+    if(!sec)return;
+    var subs=sec.querySelectorAll('[data-sub-id]');
+    var t=subs.length,d=0;
+    subs.forEach(function(s){if(prog[s.getAttribute('data-sub-id')])d++});
+    var np=document.getElementById('np_'+ch);
+    if(np&&t)np.textContent=d+'/'+t;
+  });
+  var ch0=document.getElementById('ch0');
+  if(ch0){
+    var np0=document.getElementById('np_ch0');
+    if(np0)np0.textContent=done+'/'+total;
+  }
+}
+
+function showSection(id){
+  document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active')});
+  var sec=document.getElementById(id); if(sec)sec.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.toggle('active',n.getAttribute('data-section')===id)});
+  if(id==='mock') renderMockHome();
+  if(window.innerWidth<768)toggleSidebar();
+  window.scrollTo(0,0);
+}
+
+function handleSearch(q){
+  if(!q){document.querySelectorAll('.dd').forEach(function(d){d.style.display=''});return}
+  q=q.toLowerCase();
+  document.querySelectorAll('.dd').forEach(function(d){
+    var t=d.querySelector('.dd-t');
+    d.style.display=t&&t.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+function toggleSidebar(){var s=document.getElementById('sidebar');var o=document.getElementById('overlay');s.classList.toggle('open');o.classList.toggle('open')}
+function toggleTheme(){var b=document.body;if(b.getAttribute('data-theme')==='light')b.removeAttribute('data-theme');else b.setAttribute('data-theme','light');updateThemeBtn()}
+function updateThemeBtn(){var b=document.body.getAttribute('data-theme')==='light';document.getElementById('themeBtn').innerHTML=b?'☀️ <span class="bl">Light</span>':'🌙 <span class="bl">Dark</span>'}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200)}
+function resetProgress(){if(!confirm('Reset all progress?'))return;prog={};saveProg();document.querySelectorAll('.dd').forEach(function(d){d.classList.remove('done')});document.querySelectorAll('.dd-chk').forEach(function(c){c.classList.remove('ok')});document.querySelectorAll('.done-btn').forEach(function(b){b.classList.remove('ok');b.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Mark Complete'});updStats();showToast('Progress reset!')}
+
+// ═══ MOCK TEST ENGINE ═══
+var mockState = {active:false, testIdx:0, qIdx:0, answers:{}, submitted:false, timer:0, timerInterval:null, scores:{}};
+
+function renderMockHome(){
+  var el=document.getElementById('mockArea'); if(!el)return;
+  var tests = [
+    {name:"Test 1",desc:"Core ML Concepts",count:15},
+    {name:"Test 2",desc:"Evaluation & Metrics",count:15},
+    {name:"Test 3",desc:"Training & Optimization",count:15},
+    {name:"Test 4",desc:"Full Comprehensive",count:30}
+  ];
+  var h='<div class="mg">';
+  tests.forEach(function(t,i){
+    var score = mockState.scores[i];
+    h+='<div class="mc" onclick="startMock('+i+')">';
+    h+='<div class="mn">'+t.name+'</div>';
+    h+='<div class="mt">'+t.desc+'</div>';
+    h+='<div class="mi">'+t.count+' questions · 30 min</div>';
+    if(score!==undefined) h+='<div style="font-family:var(--fc);font-size:11px;color:var(--grn);margin-top:6px">Last: '+score+'%</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+function getMockQuestions(idx){
+  var shuffled = QB.slice().sort(function(){return Math.random()-0.5});
+  if(idx===0) return shuffled.filter(function(q){return q.tp==='Core ML'}).slice(0,15);
+  if(idx===1) return shuffled.filter(function(q){return q.tp==='Evaluation'||q.tp==='Metrics'}).slice(0,15);
+  if(idx===2) return shuffled.filter(function(q){return q.tp==='Training'||q.tp==='Features'}).slice(0,15);
+  return shuffled.slice(0,30);
+}
+
+function startMock(idx){
+  mockState = {active:true, testIdx:idx, qIdx:0, answers:{}, submitted:false, timer:0, timerInterval:null, scores:mockState.scores, questions:getMockQuestions(idx)};
+  mockState.timerInterval = setInterval(function(){mockState.timer++;renderMockQ()},1000);
+  renderMockQ();
+}
+
+function renderMockQ(){
+  var el=document.getElementById('mockArea'); if(!el)return;
+  var qs=mockState.questions; var q=qs[mockState.qIdx]; var ci=mockState.qIdx;
+  var m=Math.floor(mockState.timer/60); var s=mockState.timer%60;
+  var h='<div class="qz-h"><span class="pg">Q'+(ci+1)+' / '+qs.length+'</span><span class="tm">⏱ '+m+':'+(('0'+s).slice(-2))+'</span><button onclick="endMock()">✕ End Test</button></div>';
+  h+='<div class="qc"><div class="qc-top"><span class="badge b0">'+q.tp+'</span><div class="diff">';
+  for(var i=0;i<3;i++) h+='<i'+(i<q.d?' class="on"':'')+'></i>';
+  h+='</div></div><div class="qt">'+q.q+'</div><div class="opts">';
+  var letters=['A','B','C','D'];
+  q.o.forEach(function(opt,oi){
+    var cls='opt';
+    if(mockState.submitted){
+      if(oi===q.a) cls+=' correct';
+      else if(mockState.answers[ci]===oi) cls+=' wrong';
+    } else if(mockState.answers[ci]===oi) cls+=' sel';
+    h+='<div class="'+cls+'" onclick="selectOpt('+ci+','+oi+')"><span class="olet">'+letters[oi]+'</span><span>'+opt+'</span></div>';
+  });
+  h+='</div>';
+  if(mockState.submitted){h+='<div class="exp show">'+q.x+'</div>';}
+  h+='<div class="qnav">';
+  if(ci>0) h+='<button class="qb" onclick="mockNav('+(ci-1)+')">← Previous</button>'; else h+='<span></span>';
+  if(ci<qs.length-1) h+='<button class="qb p" onclick="mockNav('+(ci+1)+')">Next →</button>';
+  else if(!mockState.submitted) h+='<button class="qb p" onclick="submitMock()">Submit Test</button>';
+  else h+='<button class="qb p" onclick="renderMockHome()">Back to Tests</button>';
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+
+function selectOpt(qi,oi){if(mockState.submitted)return;mockState.answers[qi]=oi;renderMockQ()}
+function mockNav(i){mockState.qIdx=i;renderMockQ();window.scrollTo(0,0)}
+function endMock(){if(mockState.timerInterval)clearInterval(mockState.timerInterval);renderMockHome()}
+
+function submitMock(){
+  if(!confirm('Submit test?'))return;
+  mockState.submitted=true;
+  if(mockState.timerInterval)clearInterval(mockState.timerInterval);
+  var qs=mockState.questions; var correct=0;
+  qs.forEach(function(q,i){if(mockState.answers[i]===q.a)correct++});
+  var pct=Math.round(correct/qs.length*100);
+  mockState.scores[mockState.testIdx]=pct;
+  var m=Math.floor(mockState.timer/60);var s=mockState.timer%60;
+  var pass=pct>=60;
+  var el=document.getElementById('mockArea');
+  el.innerHTML='<div class="rcard"><div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Test Complete</div><div class="rpct '+(pass?'pass':'fail')+'">'+pct+'%</div><div style="font-size:15px;font-weight:700;color:var(--tx);margin-bottom:10px">'+(pass?'🎉 Passed!':'📚 Keep Practicing!')+'</div><div class="rrow"><div class="ri"><div class="rv" style="color:var(--grn)">'+correct+'</div><div class="rl">Correct</div></div><div class="ri"><div class="rv" style="color:var(--red)">'+(qs.length-correct)+'</div><div class="rl">Wrong</div></div><div class="ri"><div class="rv" style="color:var(--ac)">'+m+':'+(('0'+s).slice(-2))+'</div><div class="rl">Time</div></div></div><div class="rbtns"><button class="qb" onclick="mockState.qIdx=0;renderMockQ()">📖 Review Answers</button><button class="qb p" onclick="renderMockHome()">Back to Tests</button></div></div>';
+}
+
+// ═══ INIT ═══
+loadProg();
+renderQuestions();
+applyDone();
+updStats();
+
+window.addEventListener('scroll',function(){var btn=document.getElementById('sttBtn');if(btn)btn.classList.toggle('show',window.scrollY>400)});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('search').focus()}});
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+site_name: Dev Notes
+site_url: https://aignishant.github.io/dev-notes/
+site_description: My engineering + interview preparation knowledge base
+site_author: You
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 4
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Content Hub (Google SecOps):
+    - Overview: content-hub/index.md
+    - 1. Foundations:
+      - Overview: content-hub/01-foundations/index.md
+      - What is Google SecOps: content-hub/01-foundations/google-secops-overview.md
+      - What is the Content Hub: content-hub/01-foundations/what-is-content-hub.md
+      - Repository Structure: content-hub/01-foundations/repo-structure.md
+      - Interview Questions (Beginner): content-hub/01-foundations/questions.md
+    - 2. Core Concepts:
+      - Overview: content-hub/02-core-concepts/index.md
+      - Response Integrations: content-hub/02-core-concepts/response-integrations.md
+      - Playbooks: content-hub/02-core-concepts/playbooks.md
+      - Parsers: content-hub/02-core-concepts/parsers.md
+      - Entities: content-hub/02-core-concepts/entities.md
+      - Ontology & Mapping: content-hub/02-core-concepts/ontology-mapping.md
+      - Cases vs Alerts vs Events: content-hub/02-core-concepts/cases-alerts-events.md
+      - Interview Questions: content-hub/02-core-concepts/questions.md
+    - 3. Response Integrations:
+      - Overview: content-hub/03-response-integrations/index.md
+      - Integration Structure: content-hub/03-response-integrations/structure.md
+      - Actions Deep Dive: content-hub/03-response-integrations/actions.md
+      - Connectors Deep Dive: content-hub/03-response-integrations/connectors.md
+      - Jobs Deep Dive: content-hub/03-response-integrations/jobs.md
+      - Widgets: content-hub/03-response-integrations/widgets.md
+      - definition.yaml Explained: content-hub/03-response-integrations/definition-yaml.md
+      - Interview Questions: content-hub/03-response-integrations/questions.md
+    - 4. Playbooks:
+      - Overview: content-hub/04-playbooks/index.md
+      - Playbook Structure: content-hub/04-playbooks/structure.md
+      - Triggers: content-hub/04-playbooks/triggers.md
+      - Steps & Blocks: content-hub/04-playbooks/steps.md
+      - Widgets: content-hub/04-playbooks/widgets.md
+      - Overviews: content-hub/04-playbooks/overviews.md
+      - Interview Questions: content-hub/04-playbooks/questions.md
+    - 5. Parsers:
+      - Overview: content-hub/05-parsers/index.md
+      - CBN & UDM: content-hub/05-parsers/cbn-udm.md
+      - Parser Folder Structure: content-hub/05-parsers/structure.md
+      - Test Data & Validation: content-hub/05-parsers/testdata.md
+      - Interview Questions: content-hub/05-parsers/questions.md
+    - 6. TIPCommon & SOAR SDK:
+      - Overview: content-hub/06-tipcommon-sdk/index.md
+      - TIPCommon Library: content-hub/06-tipcommon-sdk/tipcommon-overview.md
+      - Base Classes: content-hub/06-tipcommon-sdk/base-classes.md
+      - Extraction & Validation: content-hub/06-tipcommon-sdk/extraction-validation.md
+      - EnvironmentCommon: content-hub/06-tipcommon-sdk/envcommon.md
+      - SOAR SDK: content-hub/06-tipcommon-sdk/soar-sdk.md
+      - Interview Questions: content-hub/06-tipcommon-sdk/questions.md
+    - 7. mp CLI:
+      - Overview: content-hub/07-mp-cli/index.md
+      - Commands Deep Dive: content-hub/07-mp-cli/commands.md
+      - dev-env Workflow: content-hub/07-mp-cli/dev-env.md
+      - Build & Deconstruct: content-hub/07-mp-cli/build-deconstruct.md
+      - Interview Questions: content-hub/07-mp-cli/questions.md
+    - 8. Dev Workflow:
+      - Overview: content-hub/08-dev-workflow/index.md
+      - uv Package Manager: content-hub/08-dev-workflow/uv.md
+      - Ruff & Ty: content-hub/08-dev-workflow/ruff-ty.md
+      - Pydantic Models: content-hub/08-dev-workflow/pydantic.md
+      - Type Hints Best Practices: content-hub/08-dev-workflow/type-hints.md
+      - IDE Setup: content-hub/08-dev-workflow/ide-setup.md
+      - Interview Questions: content-hub/08-dev-workflow/questions.md
+    - 9. Testing:
+      - Overview: content-hub/09-testing/index.md
+      - Unit Testing with pytest: content-hub/09-testing/unit-testing.md
+      - integration_testing Package: content-hub/09-testing/integration-testing.md
+      - Mocking Third-Party APIs: content-hub/09-testing/mocking.md
+      - Fixtures & conftest: content-hub/09-testing/fixtures.md
+      - Interview Questions: content-hub/09-testing/questions.md
+    - 10. CI/CD & GitHub Actions:
+      - Overview: content-hub/10-cicd/index.md
+      - GitHub Actions Workflows: content-hub/10-cicd/github-actions.md
+      - PR Review Process: content-hub/10-cicd/pr-workflow.md
+      - Validation Status Checks: content-hub/10-cicd/validation-checks.md
+      - Interview Questions: content-hub/10-cicd/questions.md
+    - 11. Advanced Topics:
+      - Overview: content-hub/11-advanced/index.md
+      - OAuth & Authentication: content-hub/11-advanced/oauth-auth.md
+      - Caching & Context: content-hub/11-advanced/caching-context.md
+      - Encryption: content-hub/11-advanced/encryption.md
+      - Async Connectors: content-hub/11-advanced/async-connectors.md
+      - Sync Jobs Pattern: content-hub/11-advanced/sync-jobs.md
+      - Error Handling Patterns: content-hub/11-advanced/error-handling.md
+      - Rate Limiting & Pagination: content-hub/11-advanced/rate-limiting.md
+      - Interview Questions: content-hub/11-advanced/questions.md
+    - 12. System Design:
+      - Overview: content-hub/12-system-design/index.md
+      - Scaling Connectors: content-hub/12-system-design/scaling-connectors.md
+      - Design a New Integration: content-hub/12-system-design/design-new-integration.md
+      - Multi-Tenant Considerations: content-hub/12-system-design/multi-tenant.md
+      - Migration Strategy: content-hub/12-system-design/migration.md
+      - Interview Questions: content-hub/12-system-design/questions.md
+    - 13. Leadership & Behavioral:
+      - Overview: content-hub/13-leadership/index.md
+      - Team Processes: content-hub/13-leadership/team-processes.md
+      - Code Review Standards: content-hub/13-leadership/code-review.md
+      - Mentoring Juniors: content-hub/13-leadership/mentoring.md
+      - Handling Incidents: content-hub/13-leadership/incidents.md
+      - STAR Stories Bank: content-hub/13-leadership/star-stories.md
+      - Behavioral Questions: content-hub/13-leadership/behavioral-questions.md
+    - 14. Scenario Playbook:
+      - Overview: content-hub/14-scenarios/index.md
+      - Live Coding - Build an Action: content-hub/14-scenarios/coding-action.md
+      - Live Coding - Build a Connector: content-hub/14-scenarios/coding-connector.md
+      - Debug a Failing Connector: content-hub/14-scenarios/debug-connector.md
+      - Migrate Legacy Integration: content-hub/14-scenarios/migrate-legacy.md
+      - Whiteboard Problems: content-hub/14-scenarios/whiteboard.md
+    - 15. Quick Reference:
+      - Cheat Sheet: content-hub/15-quick-reference/cheat-sheet.md
+      - Glossary: content-hub/15-quick-reference/glossary.md
+      - Red-Flag Answers to Avoid: content-hub/15-quick-reference/red-flags.md
+      - Day-Before Checklist: content-hub/15-quick-reference/day-before.md

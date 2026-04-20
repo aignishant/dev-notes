@@ -209,9 +209,9 @@ nav:
       - Glossary: content-hub/15-quick-reference/glossary.md
       - Red-Flag Answers to Avoid: content-hub/15-quick-reference/red-flags.md
       - Day-Before Checklist: content-hub/15-quick-reference/day-before.md
-  - Python Interview:
+  - Python:
     - Overview: python-interview/index.md
-    - Deep-Dive Guides:
+    - Deep Dive Notes:
       - Index: python-interview/old/00_INDEX_START_HERE.md
       - Python Core Fundamentals: python-interview/old/01_Python_Core_Fundamentals.md
       - OOP in Python: python-interview/old/02_OOP_In_Python.md
@@ -223,17 +223,73 @@ nav:
       - Database & ORM: python-interview/old/08_Database_and_ORM.md
       - Testing & DevOps: python-interview/old/09_Testing_and_DevOps.md
       - AI/ML Interview: python-interview/old/10_AI_ML_Interview.md
-      - Libraries & Frameworks: python-interview/old/11_Python_Libraries_Frameworks.md
+      - Python Libraries & Frameworks: python-interview/old/11_Python_Libraries_Frameworks.md
       - Modern Python & Trending: python-interview/old/12_Modern_Python_Trending.md
-      - Scenario Based Python: python-interview/old/13_Scenario_Based_Python.md
+      - Scenario-Based Python: python-interview/old/13_Scenario_Based_Python.md
       - Real-Time Project Issues: python-interview/old/14_RealTime_Project_Issues.md
       - Strengths, Weakness & HR: python-interview/old/15_Strengths_Weakness_HR.md
       - Database Basic to Advanced: python-interview/old/16_Database_Basic_to_Advanced.md
       - FastAPI Basic to Advanced: python-interview/old/17_FastAPI_Basic_to_Advanced.md
       - Microservices Complete: python-interview/old/18_Microservices_Complete.md
       - DSA Patterns Bible: python-interview/old/19_DSA_Patterns_Bible.md
-      - DSA Roadmap Strategy: python-interview/old/20_DSA_Roadmap_Strategy.md
+      - DSA Roadmap & Strategy: python-interview/old/20_DSA_Roadmap_Strategy.md
       - Quantitative Aptitude: python-interview/old/21_Quantitative_Aptitude.md
       - Enhanced Python Core & OOP: python-interview/old/22_Enhanced_Python_Core_OOP.md
       - Enhanced DB & System Design: python-interview/old/23_Enhanced_DB_SystemDesign.md
       - Advanced DSA (FAANG): python-interview/old/24_Advanced_DSA_FAANG.md
+  - AI:
+    - Overview: interview-ai/index.md
+    - ML Fundamentals:
+      - Overview: interview-ai/ml-fundamentals/index.md
+      - Core Concepts: interview-ai/ml-fundamentals/core-concepts.md
+      - Bias & Variance: interview-ai/ml-fundamentals/bias-variance.md
+      - Data & Features: interview-ai/ml-fundamentals/data-and-features.md
+      - Metrics: interview-ai/ml-fundamentals/metrics.md
+      - Training & Optimization: interview-ai/ml-fundamentals/training-optimization.md
+      - Production & Debugging: interview-ai/ml-fundamentals/production-debugging.md
+      - Advanced Scenarios: interview-ai/ml-fundamentals/advanced-scenarios.md
+      - Rapid Revision: interview-ai/ml-fundamentals/rapid-revision.md
+      - Mock Interview: interview-ai/ml-fundamentals/mock-interview.md
+    - Algorithms:
+      - Overview: interview-ai/algorithms/index.md
+      - Linear Models: interview-ai/algorithms/linear-models.md
+      - Tree Models: interview-ai/algorithms/tree-models.md
+      - SVM & Kernels: interview-ai/algorithms/svm-kernels.md
+      - Distance & Probabilistic: interview-ai/algorithms/distance-probabilistic.md
+      - Unsupervised: interview-ai/algorithms/unsupervised.md
+      - Recommenders: interview-ai/algorithms/recommenders.md
+      - Time Series: interview-ai/algorithms/time-series.md
+      - Algorithm Selection: interview-ai/algorithms/algorithm-selection.md
+      - Rapid Revision: interview-ai/algorithms/rapid-revision.md
+      - Mock Interview: interview-ai/algorithms/mock-interview.md
+    - Algorithms Deep Dive:
+      - Overview: interview-ai/algorithms-deep-dive/index.md
+      - Linear Models: interview-ai/algorithms-deep-dive/linear-models.md
+      - Tree Models: interview-ai/algorithms-deep-dive/tree-models.md
+      - Kernels & SVM: interview-ai/algorithms-deep-dive/kernels-svm.md
+      - Probabilistic: interview-ai/algorithms-deep-dive/probabilistic.md
+      - Clustering: interview-ai/algorithms-deep-dive/clustering.md
+      - Recommenders: interview-ai/algorithms-deep-dive/recommenders.md
+      - Time Series: interview-ai/algorithms-deep-dive/time-series.md
+      - Rapid Revision: interview-ai/algorithms-deep-dive/rapid-revision.md
+      - Mock Interview: interview-ai/algorithms-deep-dive/mock-interview.md
+    - Deep Learning:
+      - Overview: interview-ai/deep-learning/index.md
+      - Foundations: interview-ai/deep-learning/foundations.md
+      - CNNs: interview-ai/deep-learning/cnns.md
+      - RNNs: interview-ai/deep-learning/rnns.md
+      - Transformers: interview-ai/deep-learning/transformers.md
+      - Optimization: interview-ai/deep-learning/optimization.md
+      - Regularization: interview-ai/deep-learning/regularization.md
+      - Rapid Revision: interview-ai/deep-learning/rapid-revision.md
+      - Mock Interview: interview-ai/deep-learning/mock-interview.md
+    - GenAI & LLMs:
+      - Overview: interview-ai/genai-llms/index.md
+      - Foundations: interview-ai/genai-llms/foundations.md
+      - Prompting: interview-ai/genai-llms/prompting.md
+      - Fine-Tuning: interview-ai/genai-llms/fine-tuning.md
+      - Inference: interview-ai/genai-llms/inference.md
+      - Evaluation: interview-ai/genai-llms/evaluation.md
+      - Safety: interview-ai/genai-llms/safety.md
+      - Rapid Revision: interview-ai/genai-llms/rapid-revision.md
+      - Mock Interview: interview-ai/genai-llms/mock-interview.md

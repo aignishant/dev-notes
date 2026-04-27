@@ -47,9 +47,9 @@ This curriculum is being built in stages. Each stage adds complete chapters and 
 |---|---|---|---|
 | **Stage 1** | Getting Started · Phase 1 (Foundations) | 9 scripts | ✅ Delivered |
 | **Stage 2** | Phase 2 (Recon) · Phase 3 — web AppSec foundations | 11 scripts | ✅ Delivered |
-| Stage 3 | Phase 3 rest (Auth, Linux/Windows, AD, wireless, mobile, pivoting) · Phase 4 part 1 | +10 scripts | Planned |
-| Stage 4 | Phase 4 rest (RE, exploit dev, IoT, AI sec) · Phase 5 (Red/Blue/DFIR/TI/Purple) | +10 scripts | Planned |
-| Stage 5 | Phase 6 (Reporting, Certifications, Government Career US+India, CTFs) · Final polish | — | Planned |
+| Stage 3 | Phase 3 rest (Auth, Linux/Windows, AD, wireless, mobile, pivoting) · Phase 4 part 1 | +10 scripts | ✅ Delivered |
+| **Stage 4** | Phase 4 rest (Exploit dev, IoT/ICS, AI/ML sec, AppSec) · Phase 5 (Red/Blue/DFIR/TI/Purple) | +10 scripts | ✅ Delivered |
+| **Stage 5** | Phase 6 (Reporting, Certifications, Government Careers US + India, CTFs) · Final polish | — | ✅ Delivered |
 
 See [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) for the full roadmap.
 

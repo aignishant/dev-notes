@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "redshift-toolkit"
+version = "0.1.0"
+description = "Personal offensive security toolkit accompanying the Redshift ethical hacking curriculum."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Redshift Project"},
+]
+keywords = ["offensive-security", "pentest", "red-team", "soar", "cybersecurity"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "requests>=2.32",
+    "httpx[http2]>=0.27",
+    "rich>=13.7",
+    "dnspython>=2.6",
+    "beautifulsoup4>=4.12",
+]
+
+[project.optional-dependencies]
+net = ["scapy>=2.5", "impacket>=0.12", "paramiko>=3.4"]
+crypto = ["cryptography>=42.0", "pycryptodome>=3.20"]
+dev = ["pytest>=8.0", "ruff>=0.4", "mypy>=1.10"]
+all = [
+    "scapy>=2.5", "impacket>=0.12", "paramiko>=3.4",
+    "cryptography>=42.0", "pycryptodome>=3.20",
+    "python-nmap>=0.7.1", "lxml>=5.0",
+]
+
+[project.scripts]
+rs-encode = "redshift_toolkit.utils.encoder_decoder:main"
+rs-cheats = "redshift_toolkit.utils.cheatsheet_cli:main"
+rs-notes  = "redshift_toolkit.utils.notes_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["redshift_toolkit*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "S", "C4"]
+ignore = ["E501", "S603", "S607", "S311"]

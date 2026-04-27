@@ -6,16 +6,16 @@ This phase is the most concrete one. Tick the boxes here and you will get interv
 
 ## Chapters in this phase
 
-| # | Chapter | Focus |
-|---|---|---|
-| 6.1 | Pentest Reporting | Executive summary, technical findings, evidence, risk rating, remediation |
-| 6.2 | Certifications Roadmap | Sec+ → eJPT → CPTS / OSCP → OSEP/OSWE/OSED → CISSP/OSCE3 |
-| 6.3 | Building a Portfolio | GitHub, blog, CTF profile, writeups, public talks |
-| 6.4 | LinkedIn, Resume & Interviewing | Industry-specific resume tips, common interview formats |
-| 6.5 | 🇺🇸 US Government Cyber Careers | NSA, CISA, FBI, USCYBERCOM, DoD civilian, clearances |
-| 6.6 | 🇮🇳 India Government Cyber Careers | CERT-In, NCIIPC, NTRO, DRDO, I4C, DCyA |
-| 6.7 | CTFs & Bug Bounty | Picking platforms, scoring, monetization |
-| 6.8 | Continuous Learning | Conferences, podcasts, RSS, mentors |
+| # | Chapter | Focus | Status |
+|---|---|---|---|
+| 6.1 | [Pentest & Red-Team Reporting](reporting.md) | Executive summary, technical findings, evidence, CVSS, risk rating, remediation | ✅ |
+| 6.2 | [Certifications Roadmap](certifications.md) | Sec+ → eJPT → CPTS / OSCP → OSEP/OSWE/OSED → GIAC → CISSP/OSCE³ | ✅ |
+| 6.3 | [Building a Security Portfolio](portfolio.md) | GitHub, blog, writeups, talks, open-source contributions, OPSEC for cleared roles | ✅ |
+| 6.4 | [Resume, LinkedIn & Interviewing](resume-linkedin-interview.md) | Private/federal/Indian-govt résumé formats, LinkedIn, interview archetypes, negotiation | ✅ |
+| 6.5 | [🇺🇸 US Government Cyber Careers](gov-careers-us.md) | NSA, CISA, FBI Cyber, USCYBERCOM, DoD civilian, national labs, clearances, USAJobs | ✅ |
+| 6.6 | [🇮🇳 India Government Cyber Careers](gov-careers-india.md) | CERT-In, NCIIPC, NTRO, DRDO, I4C, DCyA, NSCS, recruitment paths, pay tables | ✅ |
+| 6.7 | [CTFs, Labs & Bug Bounty](ctfs.md) | Platforms (picoCTF/THM/HTB/PWN.College), top tier (DEF CON/Plaid), Indian (InCTF), 12-month plan | ✅ |
+| 6.8 | [Continuous Learning](continuous-learning.md) | RSS, newsletters, podcasts, communities, mentorship, reading lists, avoiding burnout | ✅ |
 
 ---
 

@@ -95,6 +95,11 @@ markdown_extensions:
 plugins:
   - search
 
+exclude_docs: |
+  /ethical-hacking-docs/README.md
+  /ethical-hacking-docs/IMPLEMENTATION_PLAN.md
+  /ethical-hacking-unsorted/redshift-toolkit/README.md
+
 nav:
   - Home: index.md
   - Content Hub (Google SecOps):
@@ -324,7 +329,103 @@ nav:
       - Web Methodology & OWASP Top 10: ethical-hacking-docs/docs/03-offensive/web-methodology.md
       - Injection Attacks: ethical-hacking-docs/docs/03-offensive/web-injection.md
       - XSS, CSRF & SSRF: ethical-hacking-docs/docs/03-offensive/web-xss-csrf-ssrf.md
-    - Phase 4 - Specializations: ethical-hacking-docs/docs/04-specializations/index.md
-    - Phase 5 - Defense: ethical-hacking-docs/docs/05-defense/index.md
-    - Phase 6 - Career: ethical-hacking-docs/docs/06-career/index.md
+      - Auth & Session Attacks: ethical-hacking-docs/docs/03-offensive/web-auth-session.md
+      - Linux Privesc: ethical-hacking-docs/docs/03-offensive/linux-privesc.md
+      - Windows Privesc: ethical-hacking-docs/docs/03-offensive/windows-privesc.md
+      - Active Directory: ethical-hacking-docs/docs/03-offensive/active-directory.md
+      - Wireless: ethical-hacking-docs/docs/03-offensive/wireless.md
+      - Mobile: ethical-hacking-docs/docs/03-offensive/mobile.md
+      - Pivoting: ethical-hacking-docs/docs/03-offensive/pivoting.md
+    - Phase 4 - Specializations:
+      - Overview: ethical-hacking-docs/docs/04-specializations/index.md
+      - AppSec: ethical-hacking-docs/docs/04-specializations/appsec.md
+      - Cloud: ethical-hacking-docs/docs/04-specializations/cloud.md
+      - AI Security: ethical-hacking-docs/docs/04-specializations/ai-security.md
+      - Exploit Dev: ethical-hacking-docs/docs/04-specializations/exploit-dev.md
+      - IoT & ICS: ethical-hacking-docs/docs/04-specializations/iot-ics.md
+      - Malware Analysis: ethical-hacking-docs/docs/04-specializations/malware-analysis.md
+    - Phase 5 - Defense:
+      - Overview: ethical-hacking-docs/docs/05-defense/index.md
+      - Blue Team: ethical-hacking-docs/docs/05-defense/blue-team.md
+      - Red Team: ethical-hacking-docs/docs/05-defense/red-team.md
+      - Purple Team: ethical-hacking-docs/docs/05-defense/purple-team.md
+      - Threat Intel: ethical-hacking-docs/docs/05-defense/threat-intel.md
+      - DFIR: ethical-hacking-docs/docs/05-defense/dfir.md
+    - Phase 6 - Career:
+      - Overview: ethical-hacking-docs/docs/06-career/index.md
+      - Certifications: ethical-hacking-docs/docs/06-career/certifications.md
+      - CTFs: ethical-hacking-docs/docs/06-career/ctfs.md
+      - Portfolio: ethical-hacking-docs/docs/06-career/portfolio.md
+      - Reporting: ethical-hacking-docs/docs/06-career/reporting.md
+      - Resume, LinkedIn & Interview: ethical-hacking-docs/docs/06-career/resume-linkedin-interview.md
+      - Gov Careers (US): ethical-hacking-docs/docs/06-career/gov-careers-us.md
+      - Gov Careers (India): ethical-hacking-docs/docs/06-career/gov-careers-india.md
+      - Continuous Learning: ethical-hacking-docs/docs/06-career/continuous-learning.md
     - Appendix: ethical-hacking-docs/docs/99-appendix/index.md
+    - Scripts: ethical-hacking-docs/scripts/README.md
+  - Redshift (Ethical Hacking):
+    - Overview: ethical-hacking-unsorted/index.md
+    - Part 1 - Foundations:
+      - Overview: ethical-hacking-unsorted/part-01-foundations/index.md
+      - Philosophy: ethical-hacking-unsorted/part-01-foundations/01-philosophy.md
+      - Legal: ethical-hacking-unsorted/part-01-foundations/02-legal.md
+      - Lab Setup: ethical-hacking-unsorted/part-01-foundations/03-lab-setup.md
+      - OS Internals: ethical-hacking-unsorted/part-01-foundations/04-os-internals.md
+      - Python Toolkit: ethical-hacking-unsorted/part-01-foundations/05-python-toolkit.md
+    - Part 2 - Networking & Crypto:
+      - Overview: ethical-hacking-unsorted/part-02-networking-crypto/index.md
+      - Networking: ethical-hacking-unsorted/part-02-networking-crypto/06-networking.md
+      - Crypto: ethical-hacking-unsorted/part-02-networking-crypto/07-crypto.md
+      - Protocols: ethical-hacking-unsorted/part-02-networking-crypto/08-protocols.md
+    - Part 3 - Recon:
+      - Overview: ethical-hacking-unsorted/part-03-recon/index.md
+      - Passive OSINT: ethical-hacking-unsorted/part-03-recon/09-passive-osint.md
+      - Active Recon: ethical-hacking-unsorted/part-03-recon/10-active-recon.md
+      - DNS & Subdomains: ethical-hacking-unsorted/part-03-recon/11-dns-subdomains.md
+      - OSINT Automation: ethical-hacking-unsorted/part-03-recon/12-osint-automation.md
+    - Part 4 - Web App:
+      - Overview: ethical-hacking-unsorted/part-04-web-app/index.md
+      - Web Fundamentals: ethical-hacking-unsorted/part-04-web-app/13-web-fundamentals.md
+      - OWASP Deep Dives: ethical-hacking-unsorted/part-04-web-app/14-owasp-deep-dives.md
+      - API Attacks: ethical-hacking-unsorted/part-04-web-app/15-api-attacks.md
+      - Advanced Web: ethical-hacking-unsorted/part-04-web-app/16-advanced-web.md
+      - Auth & Authz: ethical-hacking-unsorted/part-04-web-app/17-auth-authz.md
+    - Part 5 - Network & Infra:
+      - Overview: ethical-hacking-unsorted/part-05-network-infra/index.md
+      - Active Directory: ethical-hacking-unsorted/part-05-network-infra/18-active-directory.md
+      - Pivoting & Lateral: ethical-hacking-unsorted/part-05-network-infra/19-pivoting-lateral.md
+      - Linux Privesc: ethical-hacking-unsorted/part-05-network-infra/20-linux-privesc.md
+      - Windows Privesc: ethical-hacking-unsorted/part-05-network-infra/21-windows-privesc.md
+  - Ethical Hacking (Unsorted):
+    - Overview: ethical-hacking-unsorted/index.md
+    - Part 1 - Foundations:
+      - Overview: ethical-hacking-unsorted/part-01-foundations/index.md
+      - Philosophy: ethical-hacking-unsorted/part-01-foundations/01-philosophy.md
+      - Legal: ethical-hacking-unsorted/part-01-foundations/02-legal.md
+      - Lab Setup: ethical-hacking-unsorted/part-01-foundations/03-lab-setup.md
+      - OS Internals: ethical-hacking-unsorted/part-01-foundations/04-os-internals.md
+      - Python Toolkit: ethical-hacking-unsorted/part-01-foundations/05-python-toolkit.md
+    - Part 2 - Networking & Crypto:
+      - Overview: ethical-hacking-unsorted/part-02-networking-crypto/index.md
+      - Networking: ethical-hacking-unsorted/part-02-networking-crypto/06-networking.md
+      - Crypto: ethical-hacking-unsorted/part-02-networking-crypto/07-crypto.md
+      - Protocols: ethical-hacking-unsorted/part-02-networking-crypto/08-protocols.md
+    - Part 3 - Recon:
+      - Overview: ethical-hacking-unsorted/part-03-recon/index.md
+      - Passive OSINT: ethical-hacking-unsorted/part-03-recon/09-passive-osint.md
+      - Active Recon: ethical-hacking-unsorted/part-03-recon/10-active-recon.md
+      - DNS & Subdomains: ethical-hacking-unsorted/part-03-recon/11-dns-subdomains.md
+      - OSINT Automation: ethical-hacking-unsorted/part-03-recon/12-osint-automation.md
+    - Part 4 - Web App:
+      - Overview: ethical-hacking-unsorted/part-04-web-app/index.md
+      - Web Fundamentals: ethical-hacking-unsorted/part-04-web-app/13-web-fundamentals.md
+      - OWASP Deep Dives: ethical-hacking-unsorted/part-04-web-app/14-owasp-deep-dives.md
+      - API Attacks: ethical-hacking-unsorted/part-04-web-app/15-api-attacks.md
+      - Advanced Web: ethical-hacking-unsorted/part-04-web-app/16-advanced-web.md
+      - Auth & AuthZ: ethical-hacking-unsorted/part-04-web-app/17-auth-authz.md
+    - Part 5 - Network & Infra:
+      - Overview: ethical-hacking-unsorted/part-05-network-infra/index.md
+      - Active Directory: ethical-hacking-unsorted/part-05-network-infra/18-active-directory.md
+      - Pivoting & Lateral: ethical-hacking-unsorted/part-05-network-infra/19-pivoting-lateral.md
+      - Linux Privesc: ethical-hacking-unsorted/part-05-network-infra/20-linux-privesc.md
+      - Windows Privesc: ethical-hacking-unsorted/part-05-network-infra/21-windows-privesc.md

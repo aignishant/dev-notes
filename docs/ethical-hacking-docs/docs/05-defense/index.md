@@ -6,52 +6,64 @@ If you want a government cybersecurity job, this phase matters more than offensi
 
 ## Chapters in this phase
 
-| # | Chapter | Focus |
-|---|---|---|
-| 5.1 | Red Team Operations | Adversary emulation, OPSEC, C2 frameworks, evasion |
-| 5.2 | Blue Team / SOC Operations | Tier 1/2/3 workflow, alert triage, escalation |
-| 5.3 | SIEM Engineering | Splunk, Elastic, Sentinel, log sources, SPL/KQL |
-| 5.4 | Detection Engineering | Sigma rules, ATT&CK coverage, threat-informed defense |
-| 5.5 | Digital Forensics & Incident Response | DFIR methodology, Volatility, KAPE, timelines |
-| 5.6 | Threat Hunting | Hypothesis-driven, anomaly-based, IOC sweeps |
-| 5.7 | Cyber Threat Intelligence | Strategic, operational, tactical; TLP, STIX/TAXII, MISP |
-| 5.8 | Purple Teaming | Atomic Red Team, CALDERA, detection validation |
-| 5.9 | Crisis Management & Tabletop Exercises | Communications, executive reporting, IR runbooks |
+| # | Chapter | Focus | Status |
+|---|---|---|---|
+| 5.1 | [Red Team Operations](red-team.md) | Adversary emulation, kill chain, C2 frameworks, EDR evasion, OPSEC | ✅ |
+| 5.2 | [Blue Team / SOC Operations](blue-team.md) | SIEM, EDR, Sigma, detection engineering, threat hunting, SOAR | ✅ |
+| 5.3 | [Digital Forensics & Incident Response](dfir.md) | PICERL lifecycle, memory + disk + network forensics, EVTX, cloud IR | ✅ |
+| 5.4 | [Cyber Threat Intelligence](threat-intel.md) | CTI lifecycle, IoCs vs TTPs, ATT&CK, STIX/TAXII, MISP, OpenCTI, ISACs | ✅ |
+| 5.5 | [Purple Team & Detection Validation](purple-team.md) | Atomic Red Team, Caldera, Stratus Red Team, VECTR, DETT&CT | ✅ |
 
 ## What you'll be able to do at the end
 
 - Walk into a SOC L1/L2 role on day one and run the alert queue
 - Author Sigma rules that map cleanly to ATT&CK
-- Triage a malware incident from telemetry to scoping to remediation
-- Produce a CTI report for an executive and a technical audience
-- Run a purple-team exercise that validates 50+ detections
-- Run a tabletop exercise for a ransomware scenario
+- Triage a malware incident from telemetry through scoping to remediation
+- Run memory forensics with Volatility 3 and disk forensics with Eric Zimmerman tools
+- Produce a CTI report for both an executive and a technical audience
+- Run a purple-team exercise that validates detections against MITRE ATT&CK techniques
+- Lead an IR engagement — including the difficult conversations with leadership
 
 ## Tools you'll learn
 
-Splunk Free, Elastic Stack, Microsoft Sentinel, Wazuh, Sigma, Sysmon, Velociraptor, KAPE, Eric Zimmerman's tools, Volatility 3, plaso/log2timeline, TheHive + Cortex, MISP, Atomic Red Team, CALDERA, Mythic, Sliver, Havoc, Cobalt Strike (commercial), ProcMon, ProcExplorer, RegRipper, Eric Zimmerman parsers (MFTECmd, AmcacheParser, RECmd), KAPE.
+**SIEM**: Splunk, Microsoft Sentinel, Elastic Security, Chronicle, Wazuh
+**EDR**: CrowdStrike Falcon, Microsoft Defender for Endpoint, SentinelOne, Carbon Black
+**Detection**: Sigma + sigma-cli, SigmaHQ rules, chainsaw, Hayabusa
+**Endpoint telemetry**: Sysmon, Sysmon for Linux, auditd, osquery, Falco, Velociraptor
+**Memory forensics**: Volatility 3, WinPMEM, LiME, AVML, pypykatz
+**Disk forensics**: Autopsy, The Sleuth Kit, KAPE, Eric Zimmerman tools (MFTECmd, RECmd, EvtxECmd, AmcacheParser)
+**Network forensics**: Wireshark, tshark, Suricata, Zeek, Arkime
+**Red team C2**: Cobalt Strike, Sliver, Mythic, Havoc, Brute Ratel
+**Adversary emulation**: Atomic Red Team, MITRE Caldera, Stratus Red Team, PurpleSharp, APTSimulator
+**TIPs**: MISP, OpenCTI, Yeti, TheHive + Cortex
+**Coverage tracking**: VECTR, DETT&CT, ATT&CK Navigator
 
-## Python scripts you'll build
+## Python scripts in this phase
 
-1. **`failed_ssh_analyzer.py`** — parse `/var/log/auth.log` and produce attacker IP heatmap.
-2. **`dns_exfil_detector.py`** — flag long, high-entropy subdomains in DNS logs.
-3. **`sigma_to_splunk.py`** — convert a Sigma rule directory to Splunk SPL.
-4. **`ioc_extractor.py`** — extract IOCs (IP, domain, hash, URL) from any text.
-5. **`misp_pull.py`** — pull recent IOCs from MISP via API and produce a threat feed.
-6. **`evtx_triager.py`** — fast triage of `.evtx` files for IOCs (logon, 4624/4625/4688/4697/4698).
-7. **`vt_lookup.py`** — bulk VirusTotal hash lookup with caching and rate limiting.
-8. **`yara_scanner.py`** — recursive YARA scanner with rich output and JSON results.
+| Script | Purpose |
+|---|---|
+| [`defense/failed_ssh_analyzer.py`](../../scripts/defense/failed_ssh_analyzer.py) | Parse `/var/log/auth.log` for failed SSH attempts (Stage 1) |
+| [`defense/ioc_extractor.py`](../../scripts/defense/ioc_extractor.py) | Extract IOCs from any text (Stage 1) |
+| [`defense/mini_honeypot.py`](../../scripts/defense/mini_honeypot.py) | Tiny multi-port honeypot (Stage 1) |
+| [`defense/dns_exfil_detector.py`](../../scripts/defense/dns_exfil_detector.py) | Flag high-entropy DNS subdomain queries (Stage 4) |
+| [`defense/sigma_to_splunk.py`](../../scripts/defense/sigma_to_splunk.py) | Bulk-convert Sigma → Splunk SPL (Stage 4) |
+| [`forensics/evtx_triager.py`](../../scripts/forensics/evtx_triager.py) | Triage Windows EVTX directories (Stage 4) |
+| [`threat-intel/stix_query.py`](../../scripts/threat-intel/stix_query.py) | Query STIX 2.1 bundles for IoCs/TTPs (Stage 4) |
 
 ## Reference frameworks
 
-- **MITRE ATT&CK** + **D3FEND**
+- **MITRE ATT&CK** + **D3FEND** — TTPs and countermeasures
 - **NIST SP 800-61 r2** — Computer Security Incident Handling Guide
 - **SANS PICERL** — Preparation, Identification, Containment, Eradication, Recovery, Lessons learned
 - **ISO/IEC 27035** — Incident management
 - **VERIS / Verizon DBIR** — Vocabulary for breach reporting
-- **Pyramid of Pain** — Bianco
-- **Diamond Model** — Sergio Caltagirone et al.
-- **Detection Maturity Level (DML)** — Ryan Stillions
+- **Pyramid of Pain** (David Bianco)
+- **Diamond Model of Intrusion Analysis** (Caltagirone et al.)
+- **Detection Maturity Level (DML)** (Ryan Stillions)
+- **Cyber Kill Chain** (Lockheed Martin)
+- **F3EAD** (Find, Fix, Finish, Exploit, Analyze, Disseminate)
+- **TLP v2.0** (FIRST)
+- **EPSS + CISA KEV** for vuln prioritization
 
 ## Estimated time
 
@@ -63,8 +75,5 @@ Splunk Free, Elastic Stack, Microsoft Sentinel, Wazuh, Sigma, Sysmon, Velocirapt
 ✅ Phases 1, 2, 3. (Specializations from Phase 4 are optional — the more offense you understand, the better defender you become.)
 
 ---
-
-!!! tip "Stage 4 of this curriculum"
-    All chapters and the 8 scripts ship in Stage 4.
 
 [← Phase 4](../04-specializations/index.md)  ·  [Phase 6 →](../06-career/index.md)

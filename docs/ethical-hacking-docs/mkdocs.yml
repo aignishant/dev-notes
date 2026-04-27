@@ -143,7 +143,36 @@ nav:
       - Web Methodology & OWASP Top 10: 03-offensive/web-methodology.md
       - Injection Attacks: 03-offensive/web-injection.md
       - XSS, CSRF & SSRF: 03-offensive/web-xss-csrf-ssrf.md
-  - "Phase 4 — Specializations": 04-specializations/index.md
-  - "Phase 5 — Defense": 05-defense/index.md
-  - "Phase 6 — Career": 06-career/index.md
+      - Auth & Session Attacks: 03-offensive/web-auth-session.md
+      - Linux Privilege Escalation: 03-offensive/linux-privesc.md
+      - Windows Privilege Escalation: 03-offensive/windows-privesc.md
+      - Active Directory Attacks: 03-offensive/active-directory.md
+      - Wireless Attacks: 03-offensive/wireless.md
+      - Mobile Application Security: 03-offensive/mobile.md
+      - Pivoting & Lateral Movement: 03-offensive/pivoting.md
+  - "Phase 4 — Specializations":
+      - 04-specializations/index.md
+      - Cloud Security (AWS / Azure / GCP / K8s): 04-specializations/cloud.md
+      - Malware Analysis & Reverse Engineering: 04-specializations/malware-analysis.md
+      - Exploit Development: 04-specializations/exploit-dev.md
+      - IoT & ICS / OT Security: 04-specializations/iot-ics.md
+      - AI & ML Security: 04-specializations/ai-security.md
+      - Application Security (AppSec): 04-specializations/appsec.md
+  - "Phase 5 — Defense":
+      - 05-defense/index.md
+      - Red Team Operations: 05-defense/red-team.md
+      - Blue Team & SOC: 05-defense/blue-team.md
+      - Digital Forensics & Incident Response: 05-defense/dfir.md
+      - Cyber Threat Intelligence: 05-defense/threat-intel.md
+      - Purple Teaming: 05-defense/purple-team.md
+  - "Phase 6 — Career":
+      - 06-career/index.md
+      - Reporting & Communication: 06-career/reporting.md
+      - Certification Roadmap: 06-career/certifications.md
+      - Building a Portfolio: 06-career/portfolio.md
+      - Resume, LinkedIn & Interviewing: 06-career/resume-linkedin-interview.md
+      - US Government Careers: 06-career/gov-careers-us.md
+      - India Government Careers: 06-career/gov-careers-india.md
+      - CTFs, Labs & Practice: 06-career/ctfs.md
+      - Continuous Learning: 06-career/continuous-learning.md
   - Appendix: 99-appendix/index.md

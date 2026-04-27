@@ -2,9 +2,17 @@
 
 > 25+ projects, fully designed end-to-end. Cloud + on-prem + architecture.
 
-<span class="phase-status phase-pending">Phase 11–13 — Pending</span>
+<span class="phase-status phase-inprogress">Phase 1 — One sample project only</span>
 
 When complete, this section will be a **complete system-design book**, larger and more detailed than Alex Xu's *System Design Interview* (vols 1 & 2 combined).
+
+---
+
+## ✅ Available now (Phase 1 sample)
+
+- [URL Shortener (TinyURL/Bitly)](tier-1-core/01-url-shortener.md) — full 20-section design, the **template** for the other 29 system-design projects.
+
+This is the contract for every system-design page. Once approved, the other 29 instantiate the same 20-section shape.
 
 ---
 

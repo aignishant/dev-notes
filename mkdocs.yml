@@ -7,6 +7,8 @@ theme:
   name: material
   features:
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
@@ -22,20 +24,28 @@ theme:
     - search.share
     - content.code.copy
     - content.code.annotate
+    - content.code.select
     - content.tabs.link
     - content.tooltips
+    - header.autohide
+    - announce.dismiss
+  font:
+    text: Inter
+    code: JetBrains Mono
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: indigo
-      accent: amber
+      accent: deep purple
       toggle:
-        icon: material/weather-night
+        icon: material/brightness-7
         name: Switch to dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       primary: indigo
-      accent: amber
+      accent: deep purple
       toggle:
-        icon: material/weather-sunny
+        icon: material/brightness-4
         name: Switch to light mode
   icon:
     repo: fontawesome/brands/github
@@ -63,6 +73,7 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+      permalink_title: Anchor link to this section
       toc_depth: 4
   - pymdownx.arithmatex:
       generic: true
@@ -78,6 +89,7 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.keys
+  - pymdownx.magiclink
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.snippets
@@ -92,6 +104,14 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
+  - https://unpkg.com/three@0.160.0/build/three.min.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
 plugins:
   - search
 
@@ -100,6 +120,7 @@ exclude_docs: |
   /ethical-hacking-docs/IMPLEMENTATION_PLAN.md
   /ethical-hacking-unsorted/redshift-toolkit/README.md
   /dsa/README.md
+  /dsa/CLAUDE.md
   /dsa/CLAUDE_CODE_HANDOFF.md
   /dsa/IMPLEMENTATION_PLAN_v3.md
   /dsa/mkdocs.yml
@@ -286,6 +307,7 @@ nav:
       - Overview: dsa/docs/03-algorithms/index.md
     - Patterns:
       - Overview: dsa/docs/04-patterns/index.md
+      - Sliding Window (sample): dsa/docs/04-patterns/01-sliding-window.md
     - Advanced:
       - Overview: dsa/docs/05-advanced/index.md
     - Ultra-Advanced:
@@ -295,6 +317,7 @@ nav:
       - Google 50 (sample): dsa/docs/07-popular-problems/product-based/google-50.md
     - System Design:
       - Overview: dsa/docs/08-system-design/index.md
+      - URL Shortener (sample): dsa/docs/08-system-design/tier-1-core/01-url-shortener.md
     - Low-Level Design:
       - Overview: dsa/docs/09-low-level-design/index.md
     - Mock Interviews:

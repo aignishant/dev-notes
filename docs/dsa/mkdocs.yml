@@ -16,12 +16,18 @@ theme:
   features:
     # Navigation
     - navigation.instant
+    - navigation.instant.prefetch
     - navigation.instant.progress
     - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.path
     - navigation.indexes      # lets each section/index.md become its landing page
     - navigation.top
     - navigation.footer
+    # Header
+    - header.autohide
+    - announce.dismiss
     # Table of contents
     - toc.follow
     # Search
@@ -31,6 +37,7 @@ theme:
     # Code blocks
     - content.code.copy
     - content.code.annotate
+    - content.code.select
     # Content tabs (the === "Python" syntax)
     - content.tabs.link
     # Inline tooltips
@@ -41,7 +48,7 @@ theme:
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: indigo
-      accent: indigo
+      accent: deep purple
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -49,7 +56,7 @@ theme:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: indigo
-      accent: indigo
+      accent: deep purple
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -70,7 +77,9 @@ extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
+  - javascripts/extra.js
   - javascripts/mathjax.js
+  - https://unpkg.com/three@0.160.0/build/three.min.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 plugins:
@@ -173,6 +182,7 @@ nav:
 
   - 🎯 Patterns:
       - Overview: 04-patterns/index.md
+      - Sliding Window (sample): 04-patterns/01-sliding-window.md
 
   - 🚀 Advanced:
       - Overview: 05-advanced/index.md
@@ -186,6 +196,7 @@ nav:
 
   - 🏛️ System Design:
       - Overview: 08-system-design/index.md
+      - URL Shortener (sample): 08-system-design/tier-1-core/01-url-shortener.md
 
   - 🧱 Low-Level Design:
       - Overview: 09-low-level-design/index.md

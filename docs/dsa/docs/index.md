@@ -1,6 +1,53 @@
-# 📘 DSA & System Design Bible
+<div class="dn-hero" markdown>
+<div class="dn-hero-3d"></div>
 
-> The one place for everything you need to crack technical interviews — written for beginners, in simple language, with Python.
+# DSA & System Design Bible
+
+The one place for everything you need to crack technical interviews — written for beginners, in simple language, with Python. Patterns, problems, system design, LLD, behavioral — all in one place.
+
+[:material-rocket-launch: &nbsp;Pick your study plan](00-roadmap/pick-your-plan.md){ .dn-hero-cta }
+
+</div>
+
+<div class="grid cards" markdown>
+
+-   :material-map-outline:{ .lg .middle } &nbsp; **Roadmap**
+
+    Pick a plan that fits your timeline (3 weeks → 6 months) and a 7-step framework for any problem.
+
+    [:octicons-arrow-right-24: Open roadmap](00-roadmap/index.md)
+
+-   :fontawesome-brands-python:{ .lg .middle } &nbsp; **Foundations**
+
+    Python for DSA, complexity, recursion, the dry-run method.
+
+    [:octicons-arrow-right-24: Open foundations](01-foundations/index.md)
+
+-   :material-cube-outline:{ .lg .middle } &nbsp; **Data Structures**
+
+    Arrays, strings, lists, trees, heaps, graphs, advanced DS — every chapter follows the same 12-part shape.
+
+    [:octicons-arrow-right-24: Open data structures](02-data-structures/index.md)
+
+-   :material-bullseye-arrow:{ .lg .middle } &nbsp; **Patterns**
+
+    The 20 patterns that solve 90% of LeetCode — sliding window, two pointers, BFS, backtracking, and more.
+
+    [:octicons-arrow-right-24: Open patterns](04-patterns/index.md)
+
+-   :material-pillar:{ .lg .middle } &nbsp; **System Design**
+
+    25+ deep-dives: URL shortener, Twitter, YouTube, Uber, WhatsApp — cloud + on-prem + architecture.
+
+    [:octicons-arrow-right-24: Open system design](08-system-design/index.md)
+
+-   :material-trophy-variant-outline:{ .lg .middle } &nbsp; **Popular Problems**
+
+    Curated lists + per-company question banks (Google 50 sample inside).
+
+    [:octicons-arrow-right-24: Open popular problems](07-popular-problems/index.md)
+
+</div>
 
 ---
 

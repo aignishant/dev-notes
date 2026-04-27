@@ -2,18 +2,31 @@
 
 > 20 patterns that solve 90% of LeetCode and 95% of interview problems.
 
-<span class="phase-status phase-pending">Phase 5 — Pending</span>
+<span class="phase-status phase-inprogress">Phase 1 — One sample pattern only</span>
 
-When this section is built, each pattern will get its own page with:
+Each pattern page in this section follows the **same five-part shape**:
 
-- What the pattern looks like (plain-English signal: *"if you see X, try this"*)
-- The template code in Python
-- 20+ problems that fit the pattern, fully solved in v3 format
-- The variations the pattern morphs into
+1. **What the pattern looks like** (plain-English signal: *"if you see X, try this"*)
+2. **The template code** in Python (fixed and variable flavors where applicable)
+3. **The sub-patterns** — every flavor of the pattern in one place
+4. **20+ problems** that fit the pattern, with difficulty + sub-pattern + status
+5. **3 deep-dive walkthroughs** demonstrating the canonical templates
 
-The 20 patterns:
+---
 
-1. Sliding Window
+## ✅ Available now (Phase 1 sample)
+
+- [Sliding Window (sample)](01-sliding-window.md) — fixed vs variable, the 7 sub-patterns, 20 problems, 3 deep-dives.
+
+This is the **template** for every other pattern page in this section.
+
+---
+
+## 🚧 Coming in Phase 5
+
+The remaining 19 patterns:
+
+1. ✅ Sliding Window — *available now*
 2. Two Pointers
 3. Fast & Slow Pointers
 4. Merge Intervals
@@ -34,4 +47,4 @@ The 20 patterns:
 19. Longest Common Subsequence DP
 20. Bitwise XOR
 
-This section will be one of the most important in the bible. It's coming in Phase 5.
+Once the sliding-window template is approved, all 19 follow the same shape.

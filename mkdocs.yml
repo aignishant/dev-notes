@@ -99,6 +99,12 @@ exclude_docs: |
   /ethical-hacking-docs/README.md
   /ethical-hacking-docs/IMPLEMENTATION_PLAN.md
   /ethical-hacking-unsorted/redshift-toolkit/README.md
+  /dsa/README.md
+  /dsa/CLAUDE_CODE_HANDOFF.md
+  /dsa/IMPLEMENTATION_PLAN_v3.md
+  /dsa/mkdocs.yml
+  /dsa/requirements.txt
+  /dsa/site/
 
 nav:
   - Home: index.md
@@ -242,6 +248,64 @@ nav:
       - Enhanced Python Core & OOP: python-interview/old/22_Enhanced_Python_Core_OOP.md
       - Enhanced DB & System Design: python-interview/old/23_Enhanced_DB_SystemDesign.md
       - Advanced DSA (FAANG): python-interview/old/24_Advanced_DSA_FAANG.md
+  - DSA & System Design:
+    - Welcome: dsa/docs/index.md
+    - Roadmap:
+      - Overview: dsa/docs/00-roadmap/index.md
+      - How to use this bible: dsa/docs/00-roadmap/how-to-use-this-doc.md
+      - Pick your study plan: dsa/docs/00-roadmap/pick-your-plan.md
+      - 3-week sprint plan: dsa/docs/00-roadmap/3-week-sprint-plan.md
+      - 5-week balanced plan: dsa/docs/00-roadmap/5-week-balanced-plan.md
+      - 6-week thorough plan: dsa/docs/00-roadmap/6-week-thorough-plan.md
+      - 1-month crash plan: dsa/docs/00-roadmap/1-month-crash-plan.md
+      - 3-month fast-track: dsa/docs/00-roadmap/3-month-fast-track.md
+      - 6-month study plan: dsa/docs/00-roadmap/6-month-study-plan.md
+      - Daily routine: dsa/docs/00-roadmap/daily-routine.md
+      - How to approach any problem: dsa/docs/00-roadmap/how-to-approach-any-problem.md
+      - Company-wise prep: dsa/docs/00-roadmap/company-wise-prep.md
+      - Product vs Service vs PSU strategy: dsa/docs/00-roadmap/product-vs-service-vs-psu-strategy.md
+      - Interview stages explained: dsa/docs/00-roadmap/interview-stages-explained.md
+      - Progress tracker: dsa/docs/00-roadmap/progress-tracker.md
+    - Foundations:
+      - Overview: dsa/docs/01-foundations/index.md
+      - Python crash course for DSA: dsa/docs/01-foundations/python-crash-course-for-dsa.md
+      - Python tricks for interviews: dsa/docs/01-foundations/python-tricks-for-interviews.md
+      - Python STL deep-dive: dsa/docs/01-foundations/python-stl-deep-dive.md
+      - Time complexity explained: dsa/docs/01-foundations/time-complexity-explained.md
+      - Space complexity explained: dsa/docs/01-foundations/space-complexity-explained.md
+      - Big-O cheatsheet: dsa/docs/01-foundations/big-o-cheatsheet.md
+      - How to think recursively: dsa/docs/01-foundations/how-to-think-recursively.md
+      - Input/output handling: dsa/docs/01-foundations/input-output-handling.md
+      - Code quality for interviews: dsa/docs/01-foundations/code-quality-for-interviews.md
+      - The dry-run method: dsa/docs/01-foundations/dry-run-method.md
+    - Data Structures:
+      - Overview: dsa/docs/02-data-structures/index.md
+      - Arrays:
+        - Array basics: dsa/docs/02-data-structures/arrays/01-array-basics.md
+    - Algorithms:
+      - Overview: dsa/docs/03-algorithms/index.md
+    - Patterns:
+      - Overview: dsa/docs/04-patterns/index.md
+    - Advanced:
+      - Overview: dsa/docs/05-advanced/index.md
+    - Ultra-Advanced:
+      - Overview: dsa/docs/06-ultra-advanced/index.md
+    - Popular Problems:
+      - Overview: dsa/docs/07-popular-problems/index.md
+      - Google 50 (sample): dsa/docs/07-popular-problems/product-based/google-50.md
+    - System Design:
+      - Overview: dsa/docs/08-system-design/index.md
+    - Low-Level Design:
+      - Overview: dsa/docs/09-low-level-design/index.md
+    - Mock Interviews:
+      - Overview: dsa/docs/10-mock-interviews/index.md
+    - Behavioral:
+      - Overview: dsa/docs/11-behavioral/index.md
+    - Common Across Companies:
+      - Overview: dsa/docs/12-common-across-all-companies/index.md
+      - Arrays — common questions: dsa/docs/12-common-across-all-companies/02-arrays-common.md
+    - Resources:
+      - Overview: dsa/docs/13-resources/index.md
   - AI:
     - Overview: interview-ai/index.md
     - ML Fundamentals:

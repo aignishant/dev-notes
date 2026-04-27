@@ -1,0 +1,81 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   DSA Bible — small polish on top of mkdocs-material.
+   Keep this file SHORT. Material already does the heavy lifting.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Slightly tighter inline code so dense problem write-ups breathe. */
+:root {
+  --md-code-font-size: 0.85em;
+}
+
+/* Difficulty pills (used inline next to problem titles).
+   Usage in markdown:  <span class="diff-easy">EASY</span>
+*/
+.diff-easy,
+.diff-medium,
+.diff-hard {
+  display: inline-block;
+  padding: 0.05em 0.55em;
+  border-radius: 0.4em;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  margin-right: 0.4em;
+  text-transform: uppercase;
+}
+.diff-easy   { background: #d4edda; color: #155724; }
+.diff-medium { background: #fff3cd; color: #856404; }
+.diff-hard   { background: #f8d7da; color: #721c24; }
+
+/* Dark-mode overrides for the pills. */
+[data-md-color-scheme="slate"] .diff-easy   { background: #1f3d28; color: #9be0a8; }
+[data-md-color-scheme="slate"] .diff-medium { background: #4a3c0a; color: #f5d56a; }
+[data-md-color-scheme="slate"] .diff-hard   { background: #4a1f25; color: #f29ba2; }
+
+/* Company tag chips (used after "Asked at:") */
+.company-tag {
+  display: inline-block;
+  padding: 0.05em 0.5em;
+  border-radius: 999px;
+  font-size: 0.72em;
+  font-weight: 600;
+  background: var(--md-default-fg-color--lightest);
+  color: var(--md-default-fg-color);
+  margin-right: 0.25em;
+  margin-bottom: 0.15em;
+  border: 1px solid var(--md-default-fg-color--lighter);
+}
+
+/* Make tables a touch nicer for our complexity-analysis tables. */
+.md-typeset table:not([class]) th {
+  background: var(--md-default-fg-color--lightest);
+}
+
+/* Slightly wider content area so 80-char code blocks fit comfortably. */
+@media screen and (min-width: 76.25em) {
+  .md-grid {
+    max-width: 65rem;
+  }
+}
+
+/* Mermaid diagrams: center them and constrain width. */
+.mermaid {
+  text-align: center;
+  margin: 1.2em 0;
+}
+
+/* "Phase status" callouts on section landing pages. */
+.phase-status {
+  display: inline-block;
+  padding: 0.15em 0.7em;
+  border-radius: 0.4em;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+.phase-done       { background: #d4edda; color: #155724; }
+.phase-inprogress { background: #fff3cd; color: #856404; }
+.phase-pending    { background: #e2e3e5; color: #383d41; }
+[data-md-color-scheme="slate"] .phase-done       { background: #1f3d28; color: #9be0a8; }
+[data-md-color-scheme="slate"] .phase-inprogress { background: #4a3c0a; color: #f5d56a; }
+[data-md-color-scheme="slate"] .phase-pending    { background: #2c2f33; color: #c8c9cb; }

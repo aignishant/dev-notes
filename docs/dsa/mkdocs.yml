@@ -1,0 +1,204 @@
+site_name: DSA & System Design Bible
+site_description: A self-contained, beginner-friendly bible for cracking product, service, and PSU interviews — written in simple language, in Python, with progressive solutions and real-world context.
+site_author: Nishant Gupta
+site_url: ""
+
+# We serve from this folder. The MkDocs `docs/` is below.
+docs_dir: docs
+site_dir: site
+
+# Show edit URL in pages? Off — this is a personal study bible, not a public repo.
+use_directory_urls: true
+
+theme:
+  name: material
+  language: en
+  features:
+    # Navigation
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.path
+    - navigation.indexes      # lets each section/index.md become its landing page
+    - navigation.top
+    - navigation.footer
+    # Table of contents
+    - toc.follow
+    # Search
+    - search.suggest
+    - search.highlight
+    - search.share
+    # Code blocks
+    - content.code.copy
+    - content.code.annotate
+    # Content tabs (the === "Python" syntax)
+    - content.tabs.link
+    # Inline tooltips
+    - content.tooltips
+
+  palette:
+    # Light mode (default for new visitors)
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+  icon:
+    repo: fontawesome/brands/git-alt
+    admonition:
+      note: octicons/tag-16
+      tip: octicons/light-bulb-16
+      warning: octicons/alert-16
+      example: octicons/beaker-16
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+plugins:
+  - search:
+      lang: en
+  # Mermaid renders via Material's native superfences pattern (see markdown_extensions
+  # below). We do NOT enable mkdocs-mermaid2-plugin here — Material's native path
+  # auto-themes diagrams with the light/dark toggle. The plugin remains installed
+  # as a fallback if we want to swap later.
+
+markdown_extensions:
+  # Core
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section
+      toc_depth: 4
+
+  # PyMdown
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.mark
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Navigation
+# Each section currently shows only its landing page (`index.md`). As Phases 2+
+# fill in content, we'll expand each section's nav entries.
+# ──────────────────────────────────────────────────────────────────────────────
+nav:
+  - Welcome: index.md
+
+  - 🗺️ Roadmap:
+      - Overview: 00-roadmap/index.md
+      - How to use this bible: 00-roadmap/how-to-use-this-doc.md
+      - Pick your study plan: 00-roadmap/pick-your-plan.md
+      - 3-week sprint plan: 00-roadmap/3-week-sprint-plan.md
+      - 5-week balanced plan: 00-roadmap/5-week-balanced-plan.md
+      - 6-week thorough plan: 00-roadmap/6-week-thorough-plan.md
+      - 1-month crash plan: 00-roadmap/1-month-crash-plan.md
+      - 3-month fast-track: 00-roadmap/3-month-fast-track.md
+      - 6-month study plan: 00-roadmap/6-month-study-plan.md
+      - Daily routine: 00-roadmap/daily-routine.md
+      - How to approach any problem: 00-roadmap/how-to-approach-any-problem.md
+      - Company-wise prep: 00-roadmap/company-wise-prep.md
+      - Product vs Service vs PSU strategy: 00-roadmap/product-vs-service-vs-psu-strategy.md
+      - Interview stages explained: 00-roadmap/interview-stages-explained.md
+      - Progress tracker: 00-roadmap/progress-tracker.md
+
+  - 🐍 Foundations:
+      - Overview: 01-foundations/index.md
+      - Python crash course for DSA: 01-foundations/python-crash-course-for-dsa.md
+      - Python tricks for interviews: 01-foundations/python-tricks-for-interviews.md
+      - Python STL deep-dive: 01-foundations/python-stl-deep-dive.md
+      - Time complexity explained: 01-foundations/time-complexity-explained.md
+      - Space complexity explained: 01-foundations/space-complexity-explained.md
+      - Big-O cheatsheet: 01-foundations/big-o-cheatsheet.md
+      - How to think recursively: 01-foundations/how-to-think-recursively.md
+      - Input/output handling: 01-foundations/input-output-handling.md
+      - Code quality for interviews: 01-foundations/code-quality-for-interviews.md
+      - The dry-run method: 01-foundations/dry-run-method.md
+
+  - 📦 Data Structures:
+      - Overview: 02-data-structures/index.md
+      - Arrays:
+          - Array basics: 02-data-structures/arrays/01-array-basics.md
+
+  - ⚙️ Algorithms:
+      - Overview: 03-algorithms/index.md
+
+  - 🎯 Patterns:
+      - Overview: 04-patterns/index.md
+
+  - 🚀 Advanced:
+      - Overview: 05-advanced/index.md
+
+  - 🧠 Ultra-Advanced:
+      - Overview: 06-ultra-advanced/index.md
+
+  - 🔥 Popular Problems:
+      - Overview: 07-popular-problems/index.md
+      - Google 50 (sample): 07-popular-problems/product-based/google-50.md
+
+  - 🏛️ System Design:
+      - Overview: 08-system-design/index.md
+
+  - 🧱 Low-Level Design:
+      - Overview: 09-low-level-design/index.md
+
+  - 🎤 Mock Interviews:
+      - Overview: 10-mock-interviews/index.md
+
+  - 💬 Behavioral:
+      - Overview: 11-behavioral/index.md
+
+  - 🌐 Common Across Companies:
+      - Overview: 12-common-across-all-companies/index.md
+      - Arrays — common questions: 12-common-across-all-companies/02-arrays-common.md
+
+  - 📚 Resources:
+      - Overview: 13-resources/index.md

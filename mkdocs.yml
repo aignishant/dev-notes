@@ -293,3 +293,27 @@ nav:
       - Safety: interview-ai/genai-llms/safety.md
       - Rapid Revision: interview-ai/genai-llms/rapid-revision.md
       - Mock Interview: interview-ai/genai-llms/mock-interview.md
+  - Ethical Hacking:
+    - Overview: ethical-hacking-docs/docs/index.md
+    - Getting Started:
+      - Overview: ethical-hacking-docs/docs/00-getting-started/index.md
+      - Mindset: ethical-hacking-docs/docs/00-getting-started/mindset.md
+      - How to Use: ethical-hacking-docs/docs/00-getting-started/how-to-use.md
+      - Lab Setup: ethical-hacking-docs/docs/00-getting-started/lab-setup.md
+      - Tooling: ethical-hacking-docs/docs/00-getting-started/tooling.md
+      - Legal & Ethics: ethical-hacking-docs/docs/00-getting-started/legal-ethics.md
+      - Study Plan: ethical-hacking-docs/docs/00-getting-started/study-plan.md
+    - Phase 1 - Foundations:
+      - Overview: ethical-hacking-docs/docs/01-foundations/index.md
+      - Cybersecurity Fundamentals: ethical-hacking-docs/docs/01-foundations/cybersecurity-fundamentals.md
+      - Networking: ethical-hacking-docs/docs/01-foundations/networking.md
+      - Linux: ethical-hacking-docs/docs/01-foundations/linux.md
+      - Windows: ethical-hacking-docs/docs/01-foundations/windows.md
+      - Cryptography: ethical-hacking-docs/docs/01-foundations/cryptography.md
+      - Python for Security: ethical-hacking-docs/docs/01-foundations/python-for-security.md
+    - Phase 2 - Recon: ethical-hacking-docs/docs/02-recon/index.md
+    - Phase 3 - Offensive: ethical-hacking-docs/docs/03-offensive/index.md
+    - Phase 4 - Specializations: ethical-hacking-docs/docs/04-specializations/index.md
+    - Phase 5 - Defense: ethical-hacking-docs/docs/05-defense/index.md
+    - Phase 6 - Career: ethical-hacking-docs/docs/06-career/index.md
+    - Appendix: ethical-hacking-docs/docs/99-appendix/index.md

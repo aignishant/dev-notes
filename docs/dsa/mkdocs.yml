@@ -176,6 +176,17 @@ nav:
       - Overview: 02-data-structures/index.md
       - Arrays:
           - Array basics: 02-data-structures/arrays/01-array-basics.md
+      - Strings:
+          - String basics: 02-data-structures/strings/01-string-basics.md
+          - Pattern matching (KMP, Z, Rabin-Karp): 02-data-structures/strings/02-string-pattern-matching.md
+      - Linked Lists:
+          - Linked list basics: 02-data-structures/linked-lists/01-linked-list-basics.md
+      - Hash Tables:
+          - Hash table basics: 02-data-structures/hash-tables/01-hash-table-basics.md
+      - Stacks & Queues:
+          - Stacks and queues basics: 02-data-structures/stacks-and-queues/01-stacks-and-queues-basics.md
+      - Trees:
+          - Tree basics: 02-data-structures/trees/01-tree-basics.md
 
   - ⚙️ Algorithms:
       - Overview: 03-algorithms/index.md

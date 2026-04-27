@@ -2143,45 +2143,251 @@ O(n) time.
 
 <span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Google</span>
 
-> Design a stack-like data structure that always pops the most frequent element. Ties broken by most recently pushed. (LeetCode 895.)
+> Design `FreqStack` supporting `push(val)` and `pop()` where `pop` returns the **most frequent** element. Ties broken by **most recently pushed**. (LeetCode 895.)
 
-#### 🐍 Solution — frequency map + per-frequency stack
+#### 📖 Story Mode
 
-```python
-from collections import defaultdict
+```
+push 5            stack ≈ [5]
+push 7            stack ≈ [5, 7]
+push 5            stack ≈ [5, 7, 5]      // 5 now has freq 2
+push 7            stack ≈ [5, 7, 5, 7]
+push 4
+push 5            // 5 has freq 3 (highest)
 
-
-class FreqStack:
-    def __init__(self) -> None:
-        self._freq: defaultdict[int, int] = defaultdict(int)
-        self._group: defaultdict[int, list[int]] = defaultdict(list)
-        self._max_freq = 0
-
-    def push(self, val: int) -> None:
-        self._freq[val] += 1
-        f = self._freq[val]
-        self._group[f].append(val)
-        if f > self._max_freq:
-            self._max_freq = f
-
-    def pop(self) -> int:
-        val = self._group[self._max_freq].pop()
-        self._freq[val] -= 1
-        if not self._group[self._max_freq]:
-            self._max_freq -= 1
-        return val
+pop → 5           // freq=3, only 5
+pop → 7           // freqs: 5=2, 7=2, 4=1; tie 5/7 by freq, 7 pushed later
+pop → 5           // remaining freq 5=2, 7=1
+pop → 4           // freqs: 5=1, 7=1, 4=1; 4 pushed last
 ```
 
-Both operations: **O(1)**.
+#### 🌍 Real-World Usage
+
+- **LFU (Least-Frequently-Used) caches** — same idea inverted (pop *least* frequent).
+- **Word-completion ranking** — most frequent suggestion floats up; ties by recency.
+- **Trending topics** — when ties appear, prefer the more recent.
+- **Game scoring** — "best move" with recency tiebreak in MCTS.
+
+#### 🧠 Thinking Process
+
+The naïve approach: store everything in a list; on pop, scan to find max-frequency-most-recent. O(n) per pop.
+
+The insight: if we have a **separate stack per frequency level**, pushing `val` (now at frequency `f`) goes to stack `f`. Pop always takes from the highest non-empty stack. The recency tiebreak is **automatic** because each stack is LIFO.
+
+Two pieces:
+
+1. `freq[val]` — current count of `val` (so we know which bucket to push into next).
+2. `group[f]` — stack of values currently at frequency `f`. (Note: a value at freq 3 also has copies in `group[1]` and `group[2]` — those are vestigial and only get popped when needed.)
+
+Plus a `max_freq` watermark.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute (rescan on pop)"
+
+    ```python
+    from collections import Counter
+
+
+    class FreqStack:
+        def __init__(self) -> None:
+            self._stack: list[int] = []
+            self._freq: Counter = Counter()
+
+        def push(self, val: int) -> None:
+            self._stack.append(val)
+            self._freq[val] += 1
+
+        def pop(self) -> int:
+            target_freq = max(self._freq.values())
+            # find most recent val with freq == target_freq
+            for i in range(len(self._stack) - 1, -1, -1):
+                if self._freq[self._stack[i]] == target_freq:
+                    val = self._stack.pop(i)
+                    self._freq[val] -= 1
+                    if self._freq[val] == 0:
+                        del self._freq[val]
+                    return val
+            return -1                     # unreachable on valid input
+    ```
+
+    `push` O(1), `pop` O(n). Correct but too slow.
+
+=== "Layer 2 — Heap by (freq, push_index)"
+
+    ```python
+    import heapq
+
+
+    class FreqStack:
+        def __init__(self) -> None:
+            self._heap: list[tuple[int, int, int]] = []
+            self._freq: dict[int, int] = {}
+            self._tick = 0
+
+        def push(self, val: int) -> None:
+            self._freq[val] = self._freq.get(val, 0) + 1
+            self._tick += 1
+            heapq.heappush(
+                self._heap, (-self._freq[val], -self._tick, val)
+            )
+
+        def pop(self) -> int:
+            _, _, val = heapq.heappop(self._heap)
+            self._freq[val] -= 1
+            return val
+    ```
+
+    `push` and `pop` O(log n). Works, but stale heap entries linger (each `push` appends a new entry instead of updating).
+
+=== "Layer 3 — Per-frequency stacks ⭐"
+
+    ```python
+    from collections import defaultdict
+
+
+    class FreqStack:
+        def __init__(self) -> None:
+            self._freq: defaultdict[int, int] = defaultdict(int)
+            self._group: defaultdict[int, list[int]] = defaultdict(list)
+            self._max_freq = 0
+
+        def push(self, val: int) -> None:
+            self._freq[val] += 1
+            f = self._freq[val]
+            self._group[f].append(val)
+            if f > self._max_freq:
+                self._max_freq = f
+
+        def pop(self) -> int:
+            val = self._group[self._max_freq].pop()
+            self._freq[val] -= 1
+            if not self._group[self._max_freq]:
+                self._max_freq -= 1
+            return val
+    ```
+
+    Both ops **O(1)**. The interview answer.
+
+=== "Layer 4 — Track size for `__len__` / `peek`"
+
+    ```python
+    from collections import defaultdict
+
+
+    class FreqStack:
+        def __init__(self) -> None:
+            self._freq: defaultdict[int, int] = defaultdict(int)
+            self._group: defaultdict[int, list[int]] = defaultdict(list)
+            self._max_freq = 0
+            self._size = 0
+
+        def push(self, val: int) -> None:
+            self._freq[val] += 1
+            f = self._freq[val]
+            self._group[f].append(val)
+            self._max_freq = max(self._max_freq, f)
+            self._size += 1
+
+        def pop(self) -> int:
+            val = self._group[self._max_freq].pop()
+            self._freq[val] -= 1
+            if not self._group[self._max_freq]:
+                self._max_freq -= 1
+            self._size -= 1
+            return val
+
+        def peek(self) -> int:
+            return self._group[self._max_freq][-1]
+
+        def __len__(self) -> int:
+            return self._size
+    ```
+
+    Same complexity. Adds Pythonic affordances.
+
+=== "Layer 5 — Variants"
+
+    **A. LFU pop (least-frequent).** Symmetric: track `min_freq`. On pop, take from `group[min_freq]`. Re-tie on empty.
+
+    **B. Eviction by frequency.** Combine with a key→value map for an LFU cache (LeetCode 460).
+
+    **C. K most-frequent at any moment.** Maintain a heap mirroring `group` keyed by freq.
+
+    **D. Distributed counter.** Shard by `hash(val)`. Each shard runs its own FreqStack; pop fans out and reduces.
+
+#### 🔍 Dry Run (Layer 3)
+
+Sequence: push 5, 7, 5, 7, 4, 5; then pop ×4.
+
+After pushes:
+
+| step | freq | group | max |
+|---|---|---|---|
+| push 5 | {5:1} | {1:[5]} | 1 |
+| push 7 | {5:1, 7:1} | {1:[5,7]} | 1 |
+| push 5 | {5:2, 7:1} | {1:[5,7], 2:[5]} | 2 |
+| push 7 | {5:2, 7:2} | {1:[5,7], 2:[5,7]} | 2 |
+| push 4 | {5:2,7:2,4:1} | {1:[5,7,4], 2:[5,7]} | 2 |
+| push 5 | {5:3,7:2,4:1} | {1:[5,7,4], 2:[5,7], 3:[5]} | 3 |
+
+Pops:
+
+| step | returns | reason |
+|---|---|---|
+| pop | 5 | from group[3] |
+| pop | 7 | from group[2] (last in) |
+| pop | 5 | from group[2] |
+| pop | 4 | from group[1] (last in) |
+
+Output: `[5, 7, 5, 4]` ✓
+
+#### ⏱️ Complexity
+
+- Both `push` and `pop`: **O(1)**.
+- Space: **O(n)** — every push contributes one entry across the group stacks.
 
 #### 🎯 Pattern Used
 
-**Per-frequency LIFO bucket + frequency-of-each-key map.** Used for tie-breaking-by-recency.
+**Bucketing by an aggregate**. Each "level" of the aggregate (here, frequency) gets its own LIFO stack. The aggregate doubles as the bucket key. Reused in: LRU/LFU caches, top-K-frequent, scheduling-by-priority-with-tiebreak.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why doesn't `group[f]` need to be cleaned up?"
+    The lower-frequency copies of a value are *meant* to stay. They get popped only after the higher copies are gone. Garbage-free design.
+
+??? question "Follow-up 2 — `peek` without popping."
+    `group[max_freq][-1]` — O(1).
+
+??? question "Follow-up 3 — Pop the LEAST frequent (LFU)."
+    Track `min_freq`. On pop: take from `group[min_freq]`; if it empties, scan up for the next non-empty (amortise via a sorted-set of live freqs).
+
+??? question "Follow-up 4 — Concurrent push/pop."
+    Lock-free is hard here; use a single mutex around `(freq, group, max_freq)`. Throughput is fine because operations are O(1).
+
+??? question "Follow-up 5 — How does this differ from a heap-based answer?"
+    Heap is O(log n) per op and accumulates stale entries (each push creates a new heap node). Per-frequency stacks are O(1) and self-cleaning.
 
 #### 🐛 Common Bugs
 
-1. **Forgetting to decrement `max_freq` when its bucket empties.**
-2. **Updating freq before pushing to the new bucket** — small ordering matters.
+1. **Computing `f` BEFORE incrementing `freq[val]`** — pushes the value into the wrong bucket.
+2. **Forgetting to decrement `max_freq` when its bucket empties** — `pop` reads from an empty list → `IndexError`.
+3. **Using `group[f]` as a `set`** — loses the recency ordering.
+4. **Decrementing `freq[val]` without the assertion that it goes to the *previous* freq's bucket** — important for LFU variant; benign here.
+5. **Initialising `_max_freq = -1`** — fine until first pop on empty; spec says pop is only called when non-empty, but defensive `assert self._max_freq > 0` is healthy.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Single push then pop — `max_freq` correctly returns to 0.
+- [ ] All same value — `group[1], group[2], ...` each contain one copy of `val`.
+- [ ] All distinct values — every push goes to `group[1]`; pop returns LIFO order.
+- [ ] Alternating push/pop — `max_freq` watermark must track up and down correctly.
+
+#### 🏢 Sample Interviewer Quote
+
+> *"Implement a stack where pop returns the most frequent. Tie-break by most recent push."*
+
+Your opener: *"A frequency map for counts; a per-frequency stack as the bucket. Push: bump the count, append to that bucket's stack, advance the max-freq watermark. Pop: pop from the max-freq bucket, decrement count, retreat the watermark if that bucket emptied. Both ops O(1)."*
 
 ---
 
@@ -2203,78 +2409,503 @@ The interview wants to confirm you understand:
 
 ### Problem 32 — Time Based Key-Value Store
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Meta</span> <span class="company-tag">Google</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Meta</span> <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span>
 
-> Design a key-value store that supports `set(key, value, timestamp)` and `get(key, timestamp)` — return the value with the **largest timestamp ≤ given timestamp**. (LeetCode 981.)
+> Design `TimeMap` supporting `set(key, value, timestamp)` and `get(key, timestamp)` — return the value with the **largest timestamp ≤ given timestamp**, or `""` if none. Timestamps in `set` are strictly increasing per key. (LeetCode 981.)
 
-#### 🐍 Solution — dict of (key → list of (ts, val)) + binary search
+#### 📖 Story Mode
 
-```python
-from bisect import bisect_right
-from collections import defaultdict
-
-
-class TimeMap:
-    def __init__(self) -> None:
-        self._data: defaultdict[str, list[tuple[int, str]]] = defaultdict(list)
-
-    def set(self, key: str, value: str, timestamp: int) -> None:
-        self._data[key].append((timestamp, value))     # monotonically increasing ts assumed
-
-    def get(self, key: str, timestamp: int) -> str:
-        if key not in self._data: return ""
-        arr = self._data[key]
-        i = bisect_right(arr, (timestamp, chr(127)))   # largest ts <= given
-        return arr[i - 1][1] if i else ""
+```
+set("foo", "bar", 1)
+get("foo", 1) → "bar"
+get("foo", 3) → "bar"        ← still bar, no later set
+set("foo", "bar2", 4)
+get("foo", 4) → "bar2"
+get("foo", 5) → "bar2"
 ```
 
-`set`: O(1). `get`: O(log n).
+#### 🌍 Real-World Usage
+
+- **Versioned config / feature flags** — "what was the value at deploy time T?"
+- **Time-travel debugging** — replay state as of any timestamp.
+- **Cassandra / DynamoDB tombstones** — every write carries a timestamp; reads pick the latest ≤ now.
+- **Audit logs** — "what value did this customer see at 3:42 pm?"
+
+#### 🧠 Thinking Process
+
+The "largest timestamp ≤ T" cue screams **predecessor query**. Two natural shapes:
+
+1. **Hash → sorted list + binary search** — O(1) `set`, O(log n) `get`. Works because timestamps come in *increasing* order (free sortedness).
+2. **Hash → balanced BST / SortedDict** — O(log n) for both. Strictly weaker; only useful if `set` is out-of-order.
+
+We exploit the monotonic-timestamp guarantee for the cleaner Layer 3 solution.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute (linear scan)"
+
+    ```python
+    from collections import defaultdict
+
+
+    class TimeMap:
+        def __init__(self) -> None:
+            self._data: defaultdict[str, list[tuple[int, str]]] = defaultdict(list)
+
+        def set(self, key: str, value: str, timestamp: int) -> None:
+            self._data[key].append((timestamp, value))
+
+        def get(self, key: str, timestamp: int) -> str:
+            best = ""
+            for ts, val in self._data[key]:
+                if ts <= timestamp:
+                    best = val            # last one wins under monotonic ts
+            return best
+    ```
+
+    `set` O(1), `get` O(n_per_key). Fine for tiny inputs; explains the spec.
+
+=== "Layer 2 — `SortedDict` per key"
+
+    ```python
+    from sortedcontainers import SortedDict
+
+
+    class TimeMap:
+        def __init__(self) -> None:
+            self._data: dict[str, SortedDict] = {}
+
+        def set(self, key: str, value: str, timestamp: int) -> None:
+            self._data.setdefault(key, SortedDict())[timestamp] = value
+
+        def get(self, key: str, timestamp: int) -> str:
+            if key not in self._data:
+                return ""
+            sd = self._data[key]
+            i = sd.bisect_right(timestamp)
+            return sd.values()[i - 1] if i else ""
+    ```
+
+    O(log n) for both. Robust to *any* timestamp ordering, but heavier constant.
+
+=== "Layer 3 — Hash + sorted list + binary search ⭐"
+
+    ```python
+    from bisect import bisect_right
+    from collections import defaultdict
+
+
+    class TimeMap:
+        def __init__(self) -> None:
+            self._data: defaultdict[str, list[tuple[int, str]]] = defaultdict(list)
+
+        def set(self, key: str, value: str, timestamp: int) -> None:
+            # Monotonically increasing ts → list stays sorted for free.
+            self._data[key].append((timestamp, value))
+
+        def get(self, key: str, timestamp: int) -> str:
+            if key not in self._data:
+                return ""
+            arr = self._data[key]
+            # bisect_right by (ts, +∞) finds first index strictly greater than `timestamp`.
+            i = bisect_right(arr, (timestamp, chr(127)))
+            return arr[i - 1][1] if i else ""
+    ```
+
+    `set` O(1), `get` O(log n_per_key). The interview answer.
+
+=== "Layer 4 — Two parallel arrays"
+
+    ```python
+    from bisect import bisect_right
+    from collections import defaultdict
+
+
+    class TimeMap:
+        def __init__(self) -> None:
+            self._ts: defaultdict[str, list[int]] = defaultdict(list)
+            self._vals: defaultdict[str, list[str]] = defaultdict(list)
+
+        def set(self, key: str, value: str, timestamp: int) -> None:
+            self._ts[key].append(timestamp)
+            self._vals[key].append(value)
+
+        def get(self, key: str, timestamp: int) -> str:
+            ts = self._ts.get(key)
+            if not ts:
+                return ""
+            i = bisect_right(ts, timestamp)
+            return self._vals[key][i - 1] if i else ""
+    ```
+
+    Same complexity. Cleaner `bisect` (no `chr(127)` hack), slightly more memory.
+
+=== "Layer 5 — Variants"
+
+    **A. Range query** — return the values active in `[t1, t2]`. Slice the sorted list with two `bisect`s.
+
+    **B. Deletion** — `del(key, timestamp)`. Tombstone or rebuild; in production, prefer time-bucketed compaction.
+
+    **C. Distributed** — shard by `hash(key)`. Each shard runs the same algorithm.
+
+    **D. Eviction** — bound memory with TTL; periodically `popleft` per key when ts < now − ttl.
+
+#### 🔍 Dry Run
+
+`set("k", "A", 1) → set("k", "B", 5) → set("k", "C", 9)` produces `[(1,"A"), (5,"B"), (9,"C")]`.
+
+| Query | `bisect_right` returns | answer |
+|---|---|---|
+| `get("k", 0)` | 0 | `""` |
+| `get("k", 1)` | 1 | `"A"` |
+| `get("k", 4)` | 1 | `"A"` |
+| `get("k", 5)` | 2 | `"B"` |
+| `get("k", 100)` | 3 | `"C"` |
+
+#### ⏱️ Complexity
+
+- `set`: **O(1)**.
+- `get`: **O(log n_per_key)**.
+- Space: **O(total writes)**.
 
 #### 🎯 Pattern Used
 
-**Dict of timestamp-sorted lists.** Combines hash table and binary search.
+**Hash → time-sorted list + binary search.** Combines hash partitioning with predecessor query — the canonical "versioned KV" template.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — What if `set` timestamps are NOT monotonic?"
+    Either insert with `bisect.insort` (O(n) per `set`) or switch to `SortedDict` (O(log n)). Confirm with the interviewer first — the LeetCode constraint allows the simpler list-append.
+
+??? question "Follow-up 2 — Memory growth is unbounded. What now?"
+    Add a TTL or per-key cap. Periodically drop entries with `ts < now − ttl`. For strict caps, use a deque per key.
+
+??? question "Follow-up 3 — How would you make this distributed?"
+    Shard by `hash(key) % N`. Each shard handles its slice independently. For cross-shard range queries, fan out and merge.
+
+??? question "Follow-up 4 — Snapshot at time T (read all keys)."
+    Iterate keys, run `get(key, T)`. To accelerate repeated snapshots, maintain a global timeline of `(ts, key, val)` and binary search per key.
+
+#### 🐛 Common Bugs
+
+1. **`bisect_left` instead of `bisect_right`** — `bisect_left` returns the first index ≥ T, so for an exact match you'd take `arr[i]` (correct value) but the predecessor logic breaks one position; reason it through with a concrete example.
+2. **Forgetting the `i == 0` case** — when no timestamp ≤ T exists, return `""`, not `arr[-1][1]` (Python's negative indexing would silently return the *latest* entry).
+3. **Storing `(value, timestamp)` instead of `(timestamp, value)`** — sorted-by-value, not sorted-by-time. Bug only shows up when values aren't monotonic.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Key never set → `""`.
+- [ ] `timestamp` smaller than every recorded ts → `""`.
+- [ ] `timestamp` exactly matches a recorded ts → return that value.
+- [ ] Single entry with `ts == timestamp` → return it.
+- [ ] Many keys, sparse timestamps — confirm per-key isolation.
+
+#### 🏢 Sample Interviewer Quote
+
+> *"Design a versioned key-value store. Set carries a timestamp. Get with a timestamp returns the value at the most recent set ≤ that timestamp."*
+
+Your opener: *"Hash from key to a list of `(timestamp, value)`. Set is append, since timestamps grow monotonically. Get is `bisect_right` on the list — predecessor query in O(log n). Set O(1), get O(log n)."*
 
 ---
 
 ### Problem 33 — Tweet Counts Per Frequency
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Meta</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Meta</span> <span class="company-tag">Twitter</span>
 
-> Design `record(tweetName, time)` and `getCounts(freq, tweet, start, end)` returning per-bucket counts. (LeetCode 1348.)
+> Design `record(tweetName, time)` and `getCounts(freq, tweet, start, end)`. `freq` is one of `"minute"` (60s buckets), `"hour"` (3600s), or `"day"` (86400s). Return a list where index `i` is the count of tweets in bucket `i` of `[start, end]`. (LeetCode 1348.)
 
-The pattern: dict-of-tweet-name to sorted list of timestamps; on get, binary search for the range and bucket-count. Hash table for the outer mapping.
+#### 📖 Story Mode
+
+```
+record("tweet3", 0)
+record("tweet3", 60)
+record("tweet3", 10)
+
+getCounts("minute", "tweet3", 0, 59)   → [2]            ← 2 tweets in bucket [0..59]
+getCounts("minute", "tweet3", 0, 60)   → [2, 1]         ← bucket [0..59], bucket [60..60]
+getCounts("hour",   "tweet3", 0, 210)  → [3]            ← single 1-hour bucket holds all 3
+```
+
+#### 🌍 Real-World Usage
+
+- **Engagement dashboards** — "tweets per minute" / "logins per hour" rollups.
+- **Time-series databases** — Prometheus / InfluxDB: bucketize then count.
+- **Analytics fan-out** — pre-aggregate at multiple granularities for cheap queries.
+
+#### 🧠 Thinking Process
+
+Two ingredients:
+
+1. **Per-tweet timestamp store** — hash map `tweet → list of times`.
+2. **Bucket assignment** — `bucket_index = (t − start) // bucket_size`.
+
+The naïve approach scans every recorded timestamp on each `getCounts`. Faster: keep timestamps sorted (monotonic insert via `bisect.insort` is O(n); append-and-sort-on-read works if reads are rare). Then a binary search bounds the relevant range.
+
+For interview purposes, the hash-table angle dominates — show a clean implementation; mention the optimisation if asked.
+
+#### 🐍 Solution
+
+```python
+from bisect import bisect_left, insort
+from collections import defaultdict
+
+
+_BUCKET = {"minute": 60, "hour": 3600, "day": 86400}
+
+
+class TweetCounts:
+    def __init__(self) -> None:
+        self._times: defaultdict[str, list[int]] = defaultdict(list)
+
+    def recordTweet(self, tweetName: str, time: int) -> None:
+        insort(self._times[tweetName], time)                    # keep sorted
+
+    def getTweetCountsPerFrequency(
+        self, freq: str, tweetName: str, startTime: int, endTime: int
+    ) -> list[int]:
+        size = _BUCKET[freq]
+        n_buckets = (endTime - startTime) // size + 1
+        result = [0] * n_buckets
+
+        if tweetName not in self._times:
+            return result
+
+        arr = self._times[tweetName]
+        lo = bisect_left(arr, startTime)
+        # walk only the relevant suffix
+        for i in range(lo, len(arr)):
+            t = arr[i]
+            if t > endTime:
+                break
+            result[(t - startTime) // size] += 1
+        return result
+```
+
+#### ⏱️ Complexity
+
+- `recordTweet`: **O(log n + n)** with `insort` (binary search + shift). For appends with monotonic time, switch to plain `append` for O(1).
+- `getTweetCountsPerFrequency`: **O(log n + k)** where k is the count of tweets in `[start, end]`.
+- Space: **O(total recorded tweets)**.
+
+#### 🎯 Pattern Used
+
+**Hash → sorted timestamp list → bucket index.** Combines hash partitioning, binary search, and integer-division bucketing.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Records arrive monotonically. Optimize."
+    Replace `insort` with `append`. `recordTweet` becomes O(1).
+
+??? question "Follow-up 2 — Stream millions of tweets per second."
+    Pre-aggregate into bucketed counters at write time: `dict[(tweet, freq, bucket_id)] → count`. `getCounts` becomes O(buckets_in_range) instead of scanning timestamps. Trades memory for query speed.
+
+??? question "Follow-up 3 — Multiple aggregation windows simultaneously."
+    Maintain three counters per tweet (minute, hour, day). Each record increments three entries.
+
+??? question "Follow-up 4 — Distributed across N shards."
+    Shard by `hash(tweetName)`. Each shard handles its tweets independently. `getCounts` is per-tweet, so no cross-shard merge needed.
+
+#### 🐛 Common Bugs
+
+1. **Off-by-one on `endTime`** — the spec is inclusive: tweets at exactly `endTime` belong in the last bucket. Use `t > endTime` to break, not `>=`.
+2. **`(t - startTime) // size` underflow** — make sure you've filtered `t < startTime` before indexing.
+3. **`bisect_right` instead of `bisect_left`** — for a query starting exactly at a recorded timestamp, `bisect_left` includes it; `bisect_right` would skip it.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Tweet never recorded → all-zeros list.
+- [ ] All tweets fall in a single bucket.
+- [ ] `startTime == endTime` → single-bucket query.
+- [ ] `endTime − startTime` not a multiple of `size` — last bucket is partial; spec still includes it.
 
 ---
 
 ### Problem 34 — Random Pick with Blacklist
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span>
 
-> Pick a random integer in `[0, n)` excluding numbers in `blacklist`. (LeetCode 710.)
+> Given an integer `n` and an array `blacklist` of distinct integers in `[0, n)`, design a class with `pick()` returning a uniformly random integer in `[0, n) \ blacklist`. **`pick` must run in O(1)** and minimise calls to the underlying RNG. (LeetCode 710.)
 
-The trick: remap blacklisted numbers in `[0, n - len(blacklist))` to whitelisted numbers in `[n - len(blacklist), n)`. Hash map of blacklist-in-low-range → whitelist-in-high-range. `pick()` is `random.randrange(n - len(blacklist))`, then remap.
+#### 📖 Story Mode
 
-```python
-import random
-
-
-class Solution:
-    def __init__(self, n: int, blacklist: list[int]) -> None:
-        self._bound = n - len(blacklist)
-        bset = set(blacklist)
-        self._mapping: dict[int, int] = {}
-        # whitelisted numbers in [bound, n)
-        wl_iter = iter(i for i in range(self._bound, n) if i not in bset)
-        for b in blacklist:
-            if b < self._bound:
-                self._mapping[b] = next(wl_iter)
-
-    def pick(self) -> int:
-        x = random.randrange(self._bound)
-        return self._mapping.get(x, x)
+```
+n = 7, blacklist = [2, 3, 5]
+whitelist (implicit) = [0, 1, 4, 6]      ← 4 valid numbers
+pick() must uniformly return one of those four.
 ```
 
-`pick`: O(1). Construction: O(\|blacklist\|).
+#### 🌍 Real-World Usage
+
+- **Sampling without replacement from a sparse-banned set** — adversarial RL, AB-test arm masking.
+- **Random user IDs** — exclude banned accounts.
+- **Lottery / raffle** — exclude already-drawn tickets.
+
+#### 🧠 Thinking Process
+
+Three families of approach:
+
+1. **Resample on hit** — pick `random.randrange(n)`, retry if blacklisted. Worst case unbounded; expected O(n / w) per pick where `w = n - |blacklist|`. Fails when blacklist density is high.
+2. **Materialise the whitelist** — `random.choice(whitelist)`. O(1) `pick` but O(n) memory — fails when n is huge (`n ≤ 1e9` in the LC constraint).
+3. **Virtual remap** ⭐ — there are `w = n − |blacklist|` valid numbers. Map them mentally to `[0, w)`. Pick `x = randrange(w)`. Each `x ∈ [0, w)` is *either* whitelisted (return as-is) or blacklisted (remap to a whitelisted number in `[w, n)`).
+
+The remap insight: in `[0, w)` and `[w, n)`, we have **exactly `b_low` blacklisted slots in the low range** and **exactly `b_low` whitelisted slots in the high range** (where `b_low = |blacklist ∩ [0, w)|`). Pair them off in a hash map. O(b) construction, O(1) per `pick`.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Resample"
+
+    ```python
+    import random
+
+
+    class Solution:
+        def __init__(self, n: int, blacklist: list[int]) -> None:
+            self._n = n
+            self._black = set(blacklist)
+
+        def pick(self) -> int:
+            while True:
+                x = random.randrange(self._n)
+                if x not in self._black:
+                    return x
+    ```
+
+    Expected O(n / (n − b)) per pick. Pathological when most numbers are blacklisted.
+
+=== "Layer 2 — Materialise whitelist"
+
+    ```python
+    import random
+
+
+    class Solution:
+        def __init__(self, n: int, blacklist: list[int]) -> None:
+            black = set(blacklist)
+            self._white = [i for i in range(n) if i not in black]
+
+        def pick(self) -> int:
+            return random.choice(self._white)
+    ```
+
+    `pick` O(1), construction and memory O(n). Killed by large n.
+
+=== "Layer 3 — Virtual remap ⭐"
+
+    ```python
+    import random
+
+
+    class Solution:
+        def __init__(self, n: int, blacklist: list[int]) -> None:
+            self._bound = n - len(blacklist)        # size of valid whitelist
+            black_set = set(blacklist)
+            self._remap: dict[int, int] = {}
+
+            # Iterator over whitelisted numbers in [bound, n).
+            high_white = (i for i in range(self._bound, n) if i not in black_set)
+
+            # For each blacklisted number that falls in [0, bound), pair it with
+            # a whitelisted number in [bound, n).
+            for b in blacklist:
+                if b < self._bound:
+                    self._remap[b] = next(high_white)
+
+        def pick(self) -> int:
+            x = random.randrange(self._bound)
+            return self._remap.get(x, x)            # remap if blacklisted, else identity
+    ```
+
+    Construction O(b). `pick` O(1). One RNG call per pick.
+
+=== "Layer 4 — Sorted blacklist + binary search"
+
+    ```python
+    import random
+    from bisect import bisect_right
+
+
+    class Solution:
+        def __init__(self, n: int, blacklist: list[int]) -> None:
+            self._sorted = sorted(blacklist)
+            self._bound = n - len(blacklist)
+
+        def pick(self) -> int:
+            x = random.randrange(self._bound)
+            # offset by how many blacklisted numbers are ≤ current candidate
+            lo, hi = 0, len(self._sorted)
+            while lo < hi:
+                mid = (lo + hi) // 2
+                if self._sorted[mid] - mid <= x:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            return x + lo
+    ```
+
+    `pick` O(log b). No hash map. Memory O(b). Useful when hash-map memory is awkward (e.g., embedded systems).
+
+=== "Layer 5 — Variants"
+
+    **A. Mutable blacklist** — support `addToBlacklist(x)` / `removeFromBlacklist(x)`. The remap dict needs incremental maintenance; usually rebuild on the next pick if dirty.
+
+    **B. Weighted whitelist** — different probabilities per non-blacklisted number. Use prefix-sum + binary search (alias method for fully O(1)).
+
+    **C. Stream input** — n grows over time. `pick` over a moving window — see reservoir sampling.
+
+#### 🔍 Dry Run (Layer 3)
+
+`n=7, blacklist=[2, 3, 5]`. `bound = 4`.
+
+- Whitelisted in `[4, 7)`: `[4, 6]` (since `5` is blacklisted).
+- Iterate blacklist: `2 < 4` → `remap[2] = 4`. `3 < 4` → `remap[3] = 6`. `5 ≥ 4` → skip.
+
+`pick()` draws `x ∈ {0, 1, 2, 3}` uniformly:
+
+| x | remap | returned | ✓ |
+|---|---|---|---|
+| 0 | identity | 0 | yes |
+| 1 | identity | 1 | yes |
+| 2 | 2 → 4 | 4 | yes |
+| 3 | 3 → 6 | 6 | yes |
+
+Each whitelisted number is hit with probability `1/4`. ✓ uniform.
+
+#### ⏱️ Complexity
+
+- Construction: **O(|blacklist|)** time and space.
+- `pick`: **O(1)** time, one RNG call.
+
+#### 🎯 Pattern Used
+
+**Index remapping.** Compress a sparse domain into a dense interval, then bijectively remap the punctures. Reused in: random pick from a stream, weighted random sampling (alias method), reservoir extensions.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — What if `n` is 1e18?"
+    Layer 3 still works — its memory is O(b), not O(n). Construction iterates the blacklist, never the full range.
+
+??? question "Follow-up 2 — How do you prove the remap is uniform?"
+    Each draw `x ∈ [0, bound)` has probability `1/bound`. `bound` equals the whitelist size, so each *whitelisted* number is hit exactly once across all `x` values (either directly, or via remap). Uniformity follows.
+
+??? question "Follow-up 3 — Mutable blacklist."
+    Mark the structure dirty on update; rebuild on next `pick` if dirty. Amortise across many picks.
+
+??? question "Follow-up 4 — Avoid the dict."
+    Layer 4: sort the blacklist; for each pick, binary-search the offset. O(log b) per pick.
+
+#### 🐛 Common Bugs
+
+1. **Iterating the whitelist as a list** — uses O(n − b) memory for the iterator's source. Use a generator (`(i for i in range(...) if ...)`).
+2. **Looping `bound = n − len(blacklist)` over-counts duplicates** — spec guarantees distinct blacklist; assert it if unsure.
+3. **`random.randint(0, bound)` instead of `random.randrange(bound)`** — `randint` is inclusive on both ends → off-by-one (returns `bound` itself, which is whitelisted but may not be in the intended index space).
+4. **Re-creating `set(blacklist)` inside `pick`** — turns O(1) into O(b) per call.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] `blacklist` empty → `pick` is just `randrange(n)`.
+- [ ] `blacklist == range(n - 1)` → only one valid number; remap fills exhaustively; `pick` always returns it.
+- [ ] All blacklisted numbers already in `[bound, n)` → `remap` is empty; pick is the identity.
+- [ ] `n == 1`, `blacklist == []` → returns 0 deterministically.
 
 ---
 

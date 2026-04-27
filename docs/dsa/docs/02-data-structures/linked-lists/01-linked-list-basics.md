@@ -1876,7 +1876,7 @@ Return that node. ✅
 ??? question "Follow-up 2 — What if the two lists are not guaranteed to intersect?"
     The algorithm correctly returns None when both pointers reach None at the same time.
 
-??? function "Follow-up 3 — What if the lists can have cycles?"
+??? question "Follow-up 3 — What if the lists can have cycles?"
     Different problem — combine cycle detection (Problem 16) with intersection.
 
 ??? question "Follow-up 4 — Why does the trick work?"

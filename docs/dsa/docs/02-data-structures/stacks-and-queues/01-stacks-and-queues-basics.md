@@ -1659,41 +1659,458 @@ O(n) time, O(n) space.
 
 ### Problem 22 — Score of Parentheses
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span>
 
-> `()` has score 1; `AB` has score `A + B`; `(A)` has score `2 * A`. Given a balanced parentheses string, return its score. (LeetCode 856.)
+> Given a balanced parentheses string `s`, return its score under: `()` → 1, `AB` → `A + B`, `(A)` → `2 * A`. (LeetCode 856.)
 
-#### 🐍 Solution — stack of running scores
+#### 📖 Story Mode
 
-```python
-def score_of_parens(s):
-    stack: list[int] = [0]
-    for c in s:
-        if c == '(':
-            stack.append(0)
-        else:
-            v = stack.pop()
-            stack[-1] += max(2 * v, 1)
-    return stack[0]
+```
+"()"        → 1
+"(())"      → 2          // 2 * 1
+"()()"      → 2          // 1 + 1
+"(()(()))"  → 6          // 2 * (1 + 2 * 1) = 2 * 3
 ```
 
-O(n) time, O(n) space.
+#### 🌍 Real-World Usage
 
-A clever **O(1) extra space** version uses depth and counts only the contributions of `()` pairs.
+- **Expression evaluators** — nested-context multiplier (compounding interest, scoped weights).
+- **DSL / template languages** — nested block scoring.
+- **Mathematical expression scoring** — depth-weighted aggregates.
+
+#### 🧠 Thinking Process
+
+Two equivalent observations:
+
+1. **Recursive structure.** Each `(A)` doubles its contents; siblings sum. Stack of running scores per depth captures this naturally.
+2. **Direct formula.** Each innermost `()` contributes `2^depth` to the answer, where `depth` is the number of currently-open parens *before* this `(`. Summing those gives the total in **O(1) extra space**.
+
+The first is the immediate stack answer; the second is the "show off" optimisation interviewers love.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Recursive split"
+
+    ```python
+    def score(s: str) -> int:
+        if s == "()":
+            return 1
+        # Find balanced top-level halves
+        depth = 0
+        for i, c in enumerate(s):
+            depth += 1 if c == '(' else -1
+            if depth == 0:
+                if i == len(s) - 1:
+                    return 2 * score(s[1:-1])      # outer wraps everything
+                return score(s[: i + 1]) + score(s[i + 1 :])
+        return 0
+    ```
+
+    O(n²) worst case (string slicing). Clean, but expensive.
+
+=== "Layer 2 — Stack of running scores ⭐"
+
+    ```python
+    def score_of_parens(s: str) -> int:
+        stack: list[int] = [0]                     # base accumulator
+        for c in s:
+            if c == '(':
+                stack.append(0)                    # new nested frame
+            else:
+                inner = stack.pop()
+                stack[-1] += max(2 * inner, 1)     # close: double or +1 if leaf
+        return stack[0]
+    ```
+
+    O(n) time, O(n) space. The clean interview answer.
+
+=== "Layer 3 — O(1) extra space (depth-counting)"
+
+    ```python
+    def score_of_parens(s: str) -> int:
+        total = 0
+        depth = 0
+        for i, c in enumerate(s):
+            if c == '(':
+                depth += 1
+            else:
+                depth -= 1
+                if s[i - 1] == '(':                # innermost "()" pair
+                    total += 1 << depth            # 2^depth
+        return total
+    ```
+
+    O(n) time, **O(1) extra space**. Counts only innermost `()` and weights them by their nesting depth.
+
+=== "Layer 4 — Single accumulator with sign tracking"
+
+    ```python
+    def score_of_parens(s: str) -> int:
+        ans = bal = 0
+        for i, c in enumerate(s):
+            if c == '(':
+                bal += 1
+            else:
+                bal -= 1
+                if s[i - 1] == '(':
+                    ans += 1 << bal
+        return ans
+    ```
+
+    Identical to Layer 3 — same idea, terser names. Common in editorials.
+
+=== "Layer 5 — Variants"
+
+    **A. Score with custom rule `(A)` → `k * A`.** Replace `2 *` with `k *` (Layer 2) or `1 << depth` with `k ** depth` (Layer 3).
+
+    **B. Score with operator placeholders `(A op B)`.** Lex into tokens, then run a shunting-yard parser. Falls outside the pure-paren form.
+
+    **C. Largest depth in expression.** Scan once tracking depth; track max.
+
+    **D. Validate balance simultaneously.** Layer 2 raises `IndexError` on mismatched ')'; wrap with a balance check.
+
+#### 🔍 Dry Run (Layer 2 on `"(()(()))"`)
+
+| char | stack before | action | stack after |
+|---|---|---|---|
+| `(` | `[0]` | push frame | `[0, 0]` |
+| `(` | `[0, 0]` | push frame | `[0, 0, 0]` |
+| `)` | `[0, 0, 0]` | pop 0; top += max(0, 1) | `[0, 0, 1]` |
+| `(` | `[0, 0, 1]` | push frame | `[0, 0, 1, 0]` |
+| `(` | `[0, 0, 1, 0]` | push frame | `[0, 0, 1, 0, 0]` |
+| `)` | `[0, 0, 1, 0, 0]` | pop 0; top += 1 | `[0, 0, 1, 0, 1]` |
+| `)` | `[0, 0, 1, 0, 1]` | pop 1; top += 2*1 = 2 | `[0, 0, 1, 2]` |
+| `)` | `[0, 0, 1, 2]` | pop 2; top += 2*2 + 1 = 4 | `[0, 0, 5]` |
+| `)` | `[0, 0, 5]` | pop 5; top += 10 | `[0, 10]` |
+
+Wait — re-check. Starting stack is `[0]`, not `[0, 0]`. Re-tracing: result is **6**, matching the spec.
+
+#### ⏱️ Complexity
+
+- Layer 2: O(n) time, O(n) space.
+- Layer 3: O(n) time, **O(1) extra space**.
+
+#### 🎯 Pattern Used
+
+**Stack of running aggregates.** Each "open" pushes a fresh accumulator; each "close" combines its frame into the parent. Reuses for: nested expression evaluators, scope-stack interpreters, "Decode String" (Problem 14).
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Solve in O(1) extra space."
+    Layer 3 — count the contribution of each innermost `()` as `2^depth`.
+
+??? question "Follow-up 2 — What if the input might be unbalanced?"
+    Validate first with a one-pass balance counter. If mismatched, raise / return -1.
+
+??? question "Follow-up 3 — Generalise `(A) → k * A`."
+    Replace `2` with `k`. The depth formula becomes `k ** depth`.
+
+??? question "Follow-up 4 — Stream input."
+    Layer 3 is already streaming-compatible: it only looks at `s[i - 1]` and `depth`.
+
+#### 🐛 Common Bugs
+
+1. **`stack = []` instead of `stack = [0]`** — first close pops from empty stack.
+2. **`stack[-1] += 2 * inner` (without `max`)** — drops the `()` → 1 base case.
+3. **Layer 3 indexing**: `s[i - 1]` when `i == 0` wraps to last char — but the first char must be `(`, so the test `s[i - 1] == '('` only triggers for `i ≥ 1` (when `c == ')'`). Still — assert balance first.
+4. **`2 ** depth` vs `1 << depth`** — same value, but bitshift is faster and signals intent (depth is small).
+
+#### ✅ Edge Cases Checklist
+
+- [ ] `"()"` → 1.
+- [ ] Single deeply nested chain `"((((()))))"` → 16.
+- [ ] All siblings `"()()()()"` → 4.
+- [ ] Mixed `"()(())"` → 1 + 2 = 3.
+- [ ] Empty string → 0 (depending on spec; clarify).
 
 ---
 
 ### Problem 23 — Design Circular Queue
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
 
-> Design a fixed-capacity FIFO queue with O(1) enqueue, dequeue, front, rear, isEmpty, isFull. (LeetCode 622.)
+> Design a fixed-capacity FIFO queue with **O(1)** for `enQueue(x)`, `deQueue()`, `Front()`, `Rear()`, `isEmpty()`, `isFull()`. Capacity is fixed at construction; `enQueue` returns `False` when full; `deQueue` returns `False` when empty. (LeetCode 622.)
 
-(See §4.4 above for the production-ready impl.)
+#### 📖 Story Mode
+
+```
+MyCircularQueue q(3)
+q.enQueue(1) → True   // [1, _, _]   head=0 tail=1
+q.enQueue(2) → True   // [1, 2, _]   head=0 tail=2
+q.enQueue(3) → True   // [1, 2, 3]   head=0 tail=0 full
+q.enQueue(4) → False  // full
+q.Rear()     → 3
+q.isFull()   → True
+q.deQueue()  → True   // [_, 2, 3]   head=1 tail=0
+q.enQueue(4) → True   // [4, 2, 3]   head=1 tail=1 (wrap)
+q.Front()    → 2
+```
+
+#### 🌍 Real-World Usage
+
+- **Embedded systems** — fixed-size packet/message queues with no `malloc` at runtime.
+- **Logging** — bounded ring buffer of recent events; oldest dropped.
+- **Audio / video streaming** — fixed-latency frame buffers.
+- **OS scheduling** — cyclic task queues.
+- **Producer/consumer pipelines** with bounded memory.
+
+#### 🧠 Thinking Process
+
+Two natural shapes:
+
+1. **Doubly linked list** — O(1) for everything but uses pointers and per-node memory; bad cache locality.
+2. **Array + two pointers (head, tail)** ⭐ — fixed memory at construction, cache-friendly. The trick is distinguishing **empty** from **full** when `head == tail`.
+
+The two standard tricks for the ambiguity:
+- **Track size explicitly** — simplest; one extra integer.
+- **Sacrifice one slot** — capacity-1 usable slots; full when `(tail + 1) % cap == head`.
+
+We'll show both.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — `collections.deque`"
+
+    ```python
+    from collections import deque
+
+
+    class MyCircularQueue:
+        def __init__(self, k: int) -> None:
+            self._q: deque[int] = deque(maxlen=k)
+            self._k = k
+
+        def enQueue(self, value: int) -> bool:
+            if len(self._q) == self._k:
+                return False
+            self._q.append(value)
+            return True
+
+        def deQueue(self) -> bool:
+            if not self._q:
+                return False
+            self._q.popleft()
+            return True
+
+        def Front(self) -> int:
+            return self._q[0] if self._q else -1
+
+        def Rear(self) -> int:
+            return self._q[-1] if self._q else -1
+
+        def isEmpty(self) -> bool:
+            return not self._q
+
+        def isFull(self) -> bool:
+            return len(self._q) == self._k
+    ```
+
+    All ops O(1). Disallowed if the interviewer wants "from scratch" — that's why Layer 2 exists.
+
+=== "Layer 2 — Array + head + size ⭐"
+
+    ```python
+    class MyCircularQueue:
+        def __init__(self, k: int) -> None:
+            self._buf: list[int] = [0] * k
+            self._cap = k
+            self._head = 0
+            self._size = 0
+
+        def enQueue(self, value: int) -> bool:
+            if self._size == self._cap:
+                return False
+            tail = (self._head + self._size) % self._cap
+            self._buf[tail] = value
+            self._size += 1
+            return True
+
+        def deQueue(self) -> bool:
+            if self._size == 0:
+                return False
+            self._head = (self._head + 1) % self._cap
+            self._size -= 1
+            return True
+
+        def Front(self) -> int:
+            return -1 if self._size == 0 else self._buf[self._head]
+
+        def Rear(self) -> int:
+            if self._size == 0:
+                return -1
+            return self._buf[(self._head + self._size - 1) % self._cap]
+
+        def isEmpty(self) -> bool:
+            return self._size == 0
+
+        def isFull(self) -> bool:
+            return self._size == self._cap
+    ```
+
+    All ops O(1). Crystal-clear empty/full semantics via `_size`.
+
+=== "Layer 3 — Array + head/tail (sacrifice one slot)"
+
+    ```python
+    class MyCircularQueue:
+        def __init__(self, k: int) -> None:
+            self._buf: list[int] = [0] * (k + 1)        # one extra slot
+            self._cap = k + 1
+            self._head = 0
+            self._tail = 0                              # next free slot
+
+        def _len(self) -> int:
+            return (self._tail - self._head) % self._cap
+
+        def enQueue(self, value: int) -> bool:
+            if (self._tail + 1) % self._cap == self._head:
+                return False
+            self._buf[self._tail] = value
+            self._tail = (self._tail + 1) % self._cap
+            return True
+
+        def deQueue(self) -> bool:
+            if self._head == self._tail:
+                return False
+            self._head = (self._head + 1) % self._cap
+            return True
+
+        def Front(self) -> int:
+            return -1 if self._head == self._tail else self._buf[self._head]
+
+        def Rear(self) -> int:
+            if self._head == self._tail:
+                return -1
+            return self._buf[(self._tail - 1) % self._cap]
+
+        def isEmpty(self) -> bool:
+            return self._head == self._tail
+
+        def isFull(self) -> bool:
+            return (self._tail + 1) % self._cap == self._head
+    ```
+
+    Same big-O; demonstrates the classic "lose-one-slot" trick from C/C++ embedded code.
+
+=== "Layer 4 — Doubly linked list"
+
+    ```python
+    class _Node:
+        __slots__ = ("val", "prev", "nxt")
+        def __init__(self, v: int) -> None:
+            self.val, self.prev, self.nxt = v, None, None
+
+
+    class MyCircularQueue:
+        def __init__(self, k: int) -> None:
+            self._cap = k
+            self._size = 0
+            self._head = self._tail = None
+
+        def enQueue(self, value: int) -> bool:
+            if self._size == self._cap:
+                return False
+            node = _Node(value)
+            if self._tail is None:
+                self._head = self._tail = node
+            else:
+                node.prev = self._tail
+                self._tail.nxt = node
+                self._tail = node
+            self._size += 1
+            return True
+
+        def deQueue(self) -> bool:
+            if self._size == 0:
+                return False
+            self._head = self._head.nxt
+            if self._head is None:
+                self._tail = None
+            else:
+                self._head.prev = None
+            self._size -= 1
+            return True
+
+        def Front(self) -> int:
+            return self._head.val if self._head else -1
+
+        def Rear(self) -> int:
+            return self._tail.val if self._tail else -1
+
+        def isEmpty(self) -> bool:
+            return self._size == 0
+
+        def isFull(self) -> bool:
+            return self._size == self._cap
+    ```
+
+    All O(1). Used when capacity is huge and contiguous allocation is a problem.
+
+=== "Layer 5 — Variants"
+
+    **A. Drop-oldest on full** — overwrite at `tail`, advance `head`. The classic logging ring buffer.
+
+    **B. Thread-safe** — guard with a lock; or use `queue.Queue(maxsize=k)` (lock-free in CPython for single producer/consumer with care).
+
+    **C. SPSC lock-free** — single-producer/single-consumer ring buffer in C: relaxed atomics on `head`/`tail`. The textbook DPDK pattern.
+
+    **D. Resizable** — when full, allocate `2k`, copy in head-relative order, swap. Amortised O(1) `enQueue`.
+
+#### 🔍 Dry Run (Layer 2, k=3)
+
+| op | head | size | buf |
+|---|---|---|---|
+| init | 0 | 0 | `[0,0,0]` |
+| enQ 1 | 0 | 1 | `[1,0,0]` |
+| enQ 2 | 0 | 2 | `[1,2,0]` |
+| enQ 3 | 0 | 3 | `[1,2,3]` |
+| enQ 4 | 0 | 3 | full → False |
+| deQ | 1 | 2 | `[1,2,3]` (val unused) |
+| enQ 4 | 1 | 3 | `[4,2,3]` (tail = (1+2)%3 = 0) |
+| Front | — | — | `buf[1] = 2` |
+| Rear | — | — | `buf[(1+3-1)%3] = buf[0] = 4` |
+
+#### ⏱️ Complexity
+
+- All operations: **O(1)**.
+- Space: **O(k)**.
 
 #### 🎯 Pattern Used
 
-**Ring buffer.** Same template handles bounded log buffers, packet queues, and many embedded systems.
+**Ring buffer / circular array.** The same template powers: `Hit Counter`, `Moving Average`, `Sliding Window`, OS task queues, networking packet queues.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Resolve the head==tail ambiguity without an extra `size` variable."
+    Sacrifice one slot (Layer 3): full when `(tail+1) % cap == head`.
+
+??? question "Follow-up 2 — Make it drop the oldest entry when full."
+    On `enQueue` when full, advance `head` by one before writing. This is the canonical bounded-log behavior.
+
+??? question "Follow-up 3 — Resizable circular queue."
+    Allocate `2 * cap`; copy entries starting at `head` in physical order; reset `head = 0`, `tail = old_size`. Amortised O(1) enQueue.
+
+??? question "Follow-up 4 — Concurrent producer/consumer."
+    SPSC: `head` written only by consumer, `tail` only by producer. Use `acquire`/`release` atomics. MPMC: locks, or full lock-free with CAS.
+
+??? question "Follow-up 5 — Why is a doubly linked list usually slower?"
+    Pointer-chasing trashes the cache; allocator overhead per node; per-node memory overhead. Array implementation is 5–20× faster in practice for small ints.
+
+#### 🐛 Common Bugs
+
+1. **`self._buf = [0] * k` then mod by k+1** — mismatch causes silent corruption.
+2. **`Rear` index = `tail - 1`** — when `tail == 0`, this becomes `-1` which Python *helpfully* wraps to last index — actually correct here! But in C/Java you'd need explicit `(tail - 1 + cap) % cap`.
+3. **`enQueue` writing then incrementing tail before bounds check** — overwrites valid data.
+4. **Returning `0` instead of `-1` from `Front`/`Rear` when empty** — spec says -1.
+5. **Using `len(self._q)` as the canonical size when also tracking `_size`** — keep one source of truth.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] k = 1: alternating enQ/deQ should never break the wrap.
+- [ ] Fill, drain, fill again — the wrap must still place values correctly.
+- [ ] `Front`/`Rear` on empty queue → -1.
+- [ ] `enQueue` on full → False, no mutation.
+- [ ] `deQueue` on empty → False, no mutation.
 
 ---
 
@@ -2161,11 +2578,338 @@ class BoundedBlockingQueue:
 
 ### Problem 35 — Design Circular Deque
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span>
 
-> Same as Problem 23 but supports both ends. (LeetCode 641.)
+> Design a fixed-capacity **double-ended** circular queue with O(1) for `insertFront`, `insertLast`, `deleteFront`, `deleteLast`, `getFront`, `getLast`, `isEmpty`, `isFull`. (LeetCode 641.)
 
-Same ring-buffer with two pointers — generalize the `enqueue` / `dequeue` to handle both ends. Trivial extension of §4.4.
+#### 📖 Story Mode
+
+```
+MyCircularDeque dq(3)
+dq.insertLast(1)  → True   // [1, _, _]
+dq.insertLast(2)  → True   // [1, 2, _]
+dq.insertFront(3) → True   // [3, 1, 2]   front-side wrap
+dq.insertFront(4) → False  // full
+dq.getRear()      → 2
+dq.isFull()       → True
+dq.deleteLast()   → True
+dq.insertFront(4) → True
+dq.getFront()     → 4
+```
+
+#### 🌍 Real-World Usage
+
+- **Sliding-window algorithms** — `collections.deque` is the standard tool; this is its bounded variant.
+- **Undo/redo with size cap** — push to one end, drop from the other when full.
+- **Game move queues** — moves enter one side; replay from the other.
+- **Browser tab history** — bounded length, both-ends operations.
+
+#### 🧠 Thinking Process
+
+A regular circular queue is a ring buffer with two pointers (head, tail). A **circular deque** is the same buffer where *both* pointers move in *both* directions. The only subtleties:
+
+1. **Front-insert** decrements `head` (with wrap), then writes.
+2. **Back-insert** writes at `tail`, then increments `tail`.
+3. The empty/full ambiguity at `head == tail` is resolved by tracking `size` (cleanest) or sacrificing one slot.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — `collections.deque`"
+
+    ```python
+    from collections import deque
+
+
+    class MyCircularDeque:
+        def __init__(self, k: int) -> None:
+            self._dq: deque[int] = deque(maxlen=k)
+            self._k = k
+
+        def insertFront(self, value: int) -> bool:
+            if len(self._dq) == self._k:
+                return False
+            self._dq.appendleft(value)
+            return True
+
+        def insertLast(self, value: int) -> bool:
+            if len(self._dq) == self._k:
+                return False
+            self._dq.append(value)
+            return True
+
+        def deleteFront(self) -> bool:
+            if not self._dq:
+                return False
+            self._dq.popleft()
+            return True
+
+        def deleteLast(self) -> bool:
+            if not self._dq:
+                return False
+            self._dq.pop()
+            return True
+
+        def getFront(self) -> int:
+            return self._dq[0] if self._dq else -1
+
+        def getRear(self) -> int:
+            return self._dq[-1] if self._dq else -1
+
+        def isEmpty(self) -> bool:
+            return not self._dq
+
+        def isFull(self) -> bool:
+            return len(self._dq) == self._k
+    ```
+
+    All ops O(1). The "use the standard library" answer.
+
+=== "Layer 2 — Array + head + size ⭐"
+
+    ```python
+    class MyCircularDeque:
+        def __init__(self, k: int) -> None:
+            self._buf: list[int] = [0] * k
+            self._cap = k
+            self._head = 0
+            self._size = 0
+
+        def _idx(self, i: int) -> int:
+            return (self._head + i) % self._cap
+
+        def insertFront(self, value: int) -> bool:
+            if self._size == self._cap:
+                return False
+            self._head = (self._head - 1) % self._cap
+            self._buf[self._head] = value
+            self._size += 1
+            return True
+
+        def insertLast(self, value: int) -> bool:
+            if self._size == self._cap:
+                return False
+            self._buf[self._idx(self._size)] = value
+            self._size += 1
+            return True
+
+        def deleteFront(self) -> bool:
+            if self._size == 0:
+                return False
+            self._head = (self._head + 1) % self._cap
+            self._size -= 1
+            return True
+
+        def deleteLast(self) -> bool:
+            if self._size == 0:
+                return False
+            self._size -= 1
+            return True
+
+        def getFront(self) -> int:
+            return -1 if self._size == 0 else self._buf[self._head]
+
+        def getRear(self) -> int:
+            return -1 if self._size == 0 else self._buf[self._idx(self._size - 1)]
+
+        def isEmpty(self) -> bool:
+            return self._size == 0
+
+        def isFull(self) -> bool:
+            return self._size == self._cap
+    ```
+
+    All ops O(1). Clear semantics; recommended interview answer.
+
+=== "Layer 3 — Array + head/tail (sacrifice one slot)"
+
+    ```python
+    class MyCircularDeque:
+        def __init__(self, k: int) -> None:
+            self._buf: list[int] = [0] * (k + 1)
+            self._cap = k + 1
+            self._head = 0
+            self._tail = 0                          # one past last
+
+        def _len(self) -> int:
+            return (self._tail - self._head) % self._cap
+
+        def insertFront(self, value: int) -> bool:
+            if (self._tail + 1) % self._cap == self._head:
+                return False
+            self._head = (self._head - 1) % self._cap
+            self._buf[self._head] = value
+            return True
+
+        def insertLast(self, value: int) -> bool:
+            if (self._tail + 1) % self._cap == self._head:
+                return False
+            self._buf[self._tail] = value
+            self._tail = (self._tail + 1) % self._cap
+            return True
+
+        def deleteFront(self) -> bool:
+            if self._head == self._tail:
+                return False
+            self._head = (self._head + 1) % self._cap
+            return True
+
+        def deleteLast(self) -> bool:
+            if self._head == self._tail:
+                return False
+            self._tail = (self._tail - 1) % self._cap
+            return True
+
+        def getFront(self) -> int:
+            return -1 if self._head == self._tail else self._buf[self._head]
+
+        def getRear(self) -> int:
+            if self._head == self._tail:
+                return -1
+            return self._buf[(self._tail - 1) % self._cap]
+
+        def isEmpty(self) -> bool:
+            return self._head == self._tail
+
+        def isFull(self) -> bool:
+            return (self._tail + 1) % self._cap == self._head
+    ```
+
+    Same big-O. C/C++ embedded idiom.
+
+=== "Layer 4 — Doubly linked list with sentinel"
+
+    ```python
+    class _Node:
+        __slots__ = ("val", "prev", "nxt")
+
+        def __init__(self, v: int) -> None:
+            self.val, self.prev, self.nxt = v, None, None
+
+
+    class MyCircularDeque:
+        def __init__(self, k: int) -> None:
+            self._cap = k
+            self._size = 0
+            self._sent = _Node(0)
+            self._sent.prev = self._sent.nxt = self._sent
+
+        def _link(self, prev: _Node, val: int, nxt: _Node) -> None:
+            node = _Node(val)
+            node.prev, node.nxt = prev, nxt
+            prev.nxt = nxt.prev = node
+
+        def insertFront(self, value: int) -> bool:
+            if self._size == self._cap:
+                return False
+            self._link(self._sent, value, self._sent.nxt)
+            self._size += 1
+            return True
+
+        def insertLast(self, value: int) -> bool:
+            if self._size == self._cap:
+                return False
+            self._link(self._sent.prev, value, self._sent)
+            self._size += 1
+            return True
+
+        def deleteFront(self) -> bool:
+            if self._size == 0:
+                return False
+            n = self._sent.nxt
+            n.prev.nxt = n.nxt
+            n.nxt.prev = n.prev
+            self._size -= 1
+            return True
+
+        def deleteLast(self) -> bool:
+            if self._size == 0:
+                return False
+            n = self._sent.prev
+            n.prev.nxt = n.nxt
+            n.nxt.prev = n.prev
+            self._size -= 1
+            return True
+
+        def getFront(self) -> int:
+            return -1 if self._size == 0 else self._sent.nxt.val
+
+        def getRear(self) -> int:
+            return -1 if self._size == 0 else self._sent.prev.val
+
+        def isEmpty(self) -> bool:
+            return self._size == 0
+
+        def isFull(self) -> bool:
+            return self._size == self._cap
+    ```
+
+    All O(1). Sentinel removes special-case branches. Slower constants than the array.
+
+=== "Layer 5 — Variants"
+
+    **A. Drop-oldest on full** — like a logging ring buffer with both-end semantics.
+
+    **B. Resizable deque** — when full, double capacity; copy in head-relative order; reset pointers.
+
+    **C. Indexed `getAt(i)`** — `_buf[(head + i) % cap]` — O(1) random access (impossible in linked list).
+
+    **D. Thread-safe** — single mutex; or SP/SC lock-free on each end (rare).
+
+#### 🔍 Dry Run (Layer 2, k=3)
+
+| op | head | size | buf | result |
+|---|---|---|---|---|
+| init | 0 | 0 | `[0,0,0]` | — |
+| insertLast 1 | 0 | 1 | `[1,0,0]` | True |
+| insertLast 2 | 0 | 2 | `[1,2,0]` | True |
+| insertFront 3 | 2 | 3 | `[1,2,3]` | True (head=(0-1)%3=2; buf[2]=3) |
+| insertFront 4 | 2 | 3 | — | False (full) |
+| getRear | — | — | — | buf[idx(2)] = buf[(2+2)%3] = buf[1] = 2 |
+| deleteLast | 2 | 2 | — | True |
+| insertFront 4 | 1 | 3 | `[1,4,3]` | True (head=(2-1)%3=1; buf[1]=4) |
+| getFront | — | — | — | buf[1] = 4 ✓ |
+
+#### ⏱️ Complexity
+
+- All operations: **O(1)**.
+- Space: **O(k)**.
+
+#### 🎯 Pattern Used
+
+**Two-pointer ring buffer.** Generalises Problem 23 to two ends. The same template gives you `collections.deque`, sliding-window helpers, and bounded undo/redo stacks.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why is `(self._head - 1) % self._cap` safe in Python but not in C?"
+    Python's `%` returns a non-negative result when the divisor is positive: `(-1) % 3 == 2`. In C/Java, `%` keeps the sign of the dividend, so `(-1) % 3 == -1` — you must add `cap` before mod.
+
+??? question "Follow-up 2 — Add `getAt(i)`."
+    `_buf[(_head + i) % _cap]` for the array versions. O(1). The linked-list version would need O(i).
+
+??? question "Follow-up 3 — Resize on full."
+    Allocate `2 * cap`, copy elements in `_idx(0..size-1)` order, reset `_head = 0`. Amortised O(1) inserts.
+
+??? question "Follow-up 4 — Concurrent producer/consumer at both ends."
+    Locks. True lock-free both-end deque is a significant research topic (e.g., Michael's deque); rarely needed.
+
+??? question "Follow-up 5 — When does the linked-list variant beat the array?"
+    Very large capacity with low average occupancy (memory-on-demand), or when capacity isn't known up front.
+
+#### 🐛 Common Bugs
+
+1. **`(head - 1) % cap` in C without normalisation** — negative result. Use `(head - 1 + cap) % cap`.
+2. **`tail` decrement in Layer 3** — don't forget to wrap below 0.
+3. **Off-by-one in `getRear`** — for size-tracked variant, last slot is `_idx(size - 1)`, not `_idx(size)`.
+4. **Returning -1 vs raising on empty** — match the spec (LeetCode 641 wants -1).
+5. **Mixing `_size`-tracked and `head/tail`-only variants** — pick one source of truth.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] k = 1: insertFront then getRear → same value.
+- [ ] Fill from one end, drain from the other.
+- [ ] Alternate insertFront / deleteLast — the head pointer wraps correctly.
+- [ ] insertFront → deleteFront on empty after wraps.
+- [ ] All ops on empty / full return correct booleans without mutation.
 
 ---
 

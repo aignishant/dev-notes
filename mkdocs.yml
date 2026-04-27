@@ -137,6 +137,13 @@ nav:
     - 5. BigQuery & Data Warehousing: all/05-bigquery.md
     - 6. Cloud Foundations (AWS, GCP, Azure): all/06-cloud.md
     - 7. Classical Machine Learning: all/07-classical-ml.md
+    - 8. Deep Learning (PyTorch): all/08-deep-learning.md
+    - 9. NLP & Computer Vision: all/09-nlp-cv.md
+    - 10. LLMs & Generative AI: all/10-llms.md
+    - 11. Agents (LangGraph): all/11-agents.md
+    - 12. MLOps: all/12-mlops.md
+    - 13. LLMOps: all/13-llmops.md
+    - 14. Security Automation (SOAR/SIEM/TI): all/14-security.md
   - Content Hub (Google SecOps):
     - Overview: content-hub/index.md
     - 1. Foundations:

@@ -311,8 +311,19 @@ nav:
       - Windows: ethical-hacking-docs/docs/01-foundations/windows.md
       - Cryptography: ethical-hacking-docs/docs/01-foundations/cryptography.md
       - Python for Security: ethical-hacking-docs/docs/01-foundations/python-for-security.md
-    - Phase 2 - Recon: ethical-hacking-docs/docs/02-recon/index.md
-    - Phase 3 - Offensive: ethical-hacking-docs/docs/03-offensive/index.md
+    - Phase 2 - Recon:
+      - Overview: ethical-hacking-docs/docs/02-recon/index.md
+      - OSINT: ethical-hacking-docs/docs/02-recon/osint.md
+      - Passive & Active Recon: ethical-hacking-docs/docs/02-recon/passive-active-recon.md
+      - Network Scanning: ethical-hacking-docs/docs/02-recon/scanning.md
+      - Service Enumeration: ethical-hacking-docs/docs/02-recon/enumeration.md
+      - Vulnerability Assessment: ethical-hacking-docs/docs/02-recon/vulnerability-assessment.md
+      - Web Recon: ethical-hacking-docs/docs/02-recon/web-recon.md
+    - Phase 3 - Offensive:
+      - Overview: ethical-hacking-docs/docs/03-offensive/index.md
+      - Web Methodology & OWASP Top 10: ethical-hacking-docs/docs/03-offensive/web-methodology.md
+      - Injection Attacks: ethical-hacking-docs/docs/03-offensive/web-injection.md
+      - XSS, CSRF & SSRF: ethical-hacking-docs/docs/03-offensive/web-xss-csrf-ssrf.md
     - Phase 4 - Specializations: ethical-hacking-docs/docs/04-specializations/index.md
     - Phase 5 - Defense: ethical-hacking-docs/docs/05-defense/index.md
     - Phase 6 - Career: ethical-hacking-docs/docs/06-career/index.md

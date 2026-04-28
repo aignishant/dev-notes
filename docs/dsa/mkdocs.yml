@@ -197,6 +197,11 @@ nav:
       - Two Pointers: 04-patterns/02-two-pointers.md
       - Fast & Slow Pointers: 04-patterns/03-fast-slow-pointers.md
       - Merge Intervals: 04-patterns/04-merge-intervals.md
+      - Cyclic Sort: 04-patterns/05-cyclic-sort.md
+      - In-Place Linked List Reversal: 04-patterns/06-in-place-linked-list-reversal.md
+      - Tree BFS: 04-patterns/07-tree-bfs.md
+      - Tree DFS: 04-patterns/08-tree-dfs.md
+      - Two Heaps: 04-patterns/09-two-heaps.md
 
   - 🚀 Advanced:
       - Overview: 05-advanced/index.md

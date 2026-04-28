@@ -337,6 +337,11 @@ nav:
       - Two Pointers: dsa/docs/04-patterns/02-two-pointers.md
       - Fast & Slow Pointers: dsa/docs/04-patterns/03-fast-slow-pointers.md
       - Merge Intervals: dsa/docs/04-patterns/04-merge-intervals.md
+      - Cyclic Sort: dsa/docs/04-patterns/05-cyclic-sort.md
+      - In-Place Linked List Reversal: dsa/docs/04-patterns/06-in-place-linked-list-reversal.md
+      - Tree BFS: dsa/docs/04-patterns/07-tree-bfs.md
+      - Tree DFS: dsa/docs/04-patterns/08-tree-dfs.md
+      - Two Heaps: dsa/docs/04-patterns/09-two-heaps.md
     - Advanced:
       - Overview: dsa/docs/05-advanced/index.md
     - Ultra-Advanced:

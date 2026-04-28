@@ -210,9 +210,13 @@ nav:
       - 0/1 Knapsack DP: 04-patterns/15-01-knapsack-dp.md
       - Unbounded Knapsack DP: 04-patterns/16-unbounded-knapsack-dp.md
       - Fibonacci Numbers DP: 04-patterns/17-fibonacci-numbers-dp.md
+      - Palindromic Subsequence DP: 04-patterns/18-palindromic-subsequence-dp.md
+      - Longest Common Subsequence DP: 04-patterns/19-longest-common-subsequence-dp.md
+      - Bitwise XOR: 04-patterns/20-bitwise-xor.md
 
   - 🚀 Advanced:
       - Overview: 05-advanced/index.md
+      - Tries (Prefix Trees): 05-advanced/01-tries.md
 
   - 🧠 Ultra-Advanced:
       - Overview: 06-ultra-advanced/index.md

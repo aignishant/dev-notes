@@ -350,8 +350,12 @@ nav:
       - 0/1 Knapsack DP: dsa/docs/04-patterns/15-01-knapsack-dp.md
       - Unbounded Knapsack DP: dsa/docs/04-patterns/16-unbounded-knapsack-dp.md
       - Fibonacci Numbers DP: dsa/docs/04-patterns/17-fibonacci-numbers-dp.md
+      - Palindromic Subsequence DP: dsa/docs/04-patterns/18-palindromic-subsequence-dp.md
+      - Longest Common Subsequence DP: dsa/docs/04-patterns/19-longest-common-subsequence-dp.md
+      - Bitwise XOR: dsa/docs/04-patterns/20-bitwise-xor.md
     - Advanced:
       - Overview: dsa/docs/05-advanced/index.md
+      - Tries (Prefix Trees): dsa/docs/05-advanced/01-tries.md
     - Ultra-Advanced:
       - Overview: dsa/docs/06-ultra-advanced/index.md
     - Popular Problems:

@@ -2,7 +2,7 @@
 
 > 20 patterns that solve 90% of LeetCode and 95% of interview problems.
 
-<span class="phase-status phase-inprogress">Phase 5 — building out the canonical pattern pages</span>
+<span class="phase-status phase-done">Phase 5 — all 20 canonical pattern pages complete ✅</span>
 
 Each pattern page in this section follows the **same five-part shape**:
 
@@ -120,16 +120,28 @@ Each pattern page in this section follows the **same five-part shape**:
 
     Linear 1D DP with constant lookback — collapses to O(1) space via two rolling variables. Climbing Stairs (LC 70), House Robber (LC 198/213), Decode Ways (LC 91).
 
+-   :material-mirror: **[Palindromic Subsequence DP](18-palindromic-subsequence-dp.md)**
+
+    ---
+
+    Interval DP with diagonal-sweep fill order. Longest Palindromic Subsequence (LC 516), Longest Palindromic Substring (LC 5), Min Insertions to Palindrome (LC 1312), Min Cuts (LC 132).
+
+-   :material-vector-link: **[Longest Common Subsequence DP](19-longest-common-subsequence-dp.md)**
+
+    ---
+
+    Canonical 2D two-sequence DP. LCS (LC 1143), Edit Distance (LC 72), Distinct Subsequences (LC 115), Shortest Common Supersequence (LC 1092), Interleaving String (LC 97), LIS-as-LCS (LC 300).
+
+-   :material-xor: **[Bitwise XOR](20-bitwise-xor.md)**
+
+    ---
+
+    `x ^ x = 0` and the bit-tricks playbook. Single Number (LC 136/137/260), Missing Number (LC 268), Maximum XOR via bitwise trie (LC 421), Sum without `+` (LC 371), `n & (n-1)`, `n & -n`.
+
 </div>
 
 ---
 
-## 🚧 Coming next
+## 🎉 Bible complete
 
-The remaining 3 patterns:
-
-18. Palindromic Subsequence DP
-19. Longest Common Subsequence DP
-20. Bitwise XOR
-
-Every page follows the canonical shape pioneered by [Sliding Window](01-sliding-window.md).
+All 20 canonical patterns are now written. Every page follows the same five-part shape, pioneered by [Sliding Window](01-sliding-window.md). From here the journey continues with the [Advanced](../05-advanced/index.md), [Ultra-Advanced](../06-ultra-advanced/index.md), and [System Design](../08-system-design/index.md) sections.

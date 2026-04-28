@@ -72,22 +72,62 @@ Each pattern page in this section follows the **same five-part shape**:
 
     Max-heap of small half + min-heap of large half. Median of stream (LC 295), Sliding Window Median (LC 480), IPO (LC 502).
 
+-   :material-source-branch: **[Subsets & Backtracking](10-subsets-backtracking.md)**
+
+    ---
+
+    Choose / recurse / un-choose. Subsets, Permutations II with duplicate-skip, Palindrome Partitioning, N-Queens, Sudoku.
+
+-   :material-magnify-scan: **[Modified Binary Search](11-modified-binary-search.md)**
+
+    ---
+
+    Lower/upper bound, rotated arrays (pick-the-sorted-half), and binary search on the answer space (Koko, ship packages).
+
+-   :material-podium: **[Top-K Elements](12-top-k-elements.md)**
+
+    ---
+
+    Min-heap of size k for top-k largest, max-heap-via-negation for smallest, QuickSelect average O(n). Kth Largest (LC 215), K Closest Points (LC 973), Top K Frequent (LC 347 with bucket sort).
+
+-   :material-call-merge: **[K-way Merge](13-k-way-merge.md)**
+
+    ---
+
+    Heap of `k` sorted-source cursors. Merge k Sorted Lists (LC 23), Smallest Range Covering K Lists (LC 632), Find K Pairs with Smallest Sums (LC 373).
+
+-   :material-graph: **[Topological Sort](14-topological-sort.md)**
+
+    ---
+
+    Kahn's BFS (in-degree zero peel) and DFS post-order with three-colour cycle detection. Course Schedule (LC 207/210), Alien Dictionary (LC 269), Minimum Height Trees (LC 310).
+
+-   :material-bag-personal: **[0/1 Knapsack DP](15-01-knapsack-dp.md)**
+
+    ---
+
+    The mother subset-DP. 2D `dp[i][w]` table → 1D rolling with right-to-left iteration. Partition Equal Subset (LC 416), Target Sum (LC 494), Last Stone Weight II (LC 1049).
+
+-   :material-bag-personal-plus: **[Unbounded Knapsack DP](16-unbounded-knapsack-dp.md)**
+
+    ---
+
+    Items reusable. The single-character difference: iterate left-to-right. Coin Change (LC 322), Coin Change 2 (LC 518), Combination Sum IV (LC 377), Word Break (LC 139).
+
+-   :material-numeric: **[Fibonacci Numbers DP](17-fibonacci-numbers-dp.md)**
+
+    ---
+
+    Linear 1D DP with constant lookback — collapses to O(1) space via two rolling variables. Climbing Stairs (LC 70), House Robber (LC 198/213), Decode Ways (LC 91).
+
 </div>
 
 ---
 
 ## 🚧 Coming next
 
-The remaining 11 patterns:
+The remaining 3 patterns:
 
-10. Subsets / Backtracking
-11. Modified Binary Search
-12. Top-K Elements
-13. K-way Merge
-14. Topological Sort
-15. 0/1 Knapsack DP
-16. Unbounded Knapsack DP
-17. Fibonacci Numbers DP
 18. Palindromic Subsequence DP
 19. Longest Common Subsequence DP
 20. Bitwise XOR

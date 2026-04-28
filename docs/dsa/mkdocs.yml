@@ -202,6 +202,14 @@ nav:
       - Tree BFS: 04-patterns/07-tree-bfs.md
       - Tree DFS: 04-patterns/08-tree-dfs.md
       - Two Heaps: 04-patterns/09-two-heaps.md
+      - Subsets & Backtracking: 04-patterns/10-subsets-backtracking.md
+      - Modified Binary Search: 04-patterns/11-modified-binary-search.md
+      - Top-K Elements: 04-patterns/12-top-k-elements.md
+      - K-way Merge: 04-patterns/13-k-way-merge.md
+      - Topological Sort: 04-patterns/14-topological-sort.md
+      - 0/1 Knapsack DP: 04-patterns/15-01-knapsack-dp.md
+      - Unbounded Knapsack DP: 04-patterns/16-unbounded-knapsack-dp.md
+      - Fibonacci Numbers DP: 04-patterns/17-fibonacci-numbers-dp.md
 
   - 🚀 Advanced:
       - Overview: 05-advanced/index.md

@@ -333,7 +333,10 @@ nav:
       - Overview: dsa/docs/03-algorithms/index.md
     - Patterns:
       - Overview: dsa/docs/04-patterns/index.md
-      - Sliding Window (sample): dsa/docs/04-patterns/01-sliding-window.md
+      - Sliding Window: dsa/docs/04-patterns/01-sliding-window.md
+      - Two Pointers: dsa/docs/04-patterns/02-two-pointers.md
+      - Fast & Slow Pointers: dsa/docs/04-patterns/03-fast-slow-pointers.md
+      - Merge Intervals: dsa/docs/04-patterns/04-merge-intervals.md
     - Advanced:
       - Overview: dsa/docs/05-advanced/index.md
     - Ultra-Advanced:

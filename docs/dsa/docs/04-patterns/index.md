@@ -2,7 +2,7 @@
 
 > 20 patterns that solve 90% of LeetCode and 95% of interview problems.
 
-<span class="phase-status phase-inprogress">Phase 1 — One sample pattern only</span>
+<span class="phase-status phase-inprogress">Phase 5 — building out the canonical pattern pages</span>
 
 Each pattern page in this section follows the **same five-part shape**:
 
@@ -14,22 +14,42 @@ Each pattern page in this section follows the **same five-part shape**:
 
 ---
 
-## ✅ Available now (Phase 1 sample)
+## ✅ Available now
 
-- [Sliding Window (sample)](01-sliding-window.md) — fixed vs variable, the 7 sub-patterns, 20 problems, 3 deep-dives.
+<div class="grid cards" markdown>
 
-This is the **template** for every other pattern page in this section.
+-   :material-window-restore: **[Sliding Window](01-sliding-window.md)**
+
+    ---
+
+    Fixed vs variable windows. The 7 sub-patterns. Longest-substring-without-repeats, Min-window-substring, Sliding-window-maximum.
+
+-   :material-arrow-left-right-bold: **[Two Pointers](02-two-pointers.md)**
+
+    ---
+
+    Opposite-ends, same-direction, merge-two-arrays, fast-and-slow. Trapping rain water, merge sorted array in-place, two-sum sorted.
+
+-   :material-run-fast: **[Fast & Slow Pointers](03-fast-slow-pointers.md)**
+
+    ---
+
+    Floyd's tortoise & hare. Cycle detection, cycle entry algebra (`T = (k−1)·C + (C−M)`), happy number, find-middle.
+
+-   :material-table-merge-cells: **[Merge Intervals](04-merge-intervals.md)**
+
+    ---
+
+    Sort + sweep. Sweep-line events. Insert-into-sorted. Meeting Rooms II, Insert Interval, Employee Free Time.
+
+</div>
 
 ---
 
-## 🚧 Coming in Phase 5
+## 🚧 Coming next
 
-The remaining 19 patterns:
+The remaining 16 patterns:
 
-1. ✅ Sliding Window — *available now*
-2. Two Pointers
-3. Fast & Slow Pointers
-4. Merge Intervals
 5. Cyclic Sort
 6. In-Place Linked List Reversal
 7. Tree BFS
@@ -47,4 +67,4 @@ The remaining 19 patterns:
 19. Longest Common Subsequence DP
 20. Bitwise XOR
 
-Once the sliding-window template is approved, all 19 follow the same shape.
+Every page follows the canonical shape pioneered by [Sliding Window](01-sliding-window.md).

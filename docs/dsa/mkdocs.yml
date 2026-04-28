@@ -193,7 +193,10 @@ nav:
 
   - 🎯 Patterns:
       - Overview: 04-patterns/index.md
-      - Sliding Window (sample): 04-patterns/01-sliding-window.md
+      - Sliding Window: 04-patterns/01-sliding-window.md
+      - Two Pointers: 04-patterns/02-two-pointers.md
+      - Fast & Slow Pointers: 04-patterns/03-fast-slow-pointers.md
+      - Merge Intervals: 04-patterns/04-merge-intervals.md
 
   - 🚀 Advanced:
       - Overview: 05-advanced/index.md

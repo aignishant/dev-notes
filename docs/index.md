@@ -19,6 +19,14 @@ A living engineering + interview prep knowledge base — Google SecOps, Python, 
 
 <div class="grid cards" markdown>
 
+-   :material-book-open-variant:{ .lg .middle } &nbsp; **All-in-One Bible**
+
+    ---
+
+    14 self-contained modules: Python, data stack, databases, FastAPI, BigQuery, cloud, classical ML, deep learning, NLP/CV, LLMs, agents, MLOps, LLMOps, security automation.
+
+    [:octicons-arrow-right-24: Open the Bible](all/01-python-foundations.md)
+
 -   :material-shield-search:{ .lg .middle } &nbsp; **Google SecOps Content Hub**
 
     ---

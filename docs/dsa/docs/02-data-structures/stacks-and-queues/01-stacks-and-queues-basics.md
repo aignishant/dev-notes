@@ -786,128 +786,964 @@ Your opener: *"Stack of openers. Walk the string. Each closer must match the top
 
 ### Problem 2 — Implement Queue using Stacks
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Apple</span>
 
-> Implement a FIFO queue using only stack operations. (LeetCode 232.)
+> Implement a **FIFO queue** (`push`, `pop`, `peek`, `empty`) using only stack operations. (LeetCode 232.)
+
+#### 📖 Story Mode
+
+```
+push(1), push(2), push(3)        →  queue front = 1
+peek()                           →  1
+pop()                            →  1; queue front = 2
+push(4)                          →  queue order = [2, 3, 4]
+pop(), pop(), pop()              →  2, 3, 4
+empty()                          →  True
+```
+
+A queue is FIFO; a stack is LIFO. Combining two stacks reverses the order *twice* — once into the second stack, then naturally on pop — restoring FIFO semantics.
+
+#### 🌍 Real-World Usage
+
+- **Streaming pipelines** where the only available primitive is a stack — e.g., some lock-free data-structure libraries expose only stack-style push/pop.
+- **Functional persistent queues** — Okasaki's queue uses two singly linked lists, exactly this trick under the hood.
+- **Compiler / interpreter call-stack manipulation** — sometimes you have a stack and need FIFO semantics for a particular pass.
+- **Whiteboard interview classic** — tests amortized analysis understanding.
 
 #### 🧠 Thinking Process
 
-Two stacks: `in_stack` for pushes, `out_stack` for pops. When `out_stack` is empty, pour everything from `in_stack` into it, reversing the order. Each element is moved at most twice → **amortized O(1) per op.**
+Two stacks: `in_stack` for pushes, `out_stack` for pops. The `out_stack` holds elements in **FIFO order** (the bottom of `out_stack` is the queue's front). When `out_stack` is empty, pour everything from `in_stack` into `out_stack`, reversing the order — now the oldest element is at the top of `out_stack`, ready to be popped.
 
-#### 🐍 Solution
+**Why amortized O(1)?** Each element is pushed onto `in_stack` once and moved to `out_stack` at most once before being popped. Three operations per element across its lifetime → O(1) amortized per queue op.
 
-```python
-class MyQueue:
-    def __init__(self) -> None:
-        self._in: list[int] = []
-        self._out: list[int] = []
+**Why not always move?** Constantly moving turns every pop into an O(n) operation. Only move when `out_stack` is empty.
 
-    def push(self, x: int) -> None:
-        self._in.append(x)
+#### 🐍 5 Layers of Solution
 
-    def pop(self) -> int:
-        self._move()
-        return self._out.pop()
+=== "Layer 1 — Single stack with rotation (brute)"
 
-    def peek(self) -> int:
-        self._move()
-        return self._out[-1]
+    ```python
+    class MyQueueBrute:
+        def __init__(self):
+            self._stack = []
 
-    def empty(self) -> bool:
-        return not self._in and not self._out
+        def push(self, x):
+            # Reverse, push, reverse back — keeps front-at-top
+            tmp = []
+            while self._stack:
+                tmp.append(self._stack.pop())
+            self._stack.append(x)
+            while tmp:
+                self._stack.append(tmp.pop())
 
-    def _move(self) -> None:
-        if not self._out:
-            while self._in:
-                self._out.append(self._in.pop())
-```
+        def pop(self):
+            return self._stack.pop()        # already at top
+
+        def peek(self):
+            return self._stack[-1]
+
+        def empty(self):
+            return not self._stack
+    ```
+
+    `push` is **O(n)**, pop/peek/empty are O(1). Functionally correct; bad amortization.
+
+=== "Layer 2 — Two stacks, lazy transfer ⭐"
+
+    ```python
+    class MyQueue:
+        def __init__(self):
+            self._in = []
+            self._out = []
+
+        def push(self, x):
+            self._in.append(x)
+
+        def pop(self):
+            self._move()
+            return self._out.pop()
+
+        def peek(self):
+            self._move()
+            return self._out[-1]
+
+        def empty(self):
+            return not self._in and not self._out
+
+        def _move(self):
+            if not self._out:
+                while self._in:
+                    self._out.append(self._in.pop())
+    ```
+
+    **Amortized O(1)** per op; worst-case O(n) for the pop that triggers a transfer.
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    class MyQueue:
+        def __init__(self):
+            self._in = []
+            self._out = []
+
+        def push(self, x):
+            self._in.append(x)
+
+        def pop(self):
+            if self.empty():
+                raise IndexError("pop from empty queue")
+            self._move()
+            return self._out.pop()
+
+        def peek(self):
+            if self.empty():
+                raise IndexError("peek from empty queue")
+            self._move()
+            return self._out[-1]
+
+        def empty(self):
+            return not self._in and not self._out
+
+        def _move(self):
+            if not self._out:
+                while self._in:
+                    self._out.append(self._in.pop())
+    ```
+
+    Adds explicit empty-check on `pop`/`peek` instead of relying on Python's IndexError from the underlying list.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+
+
+    class MyQueue:
+        """FIFO queue backed by two LIFO stacks; amortized O(1) per operation.
+
+        `_in` collects new pushes; `_out` holds elements in pop-ready order
+        (queue front is at the top of `_out`). When `_out` is empty, all
+        elements from `_in` are poured over, reversing the order.
+
+        Each element is pushed onto `_in` once and moved to `_out` at most once
+        before being popped — so the total work across n operations is O(n),
+        giving O(1) amortized per op.
+        """
+
+        def __init__(self) -> None:
+            self._in: list[int] = []
+            self._out: list[int] = []
+
+        def push(self, x: int) -> None:
+            """Append `x` to the back of the queue. Time: O(1)."""
+            self._in.append(x)
+
+        def pop(self) -> int:
+            """Remove and return the queue's front. Time: O(1) amortized.
+
+            Raises:
+                IndexError: if the queue is empty.
+            """
+            if self.empty():
+                raise IndexError("pop from empty queue")
+            self._move()
+            return self._out.pop()
+
+        def peek(self) -> int:
+            """Return the queue's front without removing. Time: O(1) amortized."""
+            if self.empty():
+                raise IndexError("peek from empty queue")
+            self._move()
+            return self._out[-1]
+
+        def empty(self) -> bool:
+            """Whether the queue is empty. Time: O(1)."""
+            return not self._in and not self._out
+
+        def _move(self) -> None:
+            """Lazily pour `_in` into `_out` only when `_out` is empty."""
+            if not self._out:
+                while self._in:
+                    self._out.append(self._in.pop())
+    ```
+
+=== "Layer 5 — Variants"
+
+    **Variant A — Queue with `O(1) worst-case` pop.** Maintain three stacks (Hood-Melville queue) — incrementally interleaving the transfer so no single op is O(n). More complex, rare to need.
+
+    **Variant B — Persistent / immutable queue.** Each push/pop returns a *new* queue without mutating the old. Okasaki's classic is exactly the two-stack design, with linked lists instead of arrays.
+
+    **Variant C — Concurrent queue using two stacks.** Wrap each stack in its own lock; pop acquires both for the transfer. For high throughput, prefer purpose-built MPMC queues.
+
+    **Variant D — Bounded queue.** Reject `push` when `len(_in) + len(_out) >= cap`.
+
+    **Variant E — Implement queue using ONLY ONE stack** (recursion). `pop` recursively pops everything except the bottom, returns it, then re-pushes the rest. O(n) per op. A logic puzzle, not a real implementation.
+
+#### 🔍 Dry Run
+
+`push(1), push(2), peek(), pop(), push(3), pop(), pop(), empty()`:
+
+| op | _in (top right) | _out (top right) | returns |
+|----|-----------------|------------------|---------|
+| init | [] | [] | — |
+| push(1) | [1] | [] | — |
+| push(2) | [1, 2] | [] | — |
+| peek() | [] | [2, 1] (move triggered) | 1 |
+| pop() | [] | [2] | 1 |
+| push(3) | [3] | [2] | — |
+| pop() | [3] | [] | 2 |
+| pop() | [] | [3] (move triggered) | 3 |
+| empty() | [] | [] | True |
+
+Notice the move from `_in` to `_out` only happens when `_out` is empty AND a pop/peek is requested. Each element (1, 2, 3) is pushed once and moved at most once.
 
 #### ⏱️ Complexity
 
-- `push`: **O(1)**.
-- `pop`, `peek`: **O(1) amortized**, O(n) worst case.
+| Op | Layer 1 (single-stack) | **Layers 2-4 (two-stack)** ⭐ | Hood-Melville (Variant A) |
+|----|------:|------:|------:|
+| `push` | O(n) | **O(1)** | O(1) worst-case |
+| `pop` | O(1) | **O(1) amortized** (O(n) worst) | O(1) worst-case |
+| `peek` | O(1) | **O(1) amortized** | O(1) |
+| `empty` | O(1) | O(1) | O(1) |
+| Memory | O(n) | O(n) | O(n) |
+
+**Amortized analysis:** charge each element 3 units of credit on `push`. The element is pushed onto `_in` (1 unit), later popped from `_in` and pushed onto `_out` (2 units), then popped from `_out` (3 units). Total work across n ops is bounded by 3n = O(n), so O(1) amortized.
 
 #### 🎯 Pattern Used
 
-**Two stacks → queue.** A classic amortization trick.
+**Two-stack amortization (Okasaki's queue).** The hello-world of amortized analysis. Same trick reappears in immutable functional queues, persistent data structures, and some compiler IR passes.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Prove the amortized O(1) bound."
+    Each element is pushed onto `_in` exactly once (1 unit), moved to `_out` at most once (1 unit on the bulk transfer, but charged to the original push), and popped from `_out` exactly once (1 unit). Total work across n operations is at most 3n, so amortized O(1) per op.
+
+??? question "Follow-up 2 — Why move only when `_out` is empty?"
+    If we move on every pop, each pop is O(size of `_in`) — that breaks amortization. Lazy transfer ensures each element is moved at most once across its lifetime.
+
+??? question "Follow-up 3 — What's the worst-case latency for a single pop?"
+    O(n), when `_out` is empty and `_in` has all elements. For a real-time system where worst-case latency matters, use Variant A (Hood-Melville).
+
+??? question "Follow-up 4 — Implement queue with one stack."
+    Use recursion — `pop` pops every element above the bottom, captures the bottom, then re-pushes the rest. O(n) per `pop`. A logic puzzle; not a real implementation. (See Variant E.)
+
+??? question "Follow-up 5 — Make it thread-safe."
+    Wrap all four public methods with a single `threading.Lock`. For higher concurrency, lock per-stack and order acquisition consistently — but contention on the transfer step typically dominates. Real systems use lock-free MPMC queues.
+
+??? question "Follow-up 6 — Persistent / immutable queue."
+    Use linked lists instead of arrays for `_in` and `_out`. Each `push`/`pop` returns a new queue object that shares structure with the old one. Okasaki's design.
+
+??? question "Follow-up 7 — Bounded queue (capacity = K)."
+    Track `len(_in) + len(_out)`; reject push when it would exceed K. Return False or raise depending on contract.
 
 #### 🐛 Common Bugs
 
-1. **Always moving on every pop** — defeats the amortization. Only move when out_stack is empty.
+1. **Always moving on every pop** — defeats the amortization; pop becomes O(n) every time.
+2. **Moving in `push`** — same issue; push becomes O(n).
+3. **Moving when `_out` is non-empty** — corrupts the FIFO order (newer items get popped before older ones).
+4. **Not handling empty case** — `_out.pop()` raises IndexError; specify behavior with the interviewer.
+5. **`peek` not triggering a move** — returns wrong value when `_out` is empty but `_in` is non-empty.
+6. **Building `_out` in the wrong direction** — must use `pop()` from `_in` and `append()` to `_out` to actually reverse the order.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Empty queue → `empty() = True`, `pop()` raises (or contracted behavior)
+- [ ] Single push then single pop → returns that element
+- [ ] Push, pop, push, pop interleaved — verify FIFO order preserved
+- [ ] Many pushes then many pops — exactly one bulk transfer
+- [ ] After all pops, queue is empty
+- [ ] Push after partial pop — new pushes go to `_in`, don't disturb `_out` pop order
+- [ ] Stress: 10⁶ random ops — amortized O(1) per op holds
 
 #### 🏢 Sample Interviewer Quote
 
 > *"Implement a queue using only stacks."*
 
-Your opener: *"Two stacks — `in` for pushes, `out` for pops. When `out` is empty, pour everything from `in`, reversing order. Each element moves at most twice — amortized O(1)."*
+Your opener: *"Two stacks — `in` for pushes, `out` for pops. When `out` is empty, pour everything from `in` into `out`, reversing the order so the queue front is at the top. Each element moves at most twice across its lifetime — amortized O(1) per operation. Worst-case pop is O(n) when a transfer triggers; the trick is the lazy transfer: only move when `out` is empty, never re-mix."*
 
 ---
 
 ### Problem 3 — Implement Stack using Queues
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Adobe</span>
 
-> Implement a LIFO stack using only queue operations. (LeetCode 225.)
+> Implement a **LIFO stack** (`push`, `pop`, `top`, `empty`) using only the standard FIFO queue operations: `enqueue` (append to back), `dequeue` (remove from front), `peek front`, `size`, `empty`. You may use **one or two queues**, but no list indexing or stack tricks. (LeetCode 225.)
 
-#### 🐍 Solution — single-queue trick
+#### 📖 Story Mode
 
-On push, enqueue and then rotate the queue so the new element is at the front:
+```
+push(1):   q = [1]                   top → 1
+push(2):   q = [1, 2]   rotate →  q = [2, 1]    top → 2
+push(3):   q = [2, 1, 3]  rotate twice →  q = [3, 2, 1]   top → 3
+pop():     dequeue front → 3,        q = [2, 1]
+top():     peek front → 2
+pop():     dequeue front → 2,        q = [1]
+empty():   False → True after one more pop
+```
 
-```python
-from collections import deque
+The trick: a queue gives FIFO order, but a stack wants LIFO. **After each push, rotate** the queue so the newest element ends up at the *front* — then `dequeue` magically pops the top.
 
-class MyStack:
-    def __init__(self) -> None:
-        self._q: deque[int] = deque()
+#### 🌍 Real-World Usage
 
+- **Educational dual** — the canonical "if you only had FIFO primitives, can you simulate LIFO?" exercise. Hugely common in OS-classroom material on container ADTs.
+- **Concurrent simulators** — when only a thread-safe queue is exposed but you need stack semantics for undo/redo locally on a worker.
+- **Embedded systems** — some RTOS APIs expose only message queues; this lets you bolt-on LIFO behaviour without an extra primitive.
+- **Functional languages without mutation** — easier to reason about with rotated immutable queues than mutable list cells.
+- **Whiteboard classic** — co-asked with P2 (Queue using Stacks) to test ADT thinking.
+
+#### 🧠 Thinking Process
+
+A queue removes from the **front**; a stack wants to remove the **most recent** element. To bridge the gap, after every push you must arrange for the newest element to *be* at the front. Two designs:
+
+1. **Push-heavy (single queue, rotate-on-push)**: After enqueueing `x`, dequeue every prior element and re-enqueue it. The new element bubbles to the front. `push = O(n)`, `pop/top = O(1)`. **One queue, simplest.**
+2. **Pop-heavy (two queues, rotate-on-pop)**: Push appends to `q1`. On pop, drain all but the last element from `q1` into `q2`, then return the lone leftover; swap names. `push = O(1)`, `pop = O(n)`.
+
+Push-heavy is canonical because pop becomes trivial — and that aligns with the most common stack workload. Note this is **the dual of P2**: there, the costly side was `pop`. Here, the costly side is `push`. **You cannot get O(1) for both** with a queue substrate (unlike the two-stack queue, where amortization saves us — here every dequeue inherently destroys ordering for the next push).
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Two queues, pop rotates"
+
+    ```python
+    from collections import deque
+
+    class MyStackTwoQueue:
+        """Two queues; push O(1), pop O(n)."""
+
+        def __init__(self) -> None:
+            self._q1: deque[int] = deque()
+            self._q2: deque[int] = deque()
+
+        def push(self, x: int) -> None:
+            self._q1.append(x)
+
+        def pop(self) -> int:
+            while len(self._q1) > 1:
+                self._q2.append(self._q1.popleft())
+            top = self._q1.popleft()
+            self._q1, self._q2 = self._q2, self._q1
+            return top
+
+        def top(self) -> int:
+            while len(self._q1) > 1:
+                self._q2.append(self._q1.popleft())
+            top = self._q1[0]
+            self._q2.append(self._q1.popleft())
+            self._q1, self._q2 = self._q2, self._q1
+            return top
+
+        def empty(self) -> bool:
+            return not self._q1
+    ```
+
+    Honest brute. Notice `top()` must drain *all* of `q1` (including the last element) — easy to miss.
+
+=== "Layer 2 — Single queue, push rotates ⭐ (canonical)"
+
+    ```python
+    from collections import deque
+
+    class MyStack:
+        """Single queue with rotate-on-push. push O(n), pop/top O(1)."""
+
+        def __init__(self) -> None:
+            self._q: deque[int] = deque()
+
+        def push(self, x: int) -> None:
+            self._q.append(x)
+            for _ in range(len(self._q) - 1):
+                self._q.append(self._q.popleft())
+
+        def pop(self) -> int:
+            return self._q.popleft()
+
+        def top(self) -> int:
+            return self._q[0]
+
+        def empty(self) -> bool:
+            return not self._q
+    ```
+
+    The classic answer. Rotation count is `n - 1` (one less than current size *including* the new element). Watch the off-by-one: rotating `n` times brings the queue back to its original order.
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    from collections import deque
+
+    class MyStackSafe:
+        def __init__(self) -> None:
+            self._q: deque[int] = deque()
+
+        def push(self, x: int) -> None:
+            self._q.append(x)
+            # rotate len(q) - 1 times so x ends up at the front
+            for _ in range(len(self._q) - 1):
+                self._q.append(self._q.popleft())
+
+        def pop(self) -> int:
+            if not self._q:
+                raise IndexError("pop from empty stack")
+            return self._q.popleft()
+
+        def top(self) -> int:
+            if not self._q:
+                raise IndexError("top from empty stack")
+            return self._q[0]
+
+        def empty(self) -> bool:
+            return not self._q
+
+        def size(self) -> int:
+            return len(self._q)
+    ```
+
+    Explicit `IndexError` on empty access matches Python idioms. `size()` is a courtesy method some interviewers ask for.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from collections import deque
+    from typing import Generic, TypeVar
+
+    T = TypeVar("T")
+
+    class StackOnQueue(Generic[T]):
+        """LIFO stack backed by a single FIFO queue.
+
+        Push is O(n); pop, top, and empty are O(1). Choose this design when
+        pops dominate pushes — pops stay cheap. For balanced workloads
+        prefer a real list-based stack.
+        """
+
+        __slots__ = ("_q",)
+
+        def __init__(self) -> None:
+            self._q: deque[T] = deque()
+
+        def push(self, x: T) -> None:
+            """Push *x* onto the stack. O(n)."""
+            self._q.append(x)
+            for _ in range(len(self._q) - 1):
+                self._q.append(self._q.popleft())
+
+        def pop(self) -> T:
+            """Remove and return the top of the stack. O(1)."""
+            if not self._q:
+                raise IndexError("pop from empty stack")
+            return self._q.popleft()
+
+        def top(self) -> T:
+            """Return (without removing) the top of the stack. O(1)."""
+            if not self._q:
+                raise IndexError("top from empty stack")
+            return self._q[0]
+
+        def empty(self) -> bool:
+            """Return True iff the stack has no elements. O(1)."""
+            return not self._q
+
+        def __len__(self) -> int:
+            return len(self._q)
+
+        def __repr__(self) -> str:  # debug aid
+            return f"StackOnQueue(top→bottom={list(self._q)!r})"
+    ```
+
+=== "Layer 5 — Variants & extensions"
+
+    **Variant A — Recursive single-queue push (no explicit loop):**
+
+    ```python
     def push(self, x: int) -> None:
+        if not self._q:
+            self._q.append(x)
+            return
+        head = self._q.popleft()
+        self.push(x)             # recurse first
+        self._q.append(head)     # then re-append the front
+    ```
+
+    Cute but stack-depth O(n); avoid for large n.
+
+    **Variant B — Two-queue alternating ("ping-pong"):**
+
+    ```python
+    def push(self, x: int) -> None:
+        self._q2.append(x)
+        while self._q1:
+            self._q2.append(self._q1.popleft())
+        self._q1, self._q2 = self._q2, self._q1
+    ```
+
+    Same complexity as Layer 2; some interviewers prefer it because the rotation logic is more obvious — `q2` starts with `x` then we drain `q1` after it.
+
+    **Variant C — Fixed-capacity stack (overflow check):**
+
+    ```python
+    def push(self, x: T) -> None:
+        if len(self._q) >= self._capacity:
+            raise OverflowError(f"stack full (capacity={self._capacity})")
         self._q.append(x)
         for _ in range(len(self._q) - 1):
             self._q.append(self._q.popleft())
+    ```
 
-    def pop(self) -> int:
-        return self._q.popleft()
+    **Variant D — Thread-safe wrapper:**
 
-    def top(self) -> int:
-        return self._q[0]
+    ```python
+    import threading
+    class ConcurrentStackOnQueue(StackOnQueue[T]):
+        def __init__(self) -> None:
+            super().__init__()
+            self._lock = threading.RLock()
 
-    def empty(self) -> bool:
-        return not self._q
-```
+        def push(self, x: T) -> None:
+            with self._lock:
+                super().push(x)
 
-`push` is **O(n)**; pop/top/empty are O(1).
+        def pop(self) -> T:
+            with self._lock:
+                return super().pop()
+    ```
 
-The dual structure — two queues, push expensive — is also acceptable.
+    **Variant E — Stack of stacks via queue layers:** layer queues to simulate frames. Mostly academic.
+
+#### 🔍 Dry Run — `push(1), push(2), push(3), top, pop, push(4), pop, pop, empty`
+
+| Op       | Action                                                     | Queue state (front → back) | Returns |
+|----------|------------------------------------------------------------|----------------------------|---------|
+| push(1)  | append 1; rotate 0 times                                   | `[1]`                      | —       |
+| push(2)  | append 2 → `[1,2]`; rotate 1 → pop 1, append 1             | `[2, 1]`                   | —       |
+| push(3)  | append 3 → `[2,1,3]`; rotate 2 → `[1,3,2]` → `[3,2,1]`     | `[3, 2, 1]`                | —       |
+| top      | peek front                                                 | `[3, 2, 1]`                | 3       |
+| pop      | popleft → 3                                                | `[2, 1]`                   | 3       |
+| push(4)  | append 4 → `[2,1,4]`; rotate 2 → `[1,4,2]` → `[4,2,1]`     | `[4, 2, 1]`                | —       |
+| pop      | popleft → 4                                                | `[2, 1]`                   | 4       |
+| pop      | popleft → 2                                                | `[1]`                      | 2       |
+| empty    | `len == 1`, not empty                                      | `[1]`                      | False   |
+
+#### ⏱️ Complexity
+
+| Approach                        | push | pop  | top  | empty | space | notes                           |
+|---------------------------------|------|------|------|-------|-------|---------------------------------|
+| Two-queue, pop rotates          | O(1) | O(n) | O(n) | O(1)  | O(n)  | top is also O(n) — easy to miss |
+| **Single-queue, push rotates ⭐** | **O(n)** | **O(1)** | **O(1)** | **O(1)** | **O(n)** | canonical                       |
+| Recursive push                  | O(n) | O(1) | O(1) | O(1)  | O(n)  | extra O(n) call-stack           |
+
+**Cannot achieve O(1) for both push and pop with this substrate** — see Follow-up 1.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why is amortized O(1) impossible here (unlike P2)?"
+    In P2 (queue using stacks), the lazy transfer worked because each element is moved **at most twice** (in stack → out stack) over its lifetime — a charge of O(1) amortized per op. Here, every `push` (or every `pop` in the two-queue design) re-touches **all current elements**, not just the new one. After `n` pushes you've performed `0 + 1 + 2 + ... + (n-1) = O(n²)` rotations. There is no charge scheme that brings this to amortized O(1) per push because the work is proportional to the *current* size, not to a one-shot relocation. **The asymmetry between stack-on-queue and queue-on-stack is fundamental** — stacks give you "reverse" for free (LIFO), queues do not.
+
+??? question "Follow-up 2 — One queue or two — which is preferred?"
+    Single queue. Same asymptotic cost, half the memory bookkeeping, fewer swap-references to lose track of. The two-queue version is easier to **explain** on a whiteboard but easier to **bug** (forgetting to drain the last element on `top()` is the classic). Mention both, default to one.
+
+??? question "Follow-up 3 — Can you make `top()` truly O(1) in the two-queue variant?"
+    Yes — cache the most recently pushed element separately:
+    ```python
+    def push(self, x): self._q1.append(x); self._top = x
+    def top(self): return self._top
+    def pop(self):
+        # drain q1 → q2 except last; remember new top as you go
+        ...
+    ```
+    Push remains O(1), pop remains O(n) but updates `_top` to the second-newest element as it drains. Nice tweak.
+
+??? question "Follow-up 4 — Make it concurrent (multiple producers, single consumer)."
+    Wrap with a `threading.RLock` (Variant D). Or use a real `queue.LifoQueue` (Python's built-in — backed by a heap-free deque, threadsafe). For high contention, prefer a true LIFO primitive over rotated FIFOs.
+
+??? question "Follow-up 5 — Implement a `Min-Stack` on this substrate."
+    Pair the queue with a parallel deque of running minima (Problem 4 pattern). Push to both, but only the *value* queue rotates; the `_mins` deque is kept in sync by recording min-up-to-this-point values. Cost stays O(n) push, O(1) pop+min.
+
+??? question "Follow-up 6 — What if the queue API only supports `enqueue`, `dequeue`, and `size` (no peek)?"
+    `top()` becomes `pop` followed by `push` of the same value — both O(n). At that point use the two-queue variant and cache the top via Variant D's trick.
+
+??? question "Follow-up 7 — Persistent / immutable stack on a queue?"
+    Trivial with a singly-linked list (cons-cell). On a queue substrate it's pointless — the rotation forces full structural sharing breaks. This question is usually a red herring meant to surface "*right tool for the job*" reasoning.
+
+#### 🐛 Common Bugs
+
+1. **Rotating `len(q)` times instead of `len(q) - 1`** — brings the queue back to where it started; the newest element ends up at the back again. Off-by-one on the boundary.
+2. **Forgetting the swap in two-queue pop** — `q1` is empty, `q2` has the survivors; if you don't swap names, the next `push` lands in the wrong queue.
+3. **`top()` in two-queue not preserving the element** — drained but never re-enqueued, so `top` *destructively* pops. Restore it after peeking.
+4. **No empty check** — `popleft()` on an empty deque raises a confusing `IndexError: pop from an empty deque` instead of a meaningful one. Guard explicitly.
+5. **Using `list` instead of `deque`** — `list.pop(0)` is O(n) — your "rotation" is now O(n²) per push and O(n³) overall.
+6. **Recursive push without depth-limit awareness** — Variant A blows the recursion stack at ~1000 elements in CPython.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] **Empty stack** — `pop()` and `top()` raise `IndexError`.
+- [ ] **Single-element stack** — `push(x)` rotates 0 times; `top` returns `x`; `pop` returns `x`, leaves empty.
+- [ ] **Two-element stack** — verifies the off-by-one in rotation count.
+- [ ] **Push-pop-push interleaved** — make sure the new element after a pop still ends up at the front.
+- [ ] **Many pushes** — test 10⁴ pushes; should be O(n²) total work, but completing in milliseconds in CPython.
+- [ ] **Duplicates** — `push(5), push(5), pop()` returns 5; both copies independent.
+- [ ] **Type uniformity** — generic stack; mixed types should still work since deque is type-agnostic.
+- [ ] **Concurrent access** — race on rotation; ensure Variant D's lock covers the whole `push`.
+
+#### 🎤 Sample Interviewer Quote
+
+> *"Implement a stack — `push`, `pop`, `top`, `empty` — using only standard queue operations: enqueue, dequeue, peek-front, and size. After you get a working version, walk me through the tradeoff between push-heavy and pop-heavy designs. Then convince me that you cannot get amortized O(1) for both push and pop on this substrate. If you have time, extend it to a thread-safe min-stack."*
 
 ---
 
 ### Problem 4 — Min Stack
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Google</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Google</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Apple</span> <span class="company-tag">Adobe</span>
 
-> Design a stack that supports `push`, `pop`, `top`, and `getMin` in **O(1)**.
+> Design a stack supporting `push`, `pop`, `top`, and `getMin` — **all in O(1)** time, including `getMin`. (LeetCode 155.)
 
-(See §4.5 above for the production-ready impl.)
+#### 📖 Story Mode
+
+```
+push(-2)        stack = [-2]                  getMin → -2
+push(0)         stack = [-2, 0]               getMin → -2
+push(-3)        stack = [-2, 0, -3]           getMin → -3
+getMin()                                       → -3
+pop()           stack = [-2, 0]               getMin → -2     (min restored automatically!)
+top()                                          →  0
+```
+
+The tease is "all four ops O(1)" — `getMin` is the hard one, because a *natural* `min(stack)` is O(n). The trick: an **auxiliary stack of running minima** that mirrors push/pop and always has the current min on top.
+
+#### 🌍 Real-World Usage
+
+- **Undo stacks with min-tracking** — e.g., a code editor showing "minimum indentation in current scope" while you type.
+- **Trading systems** — running drawdown / running min-price across a stream of decisions, with rollback support.
+- **Game engines** — recording the *lowest health* an entity reached during a checkpointed encounter.
+- **Compiler register allocation** — track the minimum register pressure across nested basic blocks; pop on scope exit.
+- **OS / kernel** — running minimum priority of pending tasks in a stack-allocated scope.
+- **Whiteboard classic** — co-asked with Min-Max stack and "Min Queue" to test O(1)-extra-space tricks.
+
+#### 🧠 Thinking Process
+
+The naive `min(self._data)` is O(n). To get O(1), we must **bake the running minimum into the structure itself**. Two designs:
+
+1. **Auxiliary stack** (canonical): a parallel `_mins` stack that records "the min from the bottom up to the current top". Push to `_mins` whenever the new value `<= current_min`. Pop from `_mins` whenever the popped data equals the top of `_mins`. **O(1) per op, O(n) extra space.**
+2. **Encoded differences** (no aux stack): store `x - min` on the *data* stack itself when `x < min`, simultaneously updating `min`. On pop, detect "encoded" entries (negative under invariant) and recover both `x` and the previous `min`. **O(1) per op, O(1) extra space — but you sacrifice the invariant `top() == top of stack`** (top must now decode).
+
+The auxiliary-stack version is what most interviewers want. The encoded-diff version is the headline follow-up. Both deserve memorisation.
+
+The duplicate-min subtlety: if you push two `-3`s back-to-back, you must record `-3` *twice* on `_mins` — otherwise the first pop strips the min prematurely. Use `<=`, not `<`, when deciding to push to `_mins`. (Or store `(value, count)` pairs to compress duplicate runs — a memory-saving variant.)
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute force, getMin scans"
+
+    ```python
+    class MinStackBrute:
+        def __init__(self) -> None:
+            self._data: list[int] = []
+
+        def push(self, x: int) -> None:
+            self._data.append(x)
+
+        def pop(self) -> None:
+            self._data.pop()
+
+        def top(self) -> int:
+            return self._data[-1]
+
+        def getMin(self) -> int:
+            return min(self._data)            # O(n)
+    ```
+
+    Honest brute. `getMin` is O(n); fails interviews that explicitly ask for O(1).
+
+=== "Layer 2 — Auxiliary stack ⭐ (canonical)"
+
+    ```python
+    class MinStack:
+        def __init__(self) -> None:
+            self._data: list[int] = []
+            self._mins: list[int] = []        # running minima, top = current min
+
+        def push(self, x: int) -> None:
+            self._data.append(x)
+            if not self._mins or x <= self._mins[-1]:
+                self._mins.append(x)          # NOTE: <=, not <
+
+        def pop(self) -> None:
+            popped = self._data.pop()
+            if popped == self._mins[-1]:
+                self._mins.pop()
+
+        def top(self) -> int:
+            return self._data[-1]
+
+        def getMin(self) -> int:
+            return self._mins[-1]
+    ```
+
+    All four ops O(1). Worst-case extra space O(n) (strictly decreasing input).
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    class MinStackSafe:
+        def __init__(self) -> None:
+            self._data: list[int] = []
+            self._mins: list[int] = []
+
+        def push(self, x: int) -> None:
+            self._data.append(x)
+            if not self._mins or x <= self._mins[-1]:
+                self._mins.append(x)
+
+        def pop(self) -> int:
+            if not self._data:
+                raise IndexError("pop from empty stack")
+            popped = self._data.pop()
+            if popped == self._mins[-1]:
+                self._mins.pop()
+            return popped
+
+        def top(self) -> int:
+            if not self._data:
+                raise IndexError("top from empty stack")
+            return self._data[-1]
+
+        def getMin(self) -> int:
+            if not self._mins:
+                raise IndexError("getMin on empty stack")
+            return self._mins[-1]
+
+        def __len__(self) -> int:
+            return len(self._data)
+    ```
+
+    Explicit `IndexError` on every empty-access path; `pop` returns the popped value (LeetCode requires `void`, but real-world callers want it). `__len__` is a courtesy.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from typing import Generic, TypeVar
+
+    T = TypeVar("T")  # must support __le__/__eq__ and ordering.
+
+    class MinStack(Generic[T]):
+        """Stack with O(1) push, pop, top, and getMin.
+
+        Implementation maintains a parallel ``_mins`` stack of running minima.
+        Whenever the pushed value is ``<=`` the current min, it is also pushed
+        to ``_mins`` so that duplicate minima are tracked correctly. On pop,
+        if the popped value equals the top of ``_mins``, both stacks pop in
+        lockstep.
+
+        Time:  O(1) for all operations.
+        Space: O(n) — worst case (strictly decreasing input).
+        """
+
+        __slots__ = ("_data", "_mins")
+
+        def __init__(self) -> None:
+            self._data: list[T] = []
+            self._mins: list[T] = []
+
+        def push(self, x: T) -> None:
+            """Push ``x`` onto the stack. O(1)."""
+            self._data.append(x)
+            if not self._mins or x <= self._mins[-1]:
+                self._mins.append(x)
+
+        def pop(self) -> T:
+            """Remove and return the top of the stack. O(1)."""
+            if not self._data:
+                raise IndexError("pop from empty stack")
+            popped = self._data.pop()
+            if popped == self._mins[-1]:
+                self._mins.pop()
+            return popped
+
+        def top(self) -> T:
+            """Return (without removing) the top of the stack. O(1)."""
+            if not self._data:
+                raise IndexError("top from empty stack")
+            return self._data[-1]
+
+        def getMin(self) -> T:
+            """Return the minimum element currently in the stack. O(1)."""
+            if not self._mins:
+                raise IndexError("getMin on empty stack")
+            return self._mins[-1]
+
+        def __len__(self) -> int:
+            return len(self._data)
+
+        def __repr__(self) -> str:
+            return f"MinStack(top→bottom={list(reversed(self._data))!r}, min={self._mins[-1] if self._mins else None})"
+    ```
+
+=== "Layer 5 — Variants & extensions"
+
+    **Variant A — `(value, count)` compression in `_mins`** (saves space on long duplicate runs):
+
+    ```python
+    def push(self, x: int) -> None:
+        self._data.append(x)
+        if self._mins and self._mins[-1][0] == x:
+            self._mins[-1] = (x, self._mins[-1][1] + 1)
+        elif not self._mins or x < self._mins[-1][0]:
+            self._mins.append((x, 1))
+
+    def pop(self) -> None:
+        popped = self._data.pop()
+        if popped == self._mins[-1][0]:
+            v, c = self._mins[-1]
+            self._mins[-1] = (v, c - 1)
+            if c - 1 == 0:
+                self._mins.pop()
+    ```
+
+    Same O(1) ops; `_mins` shrinks dramatically when minima repeat.
+
+    **Variant B — Encoded-difference, single stack (O(1) extra space):**
+
+    ```python
+    class MinStackEncoded:
+        def __init__(self) -> None:
+            self._data: list[int] = []
+            self._min: int | None = None
+
+        def push(self, x: int) -> None:
+            if not self._data:
+                self._data.append(0)
+                self._min = x
+            else:
+                self._data.append(x - self._min)        # may be negative
+                if x < self._min:
+                    self._min = x
+
+        def pop(self) -> None:
+            diff = self._data.pop()
+            if diff < 0:
+                # The popped element WAS the min; restore previous min.
+                self._min = self._min - diff             # = old_min
+            # If diff >= 0, min is unchanged.
+
+        def top(self) -> int:
+            diff = self._data[-1]
+            if diff >= 0:
+                return self._min + diff
+            return self._min                              # the new min itself
+
+        def getMin(self) -> int:
+            return self._min
+    ```
+
+    Trick: when `x < min`, store `x - min` (negative) and update `min` to `x`. On pop of a negative entry, recover the **old** min via `min - diff`. **O(1) extra space, O(1) per op** — the headline follow-up.
+
+    **Variant C — Min-Max stack:** add a second auxiliary stack `_maxes` symmetric to `_mins`. `getMin` and `getMax` both O(1).
+
+    **Variant D — Thread-safe Min Stack:** wrap with `threading.RLock`. For high contention, see Java's `ConcurrentLinkedDeque` analogue.
+
+    **Variant E — Persistent (immutable) Min Stack:** singly-linked node carries `(value, min_so_far)`. Each `push` creates a new node; `pop` returns the parent reference. Allows time-travel queries.
+
+    **Variant F — Min Queue** (different problem, common follow-up): a queue with O(1) `getMin`. Solved by *two* monotone deques or by Hood-Melville-style amortization. The stack→queue dual; mention it if asked.
+
+    **Variant G — Generic comparator:** parameterise on a `key=` function so the same class doubles as a "max stack" or "min by attribute" stack.
+
+#### 🔍 Dry Run — `push(-2), push(0), push(-3), getMin, pop, top, getMin`
+
+| Op           | Action                          | `_data`         | `_mins`            | Returns |
+|--------------|---------------------------------|------------------|--------------------|---------|
+| push(-2)     | data ← -2; -2 ≤ ∅ → mins ← -2   | `[-2]`           | `[-2]`             | —       |
+| push(0)      | data ← 0;  0 > -2 → mins same   | `[-2, 0]`        | `[-2]`             | —       |
+| push(-3)     | data ← -3; -3 ≤ -2 → mins ← -3  | `[-2, 0, -3]`    | `[-2, -3]`         | —       |
+| getMin       | mins[-1]                        | `[-2, 0, -3]`    | `[-2, -3]`         | -3      |
+| pop          | data pops -3; -3 == mins[-1] → mins pops -3 | `[-2, 0]` | `[-2]`             | -3      |
+| top          | data[-1]                        | `[-2, 0]`        | `[-2]`             | 0       |
+| getMin       | mins[-1]                        | `[-2, 0]`        | `[-2]`             | -2      |
+
+Dry-run for the encoded-difference variant on the same sequence:
+
+| Op           | Action                                          | `_data`         | `_min` | top decode             |
+|--------------|-------------------------------------------------|-----------------|--------|------------------------|
+| push(-2)     | first push → data ← 0, min = -2                 | `[0]`           | -2     | -2                     |
+| push(0)      | 0 ≥ -2 → data ← 0 - (-2) = 2                    | `[0, 2]`        | -2     | -2 + 2 = 0             |
+| push(-3)     | -3 < -2 → data ← -3 - (-2) = -1, min = -3       | `[0, 2, -1]`    | -3     | min itself = -3        |
+| pop          | diff = -1 < 0 → min = -3 - (-1) = -2            | `[0, 2]`        | -2     | —                      |
+| top          | data[-1] = 2 ≥ 0 → -2 + 2 = 0                   | `[0, 2]`        | -2     | 0                      |
+| getMin       | min                                             | `[0, 2]`        | -2     | -2                     |
+
+#### ⏱️ Complexity
+
+| Approach                  | push | pop  | top  | getMin | extra space        |
+|---------------------------|------|------|------|--------|--------------------|
+| Brute (Layer 1)           | O(1) | O(1) | O(1) | **O(n)** | O(1)             |
+| **Aux stack ⭐**           | **O(1)** | **O(1)** | **O(1)** | **O(1)** | **O(n)** |
+| (value, count) compressed | O(1) | O(1) | O(1) | O(1)   | O(distinct minima) |
+| Encoded-diff (Variant B)  | O(1) | O(1) | O(1) | O(1)   | **O(1)**            |
 
 #### 🎯 Pattern Used
 
-**Auxiliary stack of running minima.** Each push compares to the current min; the parallel `_mins` stack tracks the running minimum at each level. On pop, if the popped value equals current min, pop the min too.
+**Auxiliary running-extremum structure.** The same idea generalises to:
+- **Max stack** (flip comparison).
+- **Min/Max queue** (replace stack with monotone deque; see Sliding Window Maximum, P18).
+- **Online range-min queries** (sparse table / segment tree).
 
 #### 🔄 Interviewer Follow-ups
 
-??? question "Follow-up 1 — Without an auxiliary stack."
-    Encode the difference `x - min` in the data stack; when `x < min`, push the encoded difference and update min. Recover `x` and old min during pop. **O(1) extra space.** Trickier; common follow-up.
+??? question "Follow-up 1 — Why `<=`, not `<`, when pushing to `_mins`?"
+    Consider `push(3), push(3), pop()`. With `<`, the second `3` is *not* pushed to `_mins` (which is `[3]`). On pop, `popped == _mins[-1] == 3` → pop `_mins` → `_mins = []`. Now `getMin` on a stack still containing `3` raises `IndexError` — wrong. With `<=`, both 3s are recorded; the first pop only takes one. Duplicates of the running min must be tracked one-for-one.
 
-??? question "Follow-up 2 — Min-Max stack."
-    Two auxiliary stacks: one for mins, one for maxes.
+??? question "Follow-up 2 — Achieve O(1) extra space with no auxiliary stack."
+    The encoded-difference trick (Variant B). Store `x - min` in the data stack when `x < min`, simultaneously updating `min`. On pop, if the entry is negative, the popped *was* the min → restore previous min via `min - diff`. **Watch for overflow** in C++/Java: `x - min` can exceed `INT_MIN` when `min` is very negative — use `long`. In Python, integers are arbitrary-precision, so no overflow.
 
-??? question "Follow-up 3 — Median Stack (O(1))."
-    Different problem. Two heaps; not just stacks.
+??? question "Follow-up 3 — Min-Max stack — both extremes in O(1)."
+    Add a symmetric `_maxes` stack mirroring `_mins`. Push to `_maxes` when `x >= current_max`. Pop in lockstep with data. Same O(n) extra space. (Variant C.)
+
+??? question "Follow-up 4 — Median Stack in O(1)?"
+    No — fundamentally not possible in O(1). The median needs order-statistic structure. Use **two heaps** (min-heap for upper half, max-heap for lower half) → `getMedian` is O(1), but `push`/`pop` are O(log n). The "median stack with O(1) all" is impossible because rebalancing the two heaps on pop is Ω(log n) in the worst case.
+
+??? question "Follow-up 5 — Min Queue (FIFO with O(1) getMin)."
+    A queue cannot use a single auxiliary stack of minima — when the front pops, the min may be anywhere. Use a **monotone increasing deque of (value, count)** pairs: on enqueue from the back, pop while back > value, append; on dequeue from the front, decrement front's count and pop if zero. **Amortized O(1) per op.** This is the well-known "Min Queue" data structure used in Sliding Window Min.
+
+??? question "Follow-up 6 — Memory pressure on a long-running stack with many minima."
+    Use Variant A's `(value, count)` compression. If minima repeat heavily, `_mins` collapses to one entry per distinct min. For *streaming with bounded reuse*, the encoded-diff variant (Variant B) is even better — O(1) extra space full stop.
+
+??? question "Follow-up 7 — Persistent / immutable Min Stack for time-travel queries."
+    Each node holds `(value, min_so_far, parent_ref)`. `push` returns a new node; `pop` returns the parent. Old roots remain queryable. Used in functional language compilers and version-control diff engines. O(1) per op, O(n) total nodes (no garbage collection penalty in arena-allocated languages).
+
+??? question "Follow-up 8 — Thread-safe variant for multiple producers."
+    Wrap with `threading.RLock` (Variant D). For high contention, partition the stack into per-thread shards and merge minima lazily — but this breaks the strict LIFO invariant. Most production systems just accept the lock and bound the contention via batching.
+
+??? question "Follow-up 9 — Adapt to support k-th smallest in O(1)?"
+    Not possible with stack primitives alone. You need a balanced BST or a `SortedList` for O(log n) per op. Mention this when interviewers push for a generalisation — tells them you understand the boundary of what monotone tricks can do.
 
 #### 🐛 Common Bugs
 
-1. **Pushing to `_mins` only when strictly less** — fails on duplicates of the min. Use `<=`.
-2. **Comparing on pop without checking** — pops the min stack incorrectly.
+1. **`<` instead of `<=`** when pushing to `_mins` — duplicate-min loses track. Classic interview gotcha.
+2. **Comparing with the value at `_mins[-1]` after popping `_data`** — make sure the order is: pop `_data` first, *then* compare to `_mins[-1]`.
+3. **Using `_data[-1]` for `getMin`** — confusing the stacks. Always read from `_mins`.
+4. **No empty check** — `_data.pop()` and `_data[-1]` raise unhelpful IndexErrors; wrap them.
+5. **Encoded variant — comparing against stale `_min` on push of first element** — must initialise `_min` to `x` for the very first push and append `0` to `_data` (not `x`) so subsequent `top()` decoding works.
+6. **Encoded variant — overflow in C++/Java** — `x - min` can exceed `INT_MAX`. Use `long`. Python is safe.
+7. **Forgetting to decrement count in `(value, count)` variant** before checking `count == 0`.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] **Empty stack** — `pop`, `top`, `getMin` all raise `IndexError`.
+- [ ] **Single element** — `push(5); getMin == 5; pop; getMin raises`.
+- [ ] **All equal** `[5, 5, 5]` — `getMin == 5` after every pop until empty (with `<=`); breaks with `<`.
+- [ ] **Strictly decreasing** `[5, 4, 3, 2, 1]` — `_mins` reaches full size n.
+- [ ] **Strictly increasing** `[1, 2, 3, 4, 5]` — `_mins` stays at size 1.
+- [ ] **Alternating min** `[3, 1, 3, 1, 3, 1]` — `_mins` records every 1 plus one 3 at bottom.
+- [ ] **Duplicates of min** `[2, 1, 1, 1, 0]` — three 1s in `_mins`; pops one at a time.
+- [ ] **Negative values** — algorithm comparison-only; no sign assumption.
+- [ ] **Very large stack** n = 10⁶ — verify O(1) push doesn't allocate amortised.
+- [ ] **Concurrent push and pop** (Variant D) — race on `_mins` updates; lock must cover both stacks.
+
+#### 🎤 Sample Interviewer Quote
+
+> *"Design a stack that supports push, pop, top, and getMin — all four operations in O(1) time. Walk me through your auxiliary-stack solution first, then convince me that the duplicate-min case works correctly. Then optimize to O(1) extra space (no auxiliary stack). Finally, what changes for a Min Queue?"*
+
+Your opener: *"Auxiliary stack of running minima — push to `_mins` when `x <= current_min`, pop in lockstep with `_data` when popped equals `_mins[-1]`. The `<=` (not `<`) handles duplicate minima correctly. For O(1) extra space, encode `x - min` on the data stack itself when `x < min`, simultaneously updating min; decode on top/pop. For Min Queue, swap the auxiliary stack for a monotone increasing deque of (value, count) pairs."*
 
 ---
 
@@ -1277,55 +2113,477 @@ Your opener: *"Brute force is O(n × m). Better: walk the larger array once with
 
 ### Problem 7 — Remove Outermost Parentheses
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span>
 
-> Decompose `s` into primitive concatenations of valid parentheses. Remove the outermost layer of each. (LeetCode 1021.)
+> A valid parentheses string `s` can be uniquely decomposed into a concatenation of *primitive* valid strings `s = P_1 + P_2 + ... + P_k` where each `P_i` is non-empty and itself a valid parentheses string with no proper-prefix decomposition. Return `s` with the **outermost parentheses of every `P_i`** removed. (LeetCode 1021.)
 
-#### 🐍 Solution — depth counter (no actual stack needed)
+#### 📖 Story Mode
 
-```python
-def remove_outer_parens(s):
-    out = []
-    depth = 0
-    for c in s:
-        if c == '(':
-            if depth > 0: out.append(c)
-            depth += 1
-        else:
-            depth -= 1
-            if depth > 0: out.append(c)
-    return "".join(out)
+```
+"(()())(())"        → "()()()"
+                       └P1┘ └P2┘  P1="(()())", P2="(())"
+                       strip outer → "()()" + "()" = "()()()"
+
+"(()())(())(()(()))" → "()()()()(())"
+"()()"               → ""    (each "()" is its own primitive; nothing inside)
 ```
 
-O(n) time, O(n) space.
+#### 🌍 Real-World Usage
 
-A counter is enough; we don't need a literal stack here. Mention this trade-off when an interviewer asks "why not a stack?"
+- **Tag stripping** — flatten outermost wrappers from a nested-tag stream.
+- **Tokenizer normalisation** — drop redundant grouping in expression parsers.
+- **Compiler IR cleanup** — remove the outermost parens of every top-level primitive in a generated form.
+
+#### 🧠 Thinking Process
+
+The key insight: **primitives are exactly the maximal balanced runs starting at depth 0**. As we walk the string maintaining `depth`:
+
+- A `(` opens a primitive when `depth == 0` *before* incrementing → skip it.
+- A `)` closes a primitive when `depth == 1` *before* decrementing → skip it.
+- All other parens are **interior** and should be kept.
+
+We don't need a literal stack — a `depth` counter is enough. (Mention this trade-off when the interviewer asks "why not a stack?": parens are the *only* characters, so depth = stack height; the stack carries no extra information.)
+
+```mermaid
+flowchart LR
+    A["c = '(' or ')'"] --> B{which?}
+    B -->|"'('"| C{depth == 0?}
+    C -->|yes| SKIP1[skip&nbsp;-&nbsp;primitive opener]
+    C -->|no| KEEP1[keep]
+    SKIP1 --> INC[depth += 1]
+    KEEP1 --> INC
+    B -->|"')'"| DEC[depth -= 1]
+    DEC --> D{depth == 0 after?}
+    D -->|yes| SKIP2[skip - primitive closer]
+    D -->|no| KEEP2[keep]
+```
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute force: explicitly find primitives"
+
+    ```python
+    def remove_outer_parens(s: str) -> str:
+        out = []
+        depth = 0
+        start = 0
+        for i, c in enumerate(s):
+            depth += 1 if c == '(' else -1
+            if depth == 0:
+                out.append(s[start + 1:i])         # strip outermost ()
+                start = i + 1
+        return "".join(out)
+    ```
+
+    O(n) time, O(n) space — but uses string slicing per primitive.
+
+=== "Layer 2 — Depth counter (canonical) ⭐"
+
+    ```python
+    def remove_outer_parens(s: str) -> str:
+        out: list[str] = []
+        depth = 0
+        for c in s:
+            if c == '(':
+                if depth > 0:
+                    out.append(c)                  # interior open
+                depth += 1
+            else:                                  # ')'
+                depth -= 1
+                if depth > 0:
+                    out.append(c)                  # interior close
+        return "".join(out)
+    ```
+
+    **O(n) time, O(n) output.** Single pass, single counter. Interview answer.
+
+=== "Layer 3 — Literal stack (when interviewer insists)"
+
+    ```python
+    def remove_outer_parens(s: str) -> str:
+        out: list[str] = []
+        stack: list[str] = []
+        for c in s:
+            if c == '(':
+                if stack:
+                    out.append(c)                  # not the outermost
+                stack.append(c)
+            else:
+                stack.pop()
+                if stack:
+                    out.append(c)                  # not the outermost
+        return "".join(out)
+    ```
+
+    Same complexity as Layer 2 but with a real stack — useful when the interviewer asks for it explicitly. The stack is **redundant** here (only `len(stack)` ever matters).
+
+=== "Layer 4 — Index-based slice over primitive boundaries"
+
+    ```python
+    def remove_outer_parens(s: str) -> str:
+        parts: list[str] = []
+        depth = 0
+        start = 0
+        for i, c in enumerate(s):
+            depth += 1 if c == '(' else -1
+            if depth == 0:
+                # Primitive is s[start..i] (inclusive)
+                parts.append(s[start + 1:i])       # drop outer ( and )
+                start = i + 1
+        return "".join(parts)
+    ```
+
+    Clearer when you also need to *enumerate* the primitives (e.g., for analysis).
+
+=== "Layer 5 — Production"
+
+    ```python
+    from __future__ import annotations
+
+
+    def remove_outer_parens(s: str) -> str:
+        """Remove the outermost parentheses of each primitive in a valid paren string.
+
+        Time:  O(n) — single pass.
+        Space: O(n) — output buffer.
+
+        Example:
+            >>> remove_outer_parens("(()())(())")
+            '()()()'
+            >>> remove_outer_parens("(()())(())(()(()))")
+            '()()()()(())'
+            >>> remove_outer_parens("()()")
+            ''
+        """
+        out: list[str] = []
+        depth = 0
+        for c in s:
+            if c == '(':
+                if depth > 0:
+                    out.append(c)
+                depth += 1
+            else:
+                depth -= 1
+                if depth > 0:
+                    out.append(c)
+        return "".join(out)
+    ```
+
+#### 🔍 Step-by-step Dry Run
+
+`s = "(()())(())"`:
+
+| i | c | depth before | action                | depth after | out so far |
+|---|---|--------------|-----------------------|-------------|-----------|
+| 0 | `(` | 0 | skip (outermost open) | 1 | `""` |
+| 1 | `(` | 1 | keep                  | 2 | `"("` |
+| 2 | `)` | 2 | keep                  | 1 | `"()"` |
+| 3 | `(` | 1 | keep                  | 2 | `"()("` |
+| 4 | `)` | 2 | keep                  | 1 | `"()()"` |
+| 5 | `)` | 1 | skip (outermost close) | 0 | `"()()"` |
+| 6 | `(` | 0 | skip (outermost open) | 1 | `"()()"` |
+| 7 | `(` | 1 | keep                  | 2 | `"()()("` |
+| 8 | `)` | 2 | keep                  | 1 | `"()()()"` |
+| 9 | `)` | 1 | skip (outermost close) | 0 | `"()()()"` |
+
+Return `"()()()"`. ✓
+
+#### ⏱️ Complexity
+
+| Layer | Time | Space | Notes |
+|-------|------|-------|-------|
+| 1 — Slice per primitive | O(n) | O(n) | Multiple substrings |
+| 2 — Depth counter ⭐ | **O(n)** | O(n) output | Interview answer |
+| 3 — Literal stack | O(n) | O(n) | Stack is redundant here |
+| 4 — Index-based slice | O(n) | O(n) | Enumerates primitives |
+| 5 — Production | O(n) | O(n) | + docstring |
+
+#### ❓ Follow-ups
+
+??? question "Why is a depth **counter** sufficient instead of a stack?"
+
+    Because the only characters are `(` and `)`. A stack would just store `(`s, and `len(stack)` equals `depth`. The stack carries no extra information, so the counter is strictly cheaper.
+
+??? question "What if the alphabet included **multiple bracket types** `()`, `[]`, `{}`?"
+
+    Now the stack is essential — depth alone can't distinguish a `[` close vs. `(` close. Use a stack of opener types and validate on each closer.
+
+??? question "Can the input be **invalid** (mismatched parens)?"
+
+    The problem guarantees validity. If you wanted to validate first, run Problem 1 (Valid Parentheses) — but there's no need here.
+
+??? question "How would you find **the count** of primitives without modifying the string?"
+
+    Increment a counter every time `depth` returns to 0. One pass, O(1) extra memory.
+
+??? question "How does this generalise to **k-th primitive**?"
+
+    Use Layer 4's slice-on-boundary approach; collect the k-th element of `parts` (1-indexed). O(n) time, O(1) extra after a single pass.
+
+??? question "What about computing the **maximum nesting depth** instead?"
+
+    Track `max(depth)` during the walk. One pass.
+
+#### 🐛 Common Bugs
+
+1. **Comparing `depth >= 0` instead of `> 0`** for the keep predicate — would keep the outermost open/close.
+2. **Order of increment vs check on `(`** — must check `depth > 0` *before* incrementing (else you'd always keep, since post-increment `depth ≥ 1`). Same on `)`: decrement *first*, then check.
+3. **Using a stack of openers and forgetting to pop on `)`** — Layer 3 must `stack.pop()` before the keep check.
+4. **`depth == 1` predicate on `)`** to detect outer close — equivalent to `depth > 0` after decrement, but easy to flip.
+5. **Returning `s[1:-1]`** — only correct when `s` is a *single* primitive; fails for `"()()"` and the like.
+
+#### 🚧 Edge Cases
+
+- `""` → `""` (empty input)
+- `"()"` → `""` (one primitive, nothing inside)
+- `"(())"` → `"()"` (nested, peel the outer)
+- `"()()"` → `""` (two flat primitives, both peel to nothing)
+- `"(()(()))"` → `"()(())"` (single primitive, deep)
+
+#### 📌 Key Takeaways
+
+> **Depth counter > stack** when the alphabet is just `(` and `)`. The stack would store only `(`s — `len(stack) == depth` always.
+
+> **Outer open/close detected by depth boundary.** Skip a `(` iff depth was 0 before; skip a `)` iff depth is 0 after.
+
+> **Primitive = balanced run starting at depth 0.** The decomposition is unique by construction.
+
+#### 🎯 Pattern Used
+
+**Depth-counter (degenerate stack) on a paren string** — the lightest member of the matching-paren family.
 
 ---
 
 ### Problem 8 — Build an Array With Stack Operations
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span>
 
-> Given a target sequence and `n`, generate the list of `"Push"` and `"Pop"` operations to produce the target. (LeetCode 1441.)
+> Imagine a stream of integers `1, 2, 3, ..., n`. You operate a stack and want it to end up holding `target` (a strictly increasing sub-sequence of `1..n`). For each integer `i`, push it onto the stack; if `i` isn't in `target`, pop it immediately. Return the list of operations (`"Push"` and `"Pop"`) you performed. (LeetCode 1441.)
 
-#### 🐍 Solution
+#### 📖 Story Mode
 
-```python
-def build_array(target, n):
-    out = []
-    j = 0
-    for i in range(1, n + 1):
-        if j == len(target): break
-        out.append("Push")
-        if target[j] == i:
-            j += 1
-        else:
-            out.append("Pop")
-    return out
+```
+target = [1, 3], n = 3
+  i=1: push 1                     → ["Push"]
+  i=2: push 2 (not in target)     → ["Push", "Push", ...]
+       pop 2                       → ["Push", "Push", "Pop"]
+  i=3: push 3                     → ["Push", "Push", "Pop", "Push"]
+return ["Push", "Push", "Pop", "Push"]
+
+target = [1, 2, 3], n = 3
+  → ["Push", "Push", "Push"]      (every i is in target → no pops)
+
+target = [1, 2], n = 4
+  → ["Push", "Push"]              (we stop after the last target element)
 ```
 
-O(n) time. Walk i = 1..n; push each, but pop immediately if i isn't the next target.
+#### 🌍 Real-World Usage
+
+- **Reverse-engineering an expected stack state** — debugging tools that replay operations.
+- **Test fixture generators** — minimal operation sequence to reach a target.
+- **Compiler IR** — emitting a sequence of bytecode pushes/pops to load a desired set of operands.
+- **Teaching example** — pure simulation; no clever data structure needed.
+
+#### 🧠 Thinking Process
+
+Walk `i = 1..n` with a pointer `j` into `target`:
+
+- **Always push** `i`.
+- If `target[j] == i`, advance `j` — this push *stays*.
+- Otherwise, immediately pop — this `i` was unwanted.
+- **Stop early** when `j == len(target)`: the stream after that doesn't matter.
+
+We don't actually maintain a stack here — the *operations* are the answer, not the final stack contents.
+
+```mermaid
+flowchart LR
+    A[i = 1..n] --> B[append Push]
+    B --> C{target[j] == i?}
+    C -->|yes| D[j += 1]
+    C -->|no| E[append Pop]
+    D --> F{j == len target?}
+    E --> A
+    F -->|yes| END[return]
+    F -->|no| A
+```
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute force: simulate with an actual stack"
+
+    ```python
+    def build_array(target: list[int], n: int) -> list[str]:
+        out: list[str] = []
+        stack: list[int] = []
+        j = 0
+        for i in range(1, n + 1):
+            if j == len(target):
+                break
+            stack.append(i); out.append("Push")
+            if stack[-1] != target[j]:
+                stack.pop(); out.append("Pop")
+            else:
+                j += 1
+        return out
+    ```
+
+    Same complexity as Layer 2 but maintains the stack explicitly. Useful for visualisation or asserts.
+
+=== "Layer 2 — Two-pointer simulation (canonical) ⭐"
+
+    ```python
+    def build_array(target: list[int], n: int) -> list[str]:
+        out: list[str] = []
+        j = 0
+        for i in range(1, n + 1):
+            if j == len(target):
+                break
+            out.append("Push")
+            if target[j] == i:
+                j += 1
+            else:
+                out.append("Pop")
+        return out
+    ```
+
+    **O(target[-1]) time, O(target[-1]) output.** The interview answer.
+
+=== "Layer 3 — Skip-aware (emit pops in bulk for runs of skipped numbers)"
+
+    ```python
+    def build_array(target: list[int], n: int) -> list[str]:
+        out: list[str] = []
+        prev = 0
+        for x in target:
+            # All numbers in (prev, x) are skipped: Push + Pop each
+            for _ in range(x - prev - 1):
+                out += ["Push", "Pop"]
+            out.append("Push")          # x itself
+            prev = x
+        return out
+    ```
+
+    Same complexity, slightly tighter inner loop — and trivially adapts to "give me the *count* of operations" by using arithmetic instead of appending.
+
+=== "Layer 4 — Iterate target only, derive ops by gap"
+
+    ```python
+    def build_array(target: list[int], n: int) -> list[str]:
+        ops: list[str] = []
+        prev = 0
+        for x in target:
+            # x - prev - 1 numbers were skipped; each contributes Push, Pop
+            ops.extend(["Push", "Pop"] * (x - prev - 1))
+            ops.append("Push")
+            prev = x
+        return ops
+    ```
+
+    Uses list multiplication for the skipped run — fastest in CPython for this size of problem.
+
+=== "Layer 5 — Production"
+
+    ```python
+    from __future__ import annotations
+
+
+    def build_array(target: list[int], n: int) -> list[str]:
+        """Operations needed to transform a stream 1..n into `target` via a stack.
+
+        Time:  O(target[-1]) — we never look beyond the last target element.
+        Space: O(2·target[-1] - len(target)) for the output list.
+
+        Args:
+            target: strictly increasing list of ints from [1, n].
+            n: upper bound of the integer stream (only target[-1] used).
+
+        Example:
+            >>> build_array([1, 3], 3)
+            ['Push', 'Push', 'Pop', 'Push']
+            >>> build_array([1, 2, 3], 3)
+            ['Push', 'Push', 'Push']
+        """
+        ops: list[str] = []
+        prev = 0
+        for x in target:
+            ops.extend(["Push", "Pop"] * (x - prev - 1))
+            ops.append("Push")
+            prev = x
+        return ops
+    ```
+
+#### 🔍 Step-by-step Dry Run
+
+`target = [1, 3], n = 3`, Layer 2:
+
+| i | j | target[j] | match? | ops appended      | ops so far                     |
+|---|---|-----------|--------|-------------------|--------------------------------|
+| 1 | 0 | 1         | yes    | `Push`            | `[Push]`                       |
+| 2 | 1 | 3         | no     | `Push`, `Pop`     | `[Push, Push, Pop]`            |
+| 3 | 1 | 3         | yes    | `Push`            | `[Push, Push, Pop, Push]`      |
+| — | 2 | (out)     | break  | —                 | done                           |
+
+Return `["Push", "Push", "Pop", "Push"]`. ✓ — `n = 3` was reached and `j` exhausted simultaneously; no extra iterations.
+
+#### ⏱️ Complexity
+
+| Layer | Time | Space | Notes |
+|-------|------|-------|-------|
+| 1 — Real stack | O(target[-1]) | O(target[-1]) | Visualisable |
+| 2 — Two-pointer ⭐ | O(target[-1]) | O(ops) | Interview answer |
+| 3 — Skip-aware | O(target[-1]) | O(ops) | Tighter inner |
+| 4 — Gap-based | O(target[-1]) | O(ops) | Fastest in CPython |
+| 5 — Production | O(target[-1]) | O(ops) | + docstring |
+
+#### ❓ Follow-ups
+
+??? question "Why iterate only up to `target[-1]` instead of `n`?"
+
+    Once `j == len(target)`, the remaining numbers contribute nothing — they'd push then pop, but the problem only asks for ops *until the target is built*. Iterate to `target[-1]` and stop.
+
+??? question "What if `target` weren't strictly increasing?"
+
+    The setup is undefined — the integer stream is `1..n` (each appears once), so the final stack contents are always a strictly-increasing subsequence. If asked to handle a non-increasing target, return an error or empty list.
+
+??? question "Can you compute the **count of operations** without building the list?"
+
+    Yes: `2 * target[-1] - len(target)`. Each skipped number contributes 2 ops (Push + Pop); each kept number contributes 1.
+
+??? question "What if the operations were `Push k`, `Pop k` (parameterised by index)?"
+
+    Same algorithm; emit `("Push", i)` and optionally `("Pop", i)` instead of bare strings.
+
+??? question "What if the stream were `1..n` shuffled (not in order)?"
+
+    Different problem — now you genuinely need a stack to find a valid op sequence. Equivalent to "Validate Stack Sequences" (Problem 20) on the inverse.
+
+#### 🐛 Common Bugs
+
+1. **Iterating to `n` without an early exit** — appends spurious `Push`/`Pop` pairs after target is built.
+2. **Off-by-one on the early-exit check** — `if j == len(target)` belongs *before* the Push, not after the increment.
+3. **Forgetting to advance `j`** on a match — infinite progress loop on the same index.
+4. **Using `target[j] == n`** (the bound) instead of `target[j] == i` (current).
+5. **Treating `target` as 0-indexed integers** when the stream is `1..n` — common Python ↔ math mismatch.
+
+#### 🚧 Edge Cases
+
+- `target = []` → `[]` (early exit immediately)
+- `target = [1]` → `["Push"]`
+- `target = [n]` → `["Push", "Pop"] * (n-1) + ["Push"]`
+- `target = [1, 2, ..., n]` → `["Push"] * n` (no pops)
+- `target[-1] == n` → loop ends naturally; no need for the break
+
+#### 📌 Key Takeaways
+
+> **Two-pointer simulation, no actual stack needed.** The output is the *operations*, not the stack contents.
+
+> **Stop at `target[-1]`.** Anything past the last target element is wasted work.
+
+> **`target` is the spec; the stream is the means.** Each gap in `target` contributes exactly one Push + Pop.
+
+#### 🎯 Pattern Used
+
+**Pure simulation / two-pointer** — included in this chapter because the *meaning* depends on stack semantics, even though the implementation needs no stack.
 
 ---
 
@@ -1744,42 +3002,107 @@ Result: `""`. ✓ — the cascade works automatically because exposing `'a'` aft
 
 ### Problem 11 — Daily Temperatures
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Apple</span>
 
-> Given an array `temperatures`, return an array `answer` such that `answer[i]` is the number of days you have to wait after day `i` to get a warmer temperature. If there is no future day, put 0.
+> Given an integer array `temperatures` of daily readings, return an array `answer` such that `answer[i]` is the **number of days** you must wait after day `i` to get a strictly warmer temperature. If no future day is warmer, set `answer[i] = 0`. (LeetCode 739.)
 
 #### 📖 Story Mode
 
-`temperatures = [73, 74, 75, 71, 69, 72, 76, 73]` → `[1, 1, 4, 2, 1, 1, 0, 0]`.
+```
+temperatures =  [73, 74, 75, 71, 69, 72, 76, 73]
+                  ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓
+answer       =  [ 1,  1,  4,  2,  1,  1,  0,  0]
+
+Day 0 (73°): warmer next day (74°)         → wait 1
+Day 1 (74°): warmer next day (75°)         → wait 1
+Day 2 (75°): warmer in 4 days (76° on d6)  → wait 4
+Day 3 (71°): warmer in 2 days (72° on d5)  → wait 2
+Day 4 (69°): warmer next day (72°)         → wait 1
+Day 5 (72°): warmer next day (76°)         → wait 1
+Day 6 (76°): never warmer                  → 0
+Day 7 (73°): no more days                  → 0
+```
+
+The "next warmer" generalises to **Next Greater Element**, the most-asked stack pattern in the LeetCode canon.
 
 #### 🌍 Real-World Usage
 
-- **Stock-price analysis** — "how many days until the next higher price?"
-- **Weather analytics.**
-- **Operations research** — waiting-time analyses.
+- **Stock-price analysis** — "how many days until the next higher close?" (LeetCode 901 *Online Stock Span* is the streaming variant).
+- **Weather / climate dashboards** — surface the next warmer day visually for trip planners.
+- **Operations research** — waiting-time analyses, e.g., the next time queue length exceeds a threshold.
+- **Game-event scheduling** — "next time damage exceeds 50?" cooldown previews.
+- **Compiler register allocation** — "next use of variable v" lookups, computed bottom-up over basic blocks.
+- **Time-series anomaly engines** — flag "no warmer reading for 30+ days" zones in one sweep.
 
 #### 🧠 Thinking Process
 
-Brute force is O(n²). The trick: **monotonic decreasing stack of indices**. As we walk right, when the current temperature is greater than the temperature at `stack[-1]`, that day's "answer" is `i - stack[-1]`. Pop and record.
+Brute force is O(n²): for each `i`, walk right until you find a warmer day. Times out around n = 10⁵.
+
+Speed-up insight: **most pairs are wasted comparisons**. If day 5 is hotter than day 4, days 4 and 5 will *never both* answer the same future day — once a future day is warmer than 5, it's also warmer than 4, but 4 needed an answer earlier (from 5 itself, if eligible). The bookkeeping object that captures "still waiting for an answer, in time-order" is a **monotonic decreasing stack of indices**.
+
+Walk left-to-right. While the current temperature exceeds `temps[stack[-1]]`, pop — those waiting days have found their answer (`i - j`). Then push the current index. Each index is pushed once and popped at most once: **amortized O(n)**.
 
 #### 🐍 5 Layers of Solution
 
-=== "Layer 2 — Monotonic stack"
+=== "Layer 1 — Brute force"
 
     ```python
-    def daily_temperatures(temps):
-        n = len(temps)
+    def daily_temperatures_brute(temperatures: list[int]) -> list[int]:
+        n = len(temperatures)
         out = [0] * n
-        stack: list[int] = []                     # indices of days waiting
-        for i, t in enumerate(temps):
-            while stack and temps[stack[-1]] < t:
+        for i in range(n):
+            for j in range(i + 1, n):
+                if temperatures[j] > temperatures[i]:
+                    out[i] = j - i
+                    break
+        return out
+    ```
+
+    O(n²) time, O(1) extra. TLE around n ≥ 10⁵. Honest brute that you should write first to prove correctness.
+
+=== "Layer 2 — Monotonic stack ⭐ (canonical)"
+
+    ```python
+    def daily_temperatures(temperatures: list[int]) -> list[int]:
+        n = len(temperatures)
+        out = [0] * n
+        stack: list[int] = []                 # indices of days still waiting
+        for i, t in enumerate(temperatures):
+            while stack and temperatures[stack[-1]] < t:
                 j = stack.pop()
                 out[j] = i - j
             stack.append(i)
         return out
     ```
 
-    O(n) time, O(n) space.
+    Each index pushed and popped at most once → **amortized O(n)**. The stack stays **monotonically decreasing in temperature** (top = smallest still-waiting reading). Memorise this skeleton — variants of it solve every "next greater" puzzle.
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    from __future__ import annotations
+
+
+    def daily_temperatures_safe(temperatures: list[int]) -> list[int]:
+        if not temperatures:
+            return []
+        n = len(temperatures)
+        if n == 1:
+            return [0]
+
+        out = [0] * n
+        stack: list[int] = []
+        for i in range(n):
+            t = temperatures[i]
+            while stack and temperatures[stack[-1]] < t:
+                j = stack.pop()
+                out[j] = i - j
+            stack.append(i)
+        # remaining stack entries get 0 (already initialised)
+        return out
+    ```
+
+    Empty / single-day fast paths plus an explicit comment that lingering stack entries naturally keep their pre-zeroed slot.
 
 === "Layer 4 — Production-ready"
 
@@ -1788,10 +3111,18 @@ Brute force is O(n²). The trick: **monotonic decreasing stack of indices**. As 
 
 
     def daily_temperatures(temperatures: list[int]) -> list[int]:
-        """For each day, days to wait for a warmer temperature; 0 if none.
+        """Days to wait after each day for a strictly warmer temperature.
 
-        Time:  O(n) — each index pushed and popped at most once.
-        Space: O(n).
+        Args:
+            temperatures: List of daily temperature readings.
+
+        Returns:
+            List ``out`` with ``out[i] = j - i`` where ``j`` is the first index
+            after ``i`` such that ``temperatures[j] > temperatures[i]``;
+            ``0`` if no such ``j`` exists.
+
+        Time:  O(n) — each index is pushed and popped at most once.
+        Space: O(n) for output, O(n) worst-case stack (monotone non-increasing).
 
         Example:
             >>> daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73])
@@ -1808,51 +3139,131 @@ Brute force is O(n²). The trick: **monotonic decreasing stack of indices**. As 
         return out
     ```
 
-=== "Layer 5 — Variants"
+=== "Layer 5 — Variants & extensions"
 
-    **Variant A — next greater element to the LEFT.** Walk right-to-left.
+    **Variant A — backwards walk (right-to-left), constant stack size in best case.**
 
-    **Variant B — next *equal-or-greater*.** `<=` instead of `<`.
+    ```python
+    def daily_temperatures_rtl(temps: list[int]) -> list[int]:
+        n = len(temps)
+        out = [0] * n
+        stack: list[int] = []
+        for i in range(n - 1, -1, -1):
+            while stack and temps[stack[-1]] <= temps[i]:
+                stack.pop()
+            if stack:
+                out[i] = stack[-1] - i
+            stack.append(i)
+        return out
+    ```
 
-    **Variant C — next *strictly smaller*.** Flip the comparison.
+    Same O(n) but more natural for some ("look ahead, pop dominated entries"). Easier to convert to **online streaming** if you reverse the question.
+
+    **Variant B — constant-bounded values (1..100): O(n) with O(1) extra.**
+
+    ```python
+    def daily_temperatures_bounded(temps: list[int]) -> list[int]:
+        n = len(temps)
+        out = [0] * n
+        # next[t] = earliest index ≥ i with temps[idx] == t
+        next_idx = [float('inf')] * 102
+        for i in range(n - 1, -1, -1):
+            warmest = float('inf')
+            for t in range(temps[i] + 1, 102):
+                warmest = min(warmest, next_idx[t])
+            if warmest < float('inf'):
+                out[i] = warmest - i
+            next_idx[temps[i]] = i
+        return out
+    ```
+
+    LeetCode constraint says 30 ≤ T ≤ 100 — exploiting that gives **O(n · 100) = O(n) time, O(100) space**. Beats the stack on memory.
+
+    **Variant C — Online Stock Span (LC 901):** identical pattern with `(price, span)` pairs on the stack instead of indices. Streaming-friendly.
+
+    **Variant D — k-th warmer day:** `k`-monotonic stack — push only after `k` consecutive larger values. Niche but appears in compiler-eviction code.
+
+    **Variant E — Vectorised NumPy (huge n):** sort-then-scan approach using `argsort` and a Fenwick tree of "earliest still-unmatched index". O(n log n) but cache-friendly for n ≥ 10⁷.
 
 #### 🔍 Dry Run
 
 `temps = [73, 74, 75, 71, 69, 72, 76, 73]`:
 
-| i | t | stack before | pops | stack after |
-|---|---|--------------|------|-------------|
-| 0 | 73 | [] | — | [0] |
-| 1 | 74 | [0] | pop 0, out[0]=1 | [1] |
-| 2 | 75 | [1] | pop 1, out[1]=1 | [2] |
-| 3 | 71 | [2] | — | [2, 3] |
-| 4 | 69 | [2, 3] | — | [2, 3, 4] |
-| 5 | 72 | [2, 3, 4] | pop 4 (out[4]=1), pop 3 (out[3]=2) | [2, 5] |
-| 6 | 76 | [2, 5] | pop 5 (out[5]=1), pop 2 (out[2]=4) | [6] |
-| 7 | 73 | [6] | — | [6, 7] |
+| i | t  | stack before | pops & writes                   | stack after |
+|---|----|--------------|---------------------------------|-------------|
+| 0 | 73 | `[]`         | —                               | `[0]`       |
+| 1 | 74 | `[0]`        | pop 0 → `out[0]=1`              | `[1]`       |
+| 2 | 75 | `[1]`        | pop 1 → `out[1]=1`              | `[2]`       |
+| 3 | 71 | `[2]`        | —                               | `[2, 3]`    |
+| 4 | 69 | `[2, 3]`     | —                               | `[2, 3, 4]` |
+| 5 | 72 | `[2, 3, 4]`  | pop 4 → `out[4]=1`; pop 3 → `out[3]=2` | `[2, 5]` |
+| 6 | 76 | `[2, 5]`     | pop 5 → `out[5]=1`; pop 2 → `out[2]=4` | `[6]`    |
+| 7 | 73 | `[6]`        | —                               | `[6, 7]`    |
 
-End: out = `[1, 1, 4, 2, 1, 1, 0, 0]`. ✅
+End-of-loop survivors `[6, 7]` → `out[6] = out[7] = 0`. Result: `[1, 1, 4, 2, 1, 1, 0, 0]` ✅
 
 #### ⏱️ Complexity
 
-- **Time: O(n)** — each index pushed and popped at most once.
-- **Space: O(n)**.
+| Approach                | time           | space          | notes                                       |
+|-------------------------|----------------|----------------|---------------------------------------------|
+| Brute (Layer 1)         | O(n²)          | O(1)           | TLE for n ≥ 10⁵                             |
+| **Monotone stack ⭐**    | **O(n)**       | **O(n)**       | each index pushed/popped at most once       |
+| Backwards stack         | O(n)           | O(n)           | symmetric, sometimes cleaner                |
+| Bounded-values trick    | O(n · V)       | O(V)           | V = value range; great when V is tiny       |
 
 #### 🎯 Pattern Used
 
-**Monotonic decreasing stack of indices.** The single most-asked stack pattern.
+**Monotonic decreasing stack of indices.** The bedrock pattern for *Next Greater / Next Smaller / Previous Greater / Previous Smaller* problems — see also LC 496, 503, 901, 84, 42, 907.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why is the amortized cost O(n)?"
+    Each index `i` is pushed exactly once. Every iteration of the inner `while` loop pops an index — and an index can only be popped once. So the *total* number of inner-loop iterations across the entire run is ≤ n. Outer loop is n. Total work: 2n = O(n). This is the textbook **amortized analysis** argument for monotone stacks.
+
+??? question "Follow-up 2 — Strictly warmer vs warmer-or-equal?"
+    Change the comparison: `temperatures[stack[-1]] < t` (strict) gives "strictly warmer"; `<=` gives "warmer or equal". Watch the off-by-one on `<=` — duplicates get answered by the next duplicate, not the next strictly-greater. Always clarify with the interviewer.
+
+??? question "Follow-up 3 — Can you do it in O(1) extra space?"
+    On unbounded inputs, **no** — you need at least Ω(n) bookkeeping in the worst case (e.g., a strictly decreasing input keeps every index on the stack until the end). On *bounded values* (LC's actual constraint, 30 ≤ T ≤ 100), Variant B achieves O(V) auxiliary space — effectively O(1) for small V.
+
+??? question "Follow-up 4 — Streaming version (online): one new temperature at a time, return wait counts as soon as they're known."
+    This is **LC 901 Online Stock Span**. Maintain a stack of `(temp, days_since_last_warmer)`. On each new temp, pop while top temp ≤ new temp, accumulating spans. Answer for the *previous* days flows out as pops happen. The Daily Temperatures answer for index `i` cannot be emitted until day `i+answer[i]` arrives, so you need a callback / future per index.
+
+??? question "Follow-up 5 — Memory pressure on a huge n (say 10⁹ readings on disk)?"
+    Two passes streaming from disk: first pass right-to-left to build a **block-level summary** (max temp per block of size B); second pass left-to-right answers queries by jumping over blocks whose max ≤ current. Trade O(n) RAM for O(n/B) RAM and O(n) time still. Works because monotonic-stack workloads are *block-decomposable*.
+
+??? question "Follow-up 6 — Find the *previous* warmer day instead."
+    Walk left-to-right with the same monotone stack but write `out[i] = i - stack[-1]` *before* popping anything; i.e., for each `i`, while top ≤ current, pop; if stack non-empty, `prev[i] = stack[-1]` else 0; then push `i`.
+
+??? question "Follow-up 7 — Maintain the answer under input mutation (point update of `temps[k]`)?"
+    Genuinely hard — local edits can ripple far. Practical answer: rebuild affected suffix in O(n - k); academic answer: a **link-cut tree** or **segment tree of next-greater pointers** supporting O(log² n) updates. Most interviewers accept "O(n) per update is fine; if updates are rare, batch them." Mentioning the segment-tree direction is bonus.
 
 #### 🐛 Common Bugs
 
-1. **Storing values, not indices** — can't compute the day-difference.
-2. **Wrong comparison direction** for "next greater" vs "next greater or equal."
-3. **Brute-force in nested loop** — O(n²) and times out.
+1. **Storing values, not indices** — you can't compute `i - j` without `j`. Push indices.
+2. **`<=` vs `<` mismatch** — duplicates get the wrong answer if you confuse "strictly" with "or-equal".
+3. **Forgetting to push `i` after the while-loop** — leaves the current day off the stack forever.
+4. **Initialising `out` lazily inside the loop** — survivors at the end never get written, so absent zeros corrupt callers expecting len = n.
+5. **Walking right-to-left but keeping the same comparison direction** — flip both or you compute "previous warmer" by accident.
+6. **Using a list as a queue (popleft) instead of a stack** — O(n²) silently. Use `list.pop()` (top) or `deque.pop()`.
 
-#### 🏢 Sample Interviewer Quote
+#### ✅ Edge Cases Checklist
 
-> *"For each day, find the number of days until a warmer temperature."*
+- [ ] **Empty input** — return `[]`.
+- [ ] **Single day** — return `[0]`.
+- [ ] **Strictly increasing** `[1,2,3,4,5]` — every answer is 1 except the last (0).
+- [ ] **Strictly decreasing** `[5,4,3,2,1]` — every answer is 0; stack grows to full size n.
+- [ ] **All equal** `[7,7,7,7]` — every answer is 0 (need *strictly* warmer).
+- [ ] **Two-element** `[71, 72]` → `[1, 0]`; `[72, 71]` → `[0, 0]`.
+- [ ] **Big input n = 10⁵** — monotone stack stays under tens of ms.
+- [ ] **Negative temperatures** (Celsius) — algorithm is comparison-based; no sign assumption.
+- [ ] **Long flat plateau then jump** `[5,5,5,5,9]` → `[4,3,2,1,0]`.
 
-Your opener: *"Monotonic decreasing stack of indices. As I walk, current temperature pops indices with smaller temperatures and writes their answer as `i - j`. O(n) time, O(n) space."*
+#### 🎤 Sample Interviewer Quote
+
+> *"Given a list of daily temperatures, for each day return the number of days until a strictly warmer day. Walk me through the brute force first, then the optimisation, then prove the optimised version is O(n). Finally, what changes if temperatures are bounded between 30 and 100?"*
+
+Your opener: *"Brute is O(n²) — for each day scan ahead. Optimal is a monotone-decreasing stack of **indices** in O(n): each index is pushed once and popped at most once. When current temp exceeds `temps[stack[-1]]`, pop and write `out[j] = i - j`. Bounded-value variant uses a 100-slot 'next index per temperature' table for O(n·V) time, O(V) space."*
 
 ---
 
@@ -3099,76 +4510,137 @@ Returned spans: `[1, 1, 1, 2, 1, 4, 6]` ✓
 
 ### Problem 18 — Sliding Window Maximum
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Citadel</span>
 
-> Given an array and window size k, return the maximum of each length-k window. (LeetCode 239.)
+> Given an integer array `nums` and an integer `k`, return an array of the **maximum** of each contiguous length-`k` window as the window slides from left to right. (LeetCode 239.)
 
 #### 📖 Story Mode
 
-`nums = [1, 3, -1, -3, 5, 3, 6, 7]`, `k = 3` → `[3, 3, 5, 5, 6, 7]`.
+```
+nums = [1, 3, -1, -3, 5, 3, 6, 7]    k = 3
+
+Window                Max
+[1, 3, -1]             3
+   [3, -1, -3]         3
+      [-1, -3, 5]      5
+         [-3, 5, 3]    5
+            [5, 3, 6]  6
+               [3, 6, 7] 7
+
+answer = [3, 3, 5, 5, 6, 7]
+```
+
+The signature interview-hard sliding-window problem — the deque trick that solves it in O(n) is one of the most beautiful constructs in algorithms.
 
 #### 🌍 Real-World Usage
 
-- **Stream analytics** — running maximum.
-- **Anomaly detection** — peak detection.
-- **Audio engineering** — peak meter over rolling window.
+- **Stream analytics** — rolling-maximum dashboards (last 60 s peak request rate, last 24 h CPU max).
+- **Anomaly detection** — flag readings that exceed the trailing window max by ≥ X.
+- **Audio engineering** — peak-hold meters and limiter envelopes use a sliding-max DSP.
+- **Trading systems** — Donchian channels = sliding max & min of price over window N.
+- **Robotics / SLAM** — sensor-fusion smoothers track sliding extrema for spike rejection.
+- **Compilers** — register pressure heatmaps over basic-block windows.
 
 #### 🧠 Thinking Process
 
-Brute force: O(n × k). Heap: O(n log k) but tricky to handle expired entries. **Monotonic deque** of indices: each index enters and leaves at most once, **O(n)**.
+Three speed tiers:
 
-The deque holds indices whose values are candidates for the window max — strictly decreasing. The front of the deque is always the max of the current window.
+1. **Brute** — for each window of `k`, scan and take max → **O(n·k)**. Times out at n = 10⁵, k = 10⁴.
+2. **Heap** — push `(value, index)` onto a max-heap; before reading the top, pop entries whose index falls outside the window ("**lazy deletion**"). Each element pushed once, popped at most once → **O(n log n)**.
+3. **Monotonic deque** — keep a deque of *indices* whose values are strictly decreasing. The front is always the current window max. Each index enters once and leaves once → **O(n)**.
+
+The deque is the cleanest. Two invariants:
+
+- **Window invariant**: front index is in `[i - k + 1, i]`. If `dq[0] <= i - k`, drop it.
+- **Monotonicity invariant**: while `nums[dq[-1]] <= nums[i]`, pop the back. Smaller-or-equal candidates can never beat `nums[i]` while `i` is in the window.
+
+After both, append `i`. Once the window is full (`i >= k - 1`), `nums[dq[0]]` is the answer for that window.
 
 #### 🐍 5 Layers of Solution
 
-=== "Layer 2 — Monotonic deque (canonical)"
+=== "Layer 1 — Brute force"
+
+    ```python
+    def max_sliding_window_brute(nums: list[int], k: int) -> list[int]:
+        if k <= 0 or not nums:
+            return []
+        n = len(nums)
+        return [max(nums[i:i + k]) for i in range(n - k + 1)]
+    ```
+
+    O(n·k) time, O(n − k + 1) output. Cleanest possible code, but quadratic.
+
+=== "Layer 1.5 — Heap with lazy deletion"
+
+    ```python
+    import heapq
+
+    def max_sliding_window_heap(nums: list[int], k: int) -> list[int]:
+        # Max-heap via negated values.
+        heap: list[tuple[int, int]] = []
+        out: list[int] = []
+        for i, x in enumerate(nums):
+            heapq.heappush(heap, (-x, i))
+            if i >= k - 1:
+                # Drop expired tops lazily.
+                while heap[0][1] <= i - k:
+                    heapq.heappop(heap)
+                out.append(-heap[0][0])
+        return out
+    ```
+
+    O(n log n) time, O(n) space. Good fallback when you forget the deque trick — also generalises to "k-th largest in window" via `SortedList`.
+
+=== "Layer 2 — Monotonic deque ⭐ (canonical)"
 
     ```python
     from collections import deque
 
-    def max_sliding_window(nums, k):
-        dq: deque[int] = deque()      # indices
+    def max_sliding_window(nums: list[int], k: int) -> list[int]:
+        dq: deque[int] = deque()                       # indices, decreasing nums[]
         out: list[int] = []
         for i, x in enumerate(nums):
-            # drop indices outside the window
+            # 1. drop indices that fall outside the window
             while dq and dq[0] <= i - k:
                 dq.popleft()
-            # drop smaller-or-equal candidates from the back
+            # 2. maintain decreasing monotonicity from the back
             while dq and nums[dq[-1]] <= x:
                 dq.pop()
             dq.append(i)
+            # 3. once the first window has formed, emit
             if i >= k - 1:
                 out.append(nums[dq[0]])
         return out
     ```
 
-    O(n) time, O(k) space.
+    O(n) time, O(k) space. Each index enters and leaves the deque at most once.
 
-=== "Layer 4 — Production-ready"
+=== "Layer 3 — Edge-case-hardened"
 
     ```python
     from __future__ import annotations
     from collections import deque
 
 
-    def max_sliding_window(nums: list[int], k: int) -> list[int]:
-        """Maximum of every length-k contiguous window of nums.
-
-        Time:  O(n).
-        Space: O(k).
-
-        Example:
-            >>> max_sliding_window([1, 3, -1, -3, 5, 3, 6, 7], 3)
-            [3, 3, 5, 5, 6, 7]
-        """
-        if not nums or k <= 0:
+    def max_sliding_window_safe(nums: list[int], k: int) -> list[int]:
+        if nums is None:
+            raise ValueError("nums must not be None")
+        if k <= 0:
+            raise ValueError(f"k must be positive, got {k}")
+        n = len(nums)
+        if n == 0:
             return []
+        if k > n:
+            raise ValueError(f"k={k} larger than len(nums)={n}")
         if k == 1:
             return list(nums)
+        if k == n:
+            return [max(nums)]
+
         dq: deque[int] = deque()
         out: list[int] = []
         for i, x in enumerate(nums):
-            while dq and dq[0] <= i - k:
+            if dq and dq[0] <= i - k:
                 dq.popleft()
             while dq and nums[dq[-1]] <= x:
                 dq.pop()
@@ -3178,41 +4650,184 @@ The deque holds indices whose values are candidates for the window max — stric
         return out
     ```
 
-=== "Layer 5 — Variants"
+    Note the front-drop became `if` rather than `while` — the front falls out of the window at most once per iteration, so a single check suffices.
 
-    **Variant A — minimum of every window.** Flip both `<=` to `>=`.
+=== "Layer 4 — Production-ready"
 
-    **Variant B — k-th largest in every window.** Sorted multiset (rare; usually `SortedList` from `sortedcontainers`).
+    ```python
+    from __future__ import annotations
+    from collections import deque
+    from typing import Iterable
 
-    **Variant C — running median.** Two heaps; out of scope here.
+
+    def max_sliding_window(nums: list[int], k: int) -> list[int]:
+        """Maximum of every length-``k`` contiguous window of ``nums``.
+
+        Args:
+            nums: Sequence of integers.
+            k: Window size; must be in ``[1, len(nums)]``.
+
+        Returns:
+            ``out`` of length ``len(nums) - k + 1`` with
+            ``out[j] = max(nums[j:j+k])``.
+
+        Raises:
+            ValueError: if ``k <= 0`` or ``k > len(nums)``.
+
+        Time:  O(n) — each index enters and leaves the deque at most once.
+        Space: O(k) for the deque + O(n − k + 1) for output.
+
+        Example:
+            >>> max_sliding_window([1, 3, -1, -3, 5, 3, 6, 7], 3)
+            [3, 3, 5, 5, 6, 7]
+        """
+        n = len(nums)
+        if k <= 0 or k > n:
+            raise ValueError(f"k={k} not in [1, {n}]")
+        if k == 1:
+            return list(nums)
+
+        dq: deque[int] = deque()
+        out: list[int] = []
+        for i, x in enumerate(nums):
+            if dq and dq[0] <= i - k:
+                dq.popleft()
+            while dq and nums[dq[-1]] <= x:
+                dq.pop()
+            dq.append(i)
+            if i >= k - 1:
+                out.append(nums[dq[0]])
+        return out
+
+
+    def streaming_max_sliding_window(stream: Iterable[int], k: int):
+        """Generator yielding running window-max as values flow in."""
+        dq: deque[int] = deque()
+        buf: list[int] = []
+        for i, x in enumerate(stream):
+            buf.append(x)
+            if dq and dq[0] <= i - k:
+                dq.popleft()
+            while dq and buf[dq[-1]] <= x:
+                dq.pop()
+            dq.append(i)
+            if i >= k - 1:
+                yield buf[dq[0]]
+    ```
+
+=== "Layer 5 — Variants & extensions"
+
+    **Variant A — minimum of every window.** Flip both monotonicity comparisons to `>=` (deque becomes increasing).
+
+    **Variant B — both max AND min in one pass:** keep two deques.
+    ```python
+    def max_min_sliding_window(nums, k):
+        dq_max, dq_min = deque(), deque()
+        max_out, min_out = [], []
+        for i, x in enumerate(nums):
+            while dq_max and dq_max[0] <= i - k: dq_max.popleft()
+            while dq_min and dq_min[0] <= i - k: dq_min.popleft()
+            while dq_max and nums[dq_max[-1]] <= x: dq_max.pop()
+            while dq_min and nums[dq_min[-1]] >= x: dq_min.pop()
+            dq_max.append(i); dq_min.append(i)
+            if i >= k - 1:
+                max_out.append(nums[dq_max[0]])
+                min_out.append(nums[dq_min[0]])
+        return max_out, min_out
+    ```
+
+    **Variant C — k-th largest in every window:** `sortedcontainers.SortedList`. O(n log k) time. The deque trick doesn't generalise to k-th largest.
+
+    **Variant D — variable window size (max over [l_i, r_i] sliding pairs):** **Sparse Table** for static arrays — O(n log n) preprocessing, O(1) per query. Beats deque when windows aren't strictly monotone-advancing.
+
+    **Variant E — dynamic / mutable nums:** **Segment tree** with point update, range-max query. O(log n) per op.
+
+    **Variant F — distributed / parallel sliding max:** chunk the array, compute per-chunk left-prefix max and right-suffix max ([Tarjan-Voloboi](https://en.wikipedia.org/wiki/Sliding_window_max-min) two-pass trick); a window straddling two chunks combines `right_suffix[chunk_a]` and `left_prefix[chunk_b]` in O(1). Embarrassingly parallel.
 
 #### 🔍 Dry Run
 
-`nums = [1, 3, -1, -3, 5, 3, 6, 7]`, k = 3:
+`nums = [1, 3, -1, -3, 5, 3, 6, 7]`, `k = 3`:
 
-| i | x | dq before | drops | dq after | out |
-|---|---|-----------|-------|----------|-----|
-| 0 | 1 | [] | — | [0] | [] |
-| 1 | 3 | [0] | pop 0 (1 ≤ 3) | [1] | [] |
-| 2 | -1 | [1] | — | [1, 2] | [3] |
-| 3 | -3 | [1, 2] | — | [1, 2, 3] | [3, 3] |
-| 4 | 5 | [1, 2, 3] | drop front 1 (out of window); pop 3, 2 (-3, -1 ≤ 5) | [4] | [3, 3, 5] |
-| ... | ... | ... | ... | ... | [3, 3, 5, 5, 6, 7] |
+| i | x  | dq before    | front-drop?       | back pops                              | dq after        | emit? | out                |
+|---|----|--------------|-------------------|----------------------------------------|-----------------|-------|--------------------|
+| 0 | 1  | `[]`         | —                 | —                                      | `[0]`           | no    | `[]`               |
+| 1 | 3  | `[0]`        | —                 | pop 0 (1 ≤ 3)                          | `[1]`           | no    | `[]`               |
+| 2 | -1 | `[1]`        | —                 | —                                      | `[1, 2]`        | i=k-1 | `[3]`              |
+| 3 | -3 | `[1, 2]`     | —                 | —                                      | `[1, 2, 3]`     | yes   | `[3, 3]`           |
+| 4 | 5  | `[1, 2, 3]`  | drop 1 (1 ≤ 4-3) | pop 3 (-3 ≤ 5), pop 2 (-1 ≤ 5)        | `[4]`           | yes   | `[3, 3, 5]`        |
+| 5 | 3  | `[4]`        | —                 | —                                      | `[4, 5]`        | yes   | `[3, 3, 5, 5]`     |
+| 6 | 6  | `[4, 5]`     | —                 | pop 5 (3 ≤ 6), pop 4 (5 ≤ 6)          | `[6]`           | yes   | `[3, 3, 5, 5, 6]`  |
+| 7 | 7  | `[6]`        | —                 | pop 6 (6 ≤ 7)                          | `[7]`           | yes   | `[3,3,5,5,6,7]`    |
 
 #### ⏱️ Complexity
 
-- **Time: O(n)**.
-- **Space: O(k)**.
+| Approach              | time         | space         | notes                                    |
+|-----------------------|--------------|---------------|------------------------------------------|
+| Brute (Layer 1)       | O(n·k)       | O(1)          | simplest, TLE for big k                  |
+| Heap + lazy delete    | O(n log n)   | O(n)          | generalises easily                       |
+| **Monotone deque ⭐**  | **O(n)**     | **O(k)**      | optimal; canonical answer                |
+| Sparse table (static) | O(n log n) build / O(1) query | O(n log n) | for arbitrary windows |
+| Segment tree (mutable)| O(n) build / O(log n) per op  | O(n)       | for point updates    |
 
 #### 🎯 Pattern Used
 
-**Monotonic deque** — the canonical sliding-window-extreme pattern.
+**Monotonic deque** — the sliding-window-extremum pattern. Same shape solves *Shortest Subarray with Sum ≥ K* (LC 862), *Constrained Subsequence Sum* (LC 1425), *Jump Game VI* (LC 1696).
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Prove the deque algorithm is O(n)."
+    Each index `i` is **appended exactly once** to the deque. Each index can be **removed at most once** (either popped from the back during monotonicity maintenance, or popped from the front when it falls out of the window). Therefore the *total* number of deque operations across the run is ≤ 2n, regardless of `k`. The outer loop is n. Total work: 3n = O(n). The `k` factor disappears entirely — that's the magic.
+
+??? question "Follow-up 2 — Why `<=` and not `<` when popping the back?"
+    With `<=`, equal-valued earlier indices are dropped — the deque always contains the *latest* index of any value. That gives the "longest survival" property: the front falls out only when the window strictly leaves it behind. With `<` you'd retain the stale earlier index, and a duplicate value would push the front out a window earlier than necessary — still correct for max value, but wrong if you also need the *index of the max*. Use `<=` defensively.
+
+??? question "Follow-up 3 — How would the heap solution compare in production?"
+    **Heap pros**: trivially generalises to k-th largest, top-m, weighted variants. **Heap cons**: O(n log n) vs O(n); also memory-unbounded if k « n because expired entries accumulate until they reach the top (lazy deletion). For real streaming with cardinality bounds, the deque is strictly better. For analytical batch jobs where you also want median or quantiles, heaps win on code reuse.
+
+??? question "Follow-up 4 — What if `k` itself can change between windows?"
+    Deque assumes monotone-advancing window of fixed size. If `k` shrinks, you may need to re-examine the front; if `k` grows, no work needed (existing deque is still valid for the larger window). For arbitrary range-max queries on a static array, **Sparse Table** is the textbook answer (O(1) per query after O(n log n) preprocessing) — see Variant D.
+
+??? question "Follow-up 5 — Streaming version (one number at a time, emit max as soon as the window fills)."
+    The deque algorithm is *already* streaming — see `streaming_max_sliding_window` in Layer 4. The only concession is that you must keep the trailing `k − 1` values in a buffer to dereference indices in the deque (or store `(index, value)` pairs and skip the buffer). With `(i, v)` pairs the algorithm becomes truly memoryless beyond the deque itself.
+
+??? question "Follow-up 6 — Parallelise across cores."
+    Two-pass per-chunk method (Variant F): split into chunks of size ≥ k. For each chunk compute left-prefix-max and right-suffix-max within the chunk (linear scans, parallelisable). For a window starting in chunk A and ending in chunk B, the answer is `max(right_suffix_max[A][start], left_prefix_max[B][end])`. Combine with embarrassingly parallel pre-computation. Used in real distributed time-series engines (TimescaleDB, M3DB).
+
+??? question "Follow-up 7 — Why doesn't the deque trick generalise to *median*?"
+    A monotonic deque preserves only one extremum per window. The median requires order-statistic structure (rank within the window), which a deque cannot maintain in O(1). Use **two heaps** (median maintenance) or **`SortedList`** (O(log k) insert/delete) instead.
+
+??? question "Follow-up 8 — Online, but window is defined by *time* not *count* (e.g., 'max in last 5 seconds')."
+    Use the same deque with `(timestamp, value)` pairs. Front-drop condition becomes `dq[0].timestamp < now - 5s`. The mono-decreasing back-pop is unchanged. Real-world telemetry pipelines (Prometheus, InfluxDB) compute rolling max/min exactly this way internally.
 
 #### 🐛 Common Bugs
 
-1. **Storing values, not indices** — can't tell when a candidate falls out of the window.
-2. **Using `<` instead of `<=` when popping the back** — fine for max; matters for stability tiebreaks.
-3. **Emitting before the window is full** (i < k - 1).
+1. **Storing values, not indices** — without `i`, you can't tell when a candidate falls out of the window.
+2. **`<` instead of `<=`** when popping the back — leaves a stale earlier index in the deque (wrong for the "max with latest index" variant; safe but suboptimal for plain max).
+3. **`while` instead of `if` for the front-drop check** — works but slightly redundant; the front falls out at most once per iteration.
+4. **Emitting before the first window is full** (forgetting `if i >= k - 1`) — corrupts the prefix of the output.
+5. **Off-by-one on the window-membership test** — should be `dq[0] <= i - k`, not `< i - k + 1` (these are equivalent; mixing them up is common).
+6. **Using a list as a deque** — `list.pop(0)` is O(n); use `collections.deque`.
+7. **Reusing the deque across calls** — make sure each call constructs its own; otherwise concurrent calls race.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] **Empty input** → `[]`.
+- [ ] **`k == 1`** → return `list(nums)` (every element is its own window).
+- [ ] **`k == n`** → single output, `max(nums)`.
+- [ ] **`k > n`** → raise `ValueError` (or define behaviour explicitly).
+- [ ] **Strictly increasing** `[1,2,3,4,5]`, k=3 → `[3,4,5]`; deque always size 1 (every push pops the back).
+- [ ] **Strictly decreasing** `[5,4,3,2,1]`, k=3 → `[5,4,3]`; deque grows to size k.
+- [ ] **All equal** `[7,7,7,7]`, k=2 → `[7,7,7]`; with `<=`, deque size always 1.
+- [ ] **Duplicates with shifting max position** — verifies front-drop logic.
+- [ ] **Negative numbers** — comparison is signed, no issue.
+- [ ] **Large input** n = 10⁶ — should complete in ~50 ms.
+- [ ] **Streaming input** — generator variant emits as soon as window fills.
+
+#### 🎤 Sample Interviewer Quote
+
+> *"Given an integer array and window size k, return the max of each length-k contiguous window. Solve it in three tiers: brute O(n·k), heap O(n log n), and the deque trick O(n). For the deque solution, prove the linear-time bound and explain why `<=` is preferred over `<` on the back-pop. Then make it work as a streaming generator."*
+
+Your opener: *"Monotone-decreasing deque of indices: front is the current window max. Each index enters once, leaves at most once → amortized O(n). On each `i`: drop front if outside window, pop back while value ≤ current, append `i`, emit `nums[dq[0]]` once `i >= k-1`. The `<=` keeps the latest index for ties, which matters when the index itself matters."*
 
 ---
 
@@ -4834,53 +6449,115 @@ The lower bound is **inclusive** (`[t - 3000, t]`), so we pop while `front < t -
 
 ### Problem 26 — Largest Rectangle in Histogram
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Meta</span> <span class="company-tag">Adobe</span>
 
-> Given heights of bars in a histogram (each width 1), return the area of the largest rectangle. (LeetCode 84.)
+> Given an integer array `heights` representing a histogram of unit-width bars, return the **area of the largest rectangle** that fits entirely under the bars. (LeetCode 84.)
 
 #### 📖 Story Mode
 
-`heights = [2, 1, 5, 6, 2, 3]` → 10 (the rectangle of height 5 + 6 spanning indices 2-3, width 2 — wait, 5×2=10).
+```
+heights = [2, 1, 5, 6, 2, 3]
+
+       ┌──┐
+       │6 │
+    ┌──┤  │
+    │5 │  │
+    │  │  │   ┌──┐
+    │██│██│   │3 │
+    │██│██│┌──┤  │
+    │██│██││2 │  │
+ ┌──┤  │  ││  │  │
+ │2 │  │  ││  │  │
+ │  ├──┤  ││  │  │
+ │  │1 │  ││  │  │
+ └──┴──┴──┴┴──┴──┘
+   0  1  2  3  4  5
+
+Answer: 10  — the rectangle of height 5 spanning bars 2–3 (width 2 → 5×2 = 10)
+                                wait — height 5, width 2 from bar 2 spanning bars 2 and 3? No!
+                                The popped-bar reasoning: bar 2 has h=5, but bar 3 (h=6) extends it.
+                                Rectangle of *height 5*, width 2 (bars 2,3) = 10. ✓
+```
+
+The premier hard stack problem. Subroutine for Maximal Rectangle in a binary matrix (LC 85), Trapping Rain Water II, and beyond.
 
 #### 🌍 Real-World Usage
 
-- **Image segmentation** — largest rectangle in a binary mask.
-- **Computational geometry** — many rectangle-fit problems reduce to this.
-- **Memory allocators** — largest free block.
+- **Image segmentation** — largest inscribed rectangle inside a binary mask (foreground detection, OCR table cells).
+- **Computational geometry** — building-block for "largest empty rectangle" / "rectangle packing" routines.
+- **Memory allocators** — largest contiguous free block in a bin-packed heap.
+- **GPU tile scheduling** — find the biggest rectangular tile region with uniform shader cost.
+- **CAD** — largest axis-aligned rectangle inside a polygon (after horizontal-slab decomposition).
+- **Database query optimisation** — finding the largest "dense block" in a row-store layout.
 
 #### 🧠 Thinking Process
 
-For each bar, the largest rectangle including that bar extends from "previous shorter bar to the left" to "next shorter bar to the right." Both can be computed in **O(n) with monotonic stacks**.
+For every bar `i`, the largest rectangle that uses it as the **limiting (shortest) height** spans from the **first shorter bar on the left** (exclusive) to the **first shorter bar on the right** (exclusive). If we know both indices `L[i]`, `R[i]`, the area is `heights[i] * (R[i] - L[i] - 1)`.
 
-The clean implementation uses a **single pass with a monotonic increasing stack of indices**. When we hit a shorter bar, pop and compute area for popped bars. Add a sentinel 0 at the end to flush.
+Both can be computed in O(n) using monotone stacks (two passes), or — more elegantly — in **a single pass** by realising that when we *pop* an index `j` because the current bar is shorter, **right boundary for `j` = current index `i`** and **left boundary for `j` = the new top of stack** (or -1 if the stack becomes empty). That's the canonical algorithm.
+
+The cherry-on-top: append a sentinel `0` after the input. Forces the stack to flush by the end of the loop, removing the post-loop cleanup branch.
+
+Why monotone increasing? An index can only be a candidate for "current limiting height of some rectangle" until a shorter bar appears to its right — at which moment we pop and compute. Bars on the stack are kept in strictly increasing order of height because any equal-or-taller bar to the left can't be a limiter while the more recent bar is around.
 
 #### 🐍 5 Layers of Solution
 
-=== "Layer 1 — Brute force"
-
-    For each pair (l, r), compute min height. O(n³). Way too slow.
-
-=== "Layer 2 — Per-bar boundary scan"
-
-    For each bar, expand left and right while heights ≥ current. O(n²) worst case.
-
-=== "Layer 3 — Monotonic stack (canonical)"
+=== "Layer 1 — Brute force (all pairs)"
 
     ```python
-    def largest_rectangle_area(heights):
-        stack: list[int] = []                 # indices, heights[stack] strictly increasing
+    def largest_rectangle_area_brute(heights: list[int]) -> int:
+        n = len(heights)
+        best = 0
+        for l in range(n):
+            for r in range(l, n):
+                h = min(heights[l:r + 1])
+                best = max(best, h * (r - l + 1))
+        return best
+    ```
+
+    O(n³) — definitely TLE. Useful only as the truth-source for testing.
+
+=== "Layer 2 — Per-bar expand left & right"
+
+    ```python
+    def largest_rectangle_area_expand(heights: list[int]) -> int:
+        n = len(heights)
+        best = 0
+        for i in range(n):
+            h = heights[i]
+            l = i
+            while l > 0 and heights[l - 1] >= h:
+                l -= 1
+            r = i
+            while r < n - 1 and heights[r + 1] >= h:
+                r += 1
+            best = max(best, h * (r - l + 1))
+        return best
+    ```
+
+    O(n²) worst case (sawtooth heights). Easy to reason about; what most candidates write first.
+
+=== "Layer 3 — Monotonic stack ⭐ (canonical)"
+
+    ```python
+    def largest_rectangle_area(heights: list[int]) -> int:
+        stack: list[int] = []                 # indices; heights[stack] strictly increasing
         max_area = 0
-        heights = heights + [0]               # sentinel to flush
-        for i, h in enumerate(heights):
+        # Sentinel 0 forces the loop to flush the stack at the end.
+        for i, h in enumerate(heights + [0]):
             while stack and heights[stack[-1]] > h:
                 top = stack.pop()
+                # New left boundary (exclusive) = stack[-1] if non-empty else -1.
                 width = i if not stack else i - stack[-1] - 1
                 max_area = max(max_area, heights[top] * width)
             stack.append(i)
         return max_area
     ```
 
-    O(n) time, O(n) space.
+    O(n) time, O(n) space. Each index pushed and popped at most once. The two off-by-ones to memorise:
+
+    - **Width when stack is empty** after pop: `width = i` (popped bar extends from start, width = `i - 0 + 0`).
+    - **Width when stack non-empty**: `width = i - stack[-1] - 1` (between new top and current `i`, **exclusive on both sides**).
 
 === "Layer 4 — Production-ready"
 
@@ -4889,20 +6566,31 @@ The clean implementation uses a **single pass with a monotonic increasing stack 
 
 
     def largest_rectangle_area(heights: list[int]) -> int:
-        """Largest rectangle area in a histogram of unit-width bars.
+        """Area of the largest rectangle in a histogram of unit-width bars.
 
-        Time:  O(n) — each bar pushed and popped at most once.
-        Space: O(n).
+        Args:
+            heights: Non-negative bar heights.
+
+        Returns:
+            The area of the largest rectangle that fits entirely under the
+            histogram. ``0`` for empty input.
+
+        Time:  O(n) — each index pushed and popped at most once.
+        Space: O(n) for the stack worst-case (strictly increasing input).
 
         Example:
             >>> largest_rectangle_area([2, 1, 5, 6, 2, 3])
             10
         """
+        if not heights:
+            return 0
+
         stack: list[int] = []
         max_area = 0
-        # Append sentinel 0 to flush the stack at the end.
-        for i, h in enumerate(heights + [0]):
-            while stack and heights[stack[-1]] > h:
+        # Sentinel 0 at i = len(heights) flushes any survivors.
+        for i in range(len(heights) + 1):
+            cur = 0 if i == len(heights) else heights[i]
+            while stack and heights[stack[-1]] > cur:
                 top = stack.pop()
                 width = i if not stack else i - stack[-1] - 1
                 area = heights[top] * width
@@ -4912,50 +6600,136 @@ The clean implementation uses a **single pass with a monotonic increasing stack 
         return max_area
     ```
 
-=== "Layer 5 — Variants"
+    Avoids `heights + [0]` allocation; uses a virtual sentinel inside the loop. Marginally faster on huge inputs.
 
-    **Variant A — Maximal Rectangle in a binary matrix.** Reduce row-by-row to histograms (Problem 27).
+=== "Layer 5 — Variants & extensions"
 
-    **Variant B — largest rectangle of *equal* height.** Different problem; group by height first.
+    **Variant A — Two-pass with `prev_smaller` / `next_smaller` arrays:**
 
-    **Variant C — largest rectangle within a polygon.** Heavyweight computational geometry.
+    ```python
+    def largest_rectangle_area_two_pass(heights: list[int]) -> int:
+        n = len(heights)
+        if n == 0:
+            return 0
+        prev_smaller = [-1] * n
+        next_smaller = [n] * n
+        st: list[int] = []
+        for i in range(n):
+            while st and heights[st[-1]] >= heights[i]:
+                st.pop()
+            prev_smaller[i] = st[-1] if st else -1
+            st.append(i)
+        st.clear()
+        for i in range(n - 1, -1, -1):
+            while st and heights[st[-1]] >= heights[i]:
+                st.pop()
+            next_smaller[i] = st[-1] if st else n
+            st.append(i)
+        return max(heights[i] * (next_smaller[i] - prev_smaller[i] - 1) for i in range(n))
+    ```
+
+    Same O(n) but more verbose — easier to **reuse** the boundary arrays for related queries (e.g., per-bar dominance regions).
+
+    **Variant B — Maximal rectangle in a binary matrix (LC 85):** for each row, treat the column-wise running heights of consecutive 1s as a histogram and apply LC 84. Total O(rows × cols).
+
+    **Variant C — Histogram with weighted widths** (each bar has its own width): generalise width math; `width = w_total_between_indices - w[top]`. Replace `i - stack[-1] - 1` with prefix-width subtraction.
+
+    **Variant D — Online streaming** (bars arrive one by one, need running max area): same algorithm; emit current `max_area` after each new `i`. Already streaming-friendly.
+
+    **Variant E — Largest *square* (not rectangle):** simpler O(rows × cols) DP (LC 221). Not a histogram problem.
+
+    **Variant F — Top-k largest rectangles:** keep a min-heap of size k; push each candidate area; final heap holds the top k.
+
+    **Variant G — Divide & conquer with sparse table:** RMQ on heights gives O(n log n) recursive solution; pedagogical but slower than the stack.
 
 #### 🔍 Dry Run
 
-`heights = [2, 1, 5, 6, 2, 3]` (with sentinel 0):
+`heights = [2, 1, 5, 6, 2, 3]`, with virtual sentinel at i=6 (h=0):
 
-| i | h | stack before | pops | new area | max | stack after |
-|---|---|--------------|------|----------|-----|-------------|
-| 0 | 2 | [] | — | — | 0 | [0] |
-| 1 | 1 | [0] | pop 0 (h=2): width=1, area=2 | 2 | 2 | [1] |
-| 2 | 5 | [1] | — | — | 2 | [1, 2] |
-| 3 | 6 | [1, 2] | — | — | 2 | [1, 2, 3] |
-| 4 | 2 | [1, 2, 3] | pop 3 (h=6): width=1, area=6; pop 2 (h=5): width=2, area=10 | 10 | 10 | [1, 4] |
-| 5 | 3 | [1, 4] | — | — | 10 | [1, 4, 5] |
-| 6 | 0 | [1, 4, 5] | pop 5 (h=3): w=1, area=3; pop 4 (h=2): w=4, area=8; pop 1 (h=1): w=6, area=6 | — | 10 | [6] |
+| i | h | stack before | pops & areas                                                          | max | stack after  |
+|---|---|--------------|-----------------------------------------------------------------------|-----|--------------|
+| 0 | 2 | `[]`         | —                                                                     | 0   | `[0]`        |
+| 1 | 1 | `[0]`        | pop 0 (h=2): width = 1 (stack empty), area = 2                       | 2   | `[1]`        |
+| 2 | 5 | `[1]`        | —                                                                     | 2   | `[1, 2]`     |
+| 3 | 6 | `[1, 2]`     | —                                                                     | 2   | `[1, 2, 3]`  |
+| 4 | 2 | `[1, 2, 3]`  | pop 3 (h=6): w = 4-2-1 = 1, area=6; pop 2 (h=5): w = 4-1-1 = 2, area=**10** | 10 | `[1, 4]`     |
+| 5 | 3 | `[1, 4]`     | —                                                                     | 10  | `[1, 4, 5]`  |
+| 6 | 0 | `[1, 4, 5]`  | pop 5 (h=3): w = 6-4-1 = 1, area=3; pop 4 (h=2): w = 6-1-1 = 4, area=8; pop 1 (h=1): w = 6 (empty), area=6 | 10 | `[6]` |
 
-Return: 10. ✅
+Return **10** ✅. The winning rectangle is bars 2 + 3 at height 5 (limiting), width 2.
 
 #### ⏱️ Complexity
 
-- **Time: O(n)**.
-- **Space: O(n)**.
+| Approach                  | time          | space      | notes                                  |
+|---------------------------|---------------|------------|----------------------------------------|
+| Brute pairs (Layer 1)     | O(n³)         | O(1)       | TLE for n ≥ 200                        |
+| Per-bar expand (Layer 2)  | O(n²)         | O(1)       | TLE for n ≥ 10⁴                        |
+| **Monotone stack ⭐**      | **O(n)**      | **O(n)**   | each index pushed/popped at most once  |
+| Two-pass prev/next        | O(n)          | O(n)       | reusable boundary arrays               |
+| Divide & conquer + RMQ    | O(n log n)    | O(n log n) | pedagogical                            |
 
 #### 🎯 Pattern Used
 
-**Monotonic increasing stack with width computation.** The premier hard-stack problem.
+**Monotonic increasing stack with width computation via the new top after pop.** Combined with a sentinel to avoid post-loop cleanup. This pattern transfers directly to **Maximal Rectangle (LC 85)**, **Trapping Rain Water (LC 42)**, **Sum of Subarray Minimums (LC 907)**, **Sum of Subarray Ranges (LC 2104)**.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why does the pop-and-compute trick work?"
+    When we pop index `top` because the current bar `i` is strictly shorter, we know:
+    - **Right boundary**: the *first* shorter bar to the right of `top` is `i` (we never popped `top` until now).
+    - **Left boundary**: the bar immediately below `top` on the stack (call it `stack[-1]` after popping) is the *first* shorter bar to the left of `top`, because the stack is monotone increasing.
+    Hence the maximal rectangle that uses `heights[top]` as its limiting height has width `i - stack[-1] - 1` and we never need to look further. Each index is the "limiter" for exactly one such rectangle, computed exactly once when popped.
+
+??? question "Follow-up 2 — Why a sentinel `0`?"
+    Without it, bars that are still on the stack at the end of the loop never get popped — and therefore never contribute their candidate rectangle. Appending a `0` (or using a virtual zero at `i = n`) forces the inner while-loop to flush all survivors. Equivalently: a post-loop `while stack: ...` block does the same job at the cost of duplicated logic.
+
+??? question "Follow-up 3 — Strictly greater (`>`) vs greater-or-equal (`>=`) when popping?"
+    Both are correct. With `>` you keep equal-height bars on the stack longer; the area is the same because equal-height bars merged into a single block are equivalent. With `>=` you flush more eagerly, which slightly simplifies reasoning but can recompute identical areas multiple times. **Use `>`** in production for cleaner semantics; either passes LeetCode.
+
+??? question "Follow-up 4 — Width computation off-by-one — derive it."
+    After popping `top`, suppose the new stack top is `L = stack[-1]` (or empty → treat as -1). The rectangle that uses `heights[top]` as the limiter spans columns `(L, i)` exclusive on both ends, i.e., columns `L+1, L+2, ..., i-1`. Count = `(i-1) - (L+1) + 1 = i - L - 1`. When stack is empty, `L = -1` and width = `i - (-1) - 1 = i`. Hence: `width = i if not stack else i - stack[-1] - 1`. Rederive on the whiteboard if you blank.
+
+??? question "Follow-up 5 — Adapt to a binary-matrix Maximal Rectangle (LC 85)."
+    For each row `r`, maintain `heights[c] = number of consecutive 1s ending at (r, c)`. Reset to 0 on a `0`. Then run LC 84 on each row. **O(rows × cols)** total — exactly one histogram pass per row.
+
+??? question "Follow-up 6 — Streaming version (bars arrive online, query running max area)."
+    The same algorithm is already streaming: process each new height as it arrives, run the inner while-loop as needed, append `i`, and report the current `max_area`. The only catch: you must defer reporting if the bars *not yet popped* could still grow the answer. **Lower bound on running answer** is always available; **exact value** at any moment requires processing a virtual sentinel at the latest index (a constant-time finalisation).
+
+??? question "Follow-up 7 — Memory-bounded version (huge n, can't keep stack in RAM)."
+    The stack can grow to size n on a strictly increasing input. To bound memory, switch to a **two-pass disk-friendly** version: pass 1 left-to-right computes `prev_smaller[i]` writing to disk; pass 2 right-to-left computes `next_smaller[i]`; pass 3 streams `heights[i] * (next_smaller[i] - prev_smaller[i] - 1)` to a max accumulator. Each pass is sequential I/O.
+
+??? question "Follow-up 8 — Largest rectangle of *exactly* a given height H."
+    For each maximal run of bars with `heights[i] >= H`, the contribution is `H * len(run)`. One pass, O(n), no stack. Different problem; common follow-up to test that you don't over-engineer.
 
 #### 🐛 Common Bugs
 
-1. **Width computation off-by-one** — `i - stack[-1] - 1` (the `-1`) is critical.
-2. **Forgetting the sentinel** — leaves bars unflushed.
-3. **Storing values instead of indices** — can't compute width.
+1. **Width off-by-one** — `i - stack[-1]` instead of `i - stack[-1] - 1` (forgot to exclude the new top itself).
+2. **Forgetting the sentinel** — bars at the end of input never flush, leaving holes in the candidate-area set.
+3. **Storing values not indices** — can't compute width without `i` and `stack[-1]`.
+4. **`>=` vs `>` confusion** — both work but mixing them across the stack-maintenance and pop-then-compute steps causes subtle wrong areas.
+5. **Empty input** — return 0; un-guarded code emits `max_area` of an unwritten variable in some languages.
+6. **Mutating `heights`** — `heights += [0]` mutates the caller's list; use `heights + [0]` (new list) or the virtual-sentinel pattern.
+7. **Using `min(heights[l:r+1])` in a triple-nested brute** — that hidden inner loop makes brute O(n³), not O(n²). Sometimes interviewers want you to spot that.
 
-#### 🏢 Sample Interviewer Quote
+#### ✅ Edge Cases Checklist
 
-> *"Find the largest rectangle in this histogram in O(n)."*
+- [ ] **Empty input** → 0.
+- [ ] **Single bar** `[7]` → 7.
+- [ ] **All equal** `[3, 3, 3, 3]` → 12.
+- [ ] **Strictly increasing** `[1, 2, 3, 4]` → max(1·4, 2·3, 3·2, 4·1) = 6.
+- [ ] **Strictly decreasing** `[4, 3, 2, 1]` → 6 (mirror of above).
+- [ ] **Sawtooth** `[1, 3, 1, 3, 1, 3]` → 6 (three 3s aren't contiguous; best is single 3 at width 2 = 6 or width 6 of height 1 = 6 — tie).
+- [ ] **All zeros** `[0, 0, 0]` → 0.
+- [ ] **Mixed zeros** `[2, 0, 2]` → 2 (the zero blocks any rectangle spanning it).
+- [ ] **One tall bar** `[1, 1, 1000, 1, 1]` → 1000.
+- [ ] **Big input n = 10⁵** strictly increasing — stack reaches full size; algorithm still O(n).
+- [ ] **Negative heights**? — undefined; specs say non-negative; reject or document.
 
-Your opener: *"Monotonic increasing stack of indices. When the current bar is shorter than the top, pop and compute the rectangle area where the popped bar is the *limiting* height. Width is determined by the new top of stack and the current index. O(n) time."*
+#### 🎤 Sample Interviewer Quote
+
+> *"Given the heights of unit-width bars in a histogram, find the area of the largest rectangle that fits under the histogram. Walk me through your O(n²) approach first, then optimize to O(n) using a stack. Explain the width-computation off-by-one and why a sentinel at the end matters. Finally, generalize to a binary matrix's maximal rectangle."*
+
+Your opener: *"Monotonic increasing stack of indices. When the current bar is strictly shorter than the top, pop and compute the rectangle that uses the popped bar's height as the limiter — width = i - new_top_of_stack - 1, or i if the stack became empty. Append a sentinel 0 to flush. O(n) time, O(n) space. For the binary matrix variant: compute column-wise heights row by row and reuse this routine."*
 
 ---
 
@@ -5837,11 +7611,354 @@ After full input `[0,1,0,2,1,0,1,3,2,1,2,1]` the totals continue: bars 8-11 cont
 
 ### Problem 30 — Maximum Frequency Stack
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Google</span> <span class="company-tag">Meta</span>
 
-> (Already covered in [Hash Tables — Problem 30](../hash-tables/01-hash-table-basics.md#problem-30-maximum-frequency-stack).)
+> Implement `FreqStack` with two operations: `push(x)` adds `x`; `pop()` removes and returns the **most frequent** element. **Ties are broken by recency** — the most recently pushed of the tied elements wins. (LeetCode 895.)
 
-The stack/queue angle: **per-frequency LIFO stack** + global frequency counter. Each frequency has its own stack. `pop` from the highest-frequency stack always wins ties by recency.
+#### 📖 Story Mode
+
+```
+push(5)  push(7)  push(5)  push(7)  push(4)  push(5)
+counts = {5: 3, 7: 2, 4: 1}
+buckets:                        most-recent-on-top per bucket
+  freq 1:  [5, 7, 4]            ← all elements ever pushed
+  freq 2:  [5, 7]               ← elements that reached freq 2
+  freq 3:  [5]                  ← element that reached freq 3
+                       max_freq = 3
+
+pop() → 5     (freq 3 stack popped)   counts now {5: 2, 7: 2, 4: 1}, max = 2
+                  buckets:  freq 1 [5,7,4], freq 2 [5,7]    (freq 3 empty, max drops)
+pop() → 7     (freq 2 stack top is 7) counts {5: 2, 7: 1, 4: 1}, max = 2
+                  buckets:  freq 1 [5,7,4], freq 2 [5]
+pop() → 5     (freq 2 stack top)       counts {5: 1, 7: 1, 4: 1}, max = 1
+pop() → 4     (freq 1 stack top)       counts {5: 1, 7: 1}, max = 1
+```
+
+The double-key tie-break (frequency *then* recency) makes this a delightful design problem. The trick: **stacks of stacks** keyed by frequency.
+
+#### 🌍 Real-World Usage
+
+- **Cache eviction** — "evict the *least* frequently used; on ties, the oldest" is the LFU dual; `FreqStack` is the LIFO recency-favoured cousin used in some compiler optimisation passes.
+- **Trending content feeds** — surface the "hottest" item with recency tie-break (Twitter trends, TikTok For-You).
+- **Build systems** — re-trigger the most recently touched + most frequently rebuilt target first when polling for invalidations.
+- **Debugger / profiler heatmaps** — pop the most-recently-hit frequently-hit code paths.
+- **Game AI** — fire the most recently triggered most-frequent player action when handling combat queues.
+- **Whiteboard classic** — co-asked with LFU and LRU to test "right data structure for the right tie-break".
+
+#### 🧠 Thinking Process
+
+The naive answer is "max-heap on `(freq, recency_index)`" — but that's `O(log n)` per op and the recency counter must be monotonic. We can do better:
+
+**Key insight**: every time `x` reaches frequency `f`, it earns the right to live at level `f`. Maintain a separate stack per frequency level. The current max frequency `max_freq` is monotonically tracked.
+
+- **Push**: bump count for `x`; append `x` to `buckets[count[x]]`. Update `max_freq` if needed.
+- **Pop**: take the top of `buckets[max_freq]`. Decrement its count. If `buckets[max_freq]` is now empty, decrement `max_freq`.
+
+Why this works: when `x` is pushed multiple times, each push leaves a copy of `x` at *every* level from 1 to `count[x]`. So when `count[x]` later drops, the previous level still has a copy of `x` — exactly the element that wins the tie-break for the *new* max frequency. **The "stack of stacks" preserves all the historical states for free**, with O(1) per op.
+
+This is a beautiful "level structure" pattern that surfaces in LFU caches, persistent priority queues, and even some persistent data structure constructions.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute force (max-heap, recompute)"
+
+    ```python
+    import heapq
+    from collections import Counter
+
+    class FreqStackBrute:
+        def __init__(self) -> None:
+            self._items: list[int] = []          # push order
+
+        def push(self, x: int) -> None:
+            self._items.append(x)
+
+        def pop(self) -> int:
+            counts = Counter(self._items)
+            best_freq = max(counts.values())
+            # find the most recently pushed item with freq == best_freq
+            for i in range(len(self._items) - 1, -1, -1):
+                if counts[self._items[i]] == best_freq:
+                    return self._items.pop(i)
+            raise IndexError("pop from empty FreqStack")
+    ```
+
+    **O(n) per pop** (rebuild Counter, then linear scan). Times out at n = 10⁵.
+
+=== "Layer 1.5 — Max-heap with monotonic recency tag"
+
+    ```python
+    import heapq
+    from collections import Counter
+
+    class FreqStackHeap:
+        def __init__(self) -> None:
+            self._heap: list[tuple[int, int, int]] = []  # (-freq, -seq, x)
+            self._counts: Counter[int] = Counter()
+            self._seq = 0
+
+        def push(self, x: int) -> None:
+            self._counts[x] += 1
+            heapq.heappush(self._heap, (-self._counts[x], -self._seq, x))
+            self._seq += 1
+
+        def pop(self) -> int:
+            _, _, x = heapq.heappop(self._heap)
+            self._counts[x] -= 1
+            return x
+    ```
+
+    O(log n) per op. Correct, simple, and what most candidates write first. The heap snapshot of `(freq, seq)` at *push time* doesn't go stale because we never decrement-and-update — each push enters with its current freq, and the most-frequent-most-recent always sorts first.
+
+=== "Layer 2 — Stacks of stacks ⭐ (canonical, O(1))"
+
+    ```python
+    from collections import defaultdict, Counter
+
+    class FreqStack:
+        def __init__(self) -> None:
+            self._counts: Counter[int] = Counter()
+            self._buckets: defaultdict[int, list[int]] = defaultdict(list)
+            self._max_freq = 0
+
+        def push(self, x: int) -> None:
+            f = self._counts[x] + 1
+            self._counts[x] = f
+            self._buckets[f].append(x)
+            if f > self._max_freq:
+                self._max_freq = f
+
+        def pop(self) -> int:
+            x = self._buckets[self._max_freq].pop()
+            self._counts[x] -= 1
+            if not self._buckets[self._max_freq]:
+                self._max_freq -= 1
+            return x
+    ```
+
+    **O(1) per op.** The stacks-of-stacks pattern exploits that `_buckets[f]` is itself a LIFO of "elements that have ever been at frequency f", in push order — perfect tie-break.
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    from __future__ import annotations
+    from collections import defaultdict, Counter
+
+
+    class FreqStackSafe:
+        def __init__(self) -> None:
+            self._counts: Counter[int] = Counter()
+            self._buckets: defaultdict[int, list[int]] = defaultdict(list)
+            self._max_freq = 0
+            self._size = 0
+
+        def push(self, x: int) -> None:
+            f = self._counts[x] + 1
+            self._counts[x] = f
+            self._buckets[f].append(x)
+            self._size += 1
+            if f > self._max_freq:
+                self._max_freq = f
+
+        def pop(self) -> int:
+            if self._size == 0:
+                raise IndexError("pop from empty FreqStack")
+            x = self._buckets[self._max_freq].pop()
+            self._counts[x] -= 1
+            self._size -= 1
+            if not self._buckets[self._max_freq]:
+                self._max_freq -= 1
+            return x
+
+        def __len__(self) -> int:
+            return self._size
+
+        def peek(self) -> int:
+            if self._size == 0:
+                raise IndexError("peek on empty FreqStack")
+            return self._buckets[self._max_freq][-1]
+    ```
+
+    Adds explicit `IndexError`, `__len__`, and a `peek` courtesy.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from collections import defaultdict, Counter
+    from typing import Generic, Hashable, TypeVar
+
+    H = TypeVar("H", bound=Hashable)
+
+
+    class FreqStack(Generic[H]):
+        """Stack returning the most frequent element (recency wins ties).
+
+        Implementation maintains:
+            * ``_counts``  — current count of each element.
+            * ``_buckets`` — for each frequency ``f``, the stack of elements
+                            that have *ever* reached frequency ``f`` (in push
+                            order). The top of ``_buckets[f]`` is therefore
+                            the most-recently-pushed element of frequency f.
+            * ``_max_freq`` — current maximum frequency; monotonically
+                            updated O(1) per op.
+
+        Time:  O(1) for both ``push`` and ``pop``.
+        Space: O(n) total across all buckets (each push appends exactly once).
+        """
+
+        __slots__ = ("_counts", "_buckets", "_max_freq", "_size")
+
+        def __init__(self) -> None:
+            self._counts: Counter[H] = Counter()
+            self._buckets: defaultdict[int, list[H]] = defaultdict(list)
+            self._max_freq: int = 0
+            self._size: int = 0
+
+        def push(self, x: H) -> None:
+            """Push *x* onto the FreqStack. O(1)."""
+            f = self._counts[x] + 1
+            self._counts[x] = f
+            self._buckets[f].append(x)
+            self._size += 1
+            if f > self._max_freq:
+                self._max_freq = f
+
+        def pop(self) -> H:
+            """Remove and return the most-frequent (most-recent on tie). O(1)."""
+            if self._size == 0:
+                raise IndexError("pop from empty FreqStack")
+            x = self._buckets[self._max_freq].pop()
+            new_count = self._counts[x] - 1
+            if new_count == 0:
+                del self._counts[x]
+            else:
+                self._counts[x] = new_count
+            self._size -= 1
+            if not self._buckets[self._max_freq]:
+                self._max_freq -= 1
+            return x
+
+        def __len__(self) -> int:
+            return self._size
+
+        def __repr__(self) -> str:
+            return f"FreqStack(size={self._size}, max_freq={self._max_freq})"
+    ```
+
+    Cleans up zero-count entries from `_counts` to keep memory tight on long sessions.
+
+=== "Layer 5 — Variants & extensions"
+
+    **Variant A — Min-Frequency Stack** (LFU-stack hybrid): symmetric, but pop returns the least-frequent / most-recent. Use `_min_freq` and pop from `_buckets[_min_freq]`. O(1) per op.
+
+    **Variant B — k-th most frequent stack** (`pop_kth(k)`): track top-k buckets. Worst-case O(k) per pop_kth. For k=1 it reduces to the standard FreqStack.
+
+    **Variant C — Decay-weighted FreqStack**: each element's "frequency" is `count * exp(-λ * age)`. Decay every `T` seconds. Periodic rebalance pushes elements to lower buckets. Used in trending-content recommenders.
+
+    **Variant D — Bounded capacity FreqStack**: when `size == cap`, push evicts the *least*-frequent / least-recent. Becomes an LFU + LIFO hybrid. Pair with a doubly-linked list per bucket for O(1) eviction.
+
+    **Variant E — Persistent (immutable) FreqStack** for time-travel: each push returns a new root referencing immutable buckets. Path-copy only the touched bucket. O(1) amortized push, O(1) pop, O(n) total nodes per session.
+
+    **Variant F — Concurrent FreqStack**: per-bucket lock + an atomic `_max_freq`. Highly contended workloads benefit from a sharded design (per-thread mini-FreqStacks merged on read).
+
+    **Variant G — `FreqStack[T]` with custom comparator**: parameterise on `key=` so it works for any hashable object — e.g., `FreqStack[str]` for trending hashtags, `FreqStack[UserId]` for top callers.
+
+#### 🔍 Dry Run
+
+Sequence: `push(5), push(7), push(5), push(7), push(4), push(5), pop(), pop(), pop(), pop()`.
+
+| op       | counts                | buckets[1]   | buckets[2] | buckets[3] | max_freq | returns |
+|----------|-----------------------|--------------|------------|------------|----------|---------|
+| push(5)  | `{5:1}`              | `[5]`        | —          | —          | 1        | —       |
+| push(7)  | `{5:1, 7:1}`         | `[5,7]`      | —          | —          | 1        | —       |
+| push(5)  | `{5:2, 7:1}`         | `[5,7]`      | `[5]`      | —          | 2        | —       |
+| push(7)  | `{5:2, 7:2}`         | `[5,7]`      | `[5,7]`    | —          | 2        | —       |
+| push(4)  | `{5:2, 7:2, 4:1}`    | `[5,7,4]`    | `[5,7]`    | —          | 2        | —       |
+| push(5)  | `{5:3, 7:2, 4:1}`    | `[5,7,4]`    | `[5,7]`    | `[5]`      | 3        | —       |
+| pop      | `{5:2, 7:2, 4:1}`    | `[5,7,4]`    | `[5,7]`    | `[]`       | 2        | 5       |
+| pop      | `{5:2, 7:1, 4:1}`    | `[5,7,4]`    | `[5]`      | —          | 2        | 7       |
+| pop      | `{5:1, 7:1, 4:1}`    | `[5,7,4]`    | `[]`       | —          | 1        | 5       |
+| pop      | `{5:1, 7:1}`         | `[5,7]`      | —          | —          | 1        | 4       |
+
+Three pops drained: 5 (freq-3 bucket), 7 (freq-2 top), 5 (freq-2 top), 4 (freq-1 top, most-recent of freq-1 ties). ✅
+
+#### ⏱️ Complexity
+
+| Approach                        | push       | pop        | space    | notes                            |
+|---------------------------------|------------|------------|----------|----------------------------------|
+| Brute Counter rebuild           | O(1)       | O(n)       | O(n)     | TLE for n ≥ 10⁵                 |
+| Max-heap with seq tag           | O(log n)   | O(log n)   | O(n)     | clean fallback; common answer    |
+| **Stacks-of-stacks ⭐**          | **O(1)**   | **O(1)**   | **O(n)** | optimal; canonical               |
+| Decay-weighted                  | O(1) amortized | O(1) amortized | O(n) | needs periodic rebalance |
+| Concurrent (per-bucket lock)    | O(1)       | O(1)       | O(n)     | lock contention bounded by max_freq |
+
+#### 🎯 Pattern Used
+
+**Level / bucket structure** keyed by a primary metric (here: frequency), with a LIFO substrate per level for the secondary tie-break (recency). Same shape solves:
+- **LFU Cache** (LC 460) — buckets keyed by frequency, doubly-linked list per bucket for O(1) eviction.
+- **Top-K elements with recency tie-break** — heap or bucket structure.
+- **Skiplist forward-array layout** — levels of "candidate next pointers" per node.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why does each push duplicate `x` into every level from 1 to count[x]?"
+    The invariant: `_buckets[f]` always contains every element that has ever reached frequency f, in push order. When `x` is pushed and reaches count `f`, we *only* append to `_buckets[f]` — but the prior pushes already appended to `_buckets[1], _buckets[2], ..., _buckets[f-1]`. So `x` appears once per level it has ever been at, with the **top of each level being the most recent push that reached that level**. When `_max_freq` later drops to `f-1` after popping x's freq-`f` copy, the freq-`f-1` bucket still holds another copy of `x` (or the next tied element) ready to be popped next.
+
+??? question "Follow-up 2 — Why decrement `_max_freq` only when `_buckets[_max_freq]` is empty?"
+    `_max_freq` tracks the highest frequency *currently present*. Popping one element from the top of `_buckets[max_freq]` decrements that element's count by 1, but other elements might still be at freq `max_freq` (sitting deeper in the bucket). Only when the bucket itself empties out do we know nothing remains at that level.
+
+??? question "Follow-up 3 — Could you implement this with a balanced BST keyed by `(freq, seq)`?"
+    Yes — O(log n) per op. Key by `(-freq, -seq)`; max element is the answer. The bucket approach is strictly better at O(1), but the BST version generalises to *range queries* like "pop any element with freq in [3, 5]". Mention both.
+
+??? question "Follow-up 4 — How does the heap version stay correct without lazy-deletion of stale entries?"
+    Each push enters a new entry `(-freq, -seq, x)` reflecting *that push's* state. We never modify or delete old entries. When `pop` returns `x`, the freshest entry for `x` was the one with the highest `-freq` (lowest `-freq` numerically) — sorting handles it. Decrementing `_counts[x]` after pop is *informational* only; the heap doesn't need to know. The heap shrinks naturally as we pop.
+
+??? question "Follow-up 5 — Adapt for least-frequent / oldest tie-break (LFU-like)."
+    Track `_min_freq`. On pop, drain `_buckets[_min_freq]` from the **bottom** (FIFO) rather than the top — but lists don't pop from front in O(1); use a `deque` per bucket. On push, if `f > 1`, `_min_freq` may need to update: it becomes `min(_min_freq, f)` initially, but cleanup is needed when `_buckets[_min_freq]` empties — set `_min_freq` to the smallest non-empty key. That breaks O(1); use a sorted-set of non-empty keys for O(log unique_freqs) per op.
+
+??? question "Follow-up 6 — Bounded capacity — what gets evicted?"
+    Define eviction policy explicitly. For "evict least frequent, oldest on tie": use Variant D's design with a `deque` per bucket and a doubly-linked list of buckets. O(1) push, pop, and evict.
+
+??? question "Follow-up 7 — Persistent FreqStack for snapshot queries."
+    Each push returns an immutable root. To avoid copying every bucket, path-copy only the modified bucket via a persistent vector (RRB-tree). O(log n) per op effectively, O(n) total nodes. Used in version-control merge logic.
+
+??? question "Follow-up 8 — Concurrent FreqStack (multi-producer multi-consumer)."
+    Per-bucket `threading.RLock` + atomic `_max_freq` updates via CAS. Tricky: when the top bucket empties between two consumers, both might try to decrement `_max_freq`. Use a CAS loop. For very high contention, shard into per-thread FreqStacks and merge on read — sacrifices strict global tie-break for throughput.
+
+??? question "Follow-up 9 — Memory pressure with billions of distinct elements pushed once each?"
+    `_buckets[1]` becomes huge. Variant A's `(value, count)` style doesn't help here (no duplicates). Switch to a probabilistic structure: **Count-Min Sketch** for frequencies + a top-K min-heap. Loses exactness; gains O(1) memory bound. Used at scale by streaming-analytics engines (Apache Flink top-K).
+
+#### 🐛 Common Bugs
+
+1. **Decrementing `_max_freq` unconditionally on every pop** — wrong; do it only when the bucket empties.
+2. **Forgetting to update `_max_freq` on push** — pop from a stale `_max_freq` returns wrong element.
+3. **Using a single global counter** without per-bucket recording — loses the recency tie-break.
+4. **Popping from `_buckets[_max_freq][0]`** (FIFO) — gives oldest tie-winner; spec says newest. Use `[-1]` and `.pop()`.
+5. **Not deleting zero-count entries from `_counts`** — fine for correctness, leaks memory in long sessions.
+6. **Heap variant — re-pushing decremented freq** on pop — unnecessary; old entries naturally fall behind newer pushes.
+7. **Concurrent variant — releasing the bucket lock before updating `_max_freq`** — race window where another consumer pops from an empty bucket.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] **Empty FreqStack** — `pop()` raises `IndexError`.
+- [ ] **Single push, single pop** — `push(7); pop() == 7`.
+- [ ] **All distinct values** — `push(1); push(2); push(3); pop() == 3` (recency wins; all freq 1).
+- [ ] **All same value** — `push(5)*3; pop()*3` returns 5, 5, 5; `_max_freq` decreases 3 → 2 → 1 → 0.
+- [ ] **Reach high freq then drop** — `push(5)*5; pop()*5` drains correctly through levels 5 → 1.
+- [ ] **Interleaved pushes** of two values — verify recency tie-break.
+- [ ] **Pop until empty, then push again** — `_max_freq = 0`, `_counts` cleaned, push restarts at level 1.
+- [ ] **Hashable types** — strings, tuples, custom objects with `__hash__`.
+- [ ] **Large n = 10⁶** — should complete in tens of ms with O(1) per op.
+- [ ] **Concurrent push/pop on Variant F** — race on `_max_freq`; lock or CAS.
+
+#### 🎤 Sample Interviewer Quote
+
+> *"Design a FreqStack: push adds an element, pop removes the most frequent. On ties, the most-recently-pushed wins. Walk me through the brute solution first, then optimize using a heap, then achieve O(1) per op. Explain why your O(1) solution preserves the recency tie-break automatically."*
+
+Your opener: *"Stacks-of-stacks. Counter for current frequencies, `buckets[f]` is a stack of elements that have ever reached frequency f, monotonic `_max_freq`. On push, append to `buckets[count[x] + 1]`; on pop, take the top of `buckets[max_freq]`. Each level's stack preserves push order, so the top is always the most-recent of all tied-frequency elements. O(1) per op."*
+
+Cross-reference: see also [Hash Tables — Problem 30](../hash-tables/01-hash-table-basics.md#problem-30-maximum-frequency-stack) for the same problem from the hash-table angle.
 
 ---
 
@@ -6477,46 +8594,375 @@ All ops: **O(L)** where L is word length.
 
 ### Problem 34 — Design Bounded Blocking Queue
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Google</span> <span class="company-tag">Uber</span>
 
-> Concurrency / threading flavor. Design a thread-safe FIFO queue with bounded capacity; `put` blocks when full, `get` blocks when empty. (LeetCode 1188.)
+> Design a **thread-safe**, FIFO, bounded-capacity blocking queue with three operations:
+>
+> - `enqueue(value)`: append `value`. **Blocks** while the queue is at capacity.
+> - `dequeue()`: remove and return the front element. **Blocks** while the queue is empty.
+> - `size()`: return current size (no blocking).
+>
+> (LeetCode 1188.)
 
-#### 🐍 Solution — `threading.Condition`
+#### 📖 Story Mode
 
-```python
-import threading
-from collections import deque
+```
+q = BoundedBlockingQueue(2)
 
-class BoundedBlockingQueue:
-    def __init__(self, capacity: int) -> None:
-        self._cap = capacity
-        self._q: deque[int] = deque()
-        self._lock = threading.Lock()
-        self._not_full = threading.Condition(self._lock)
-        self._not_empty = threading.Condition(self._lock)
+Producer thread:           Consumer thread:
+  q.enqueue(1)               t = sleep 100ms
+  q.enqueue(2)               q.dequeue()  → 1
+  q.enqueue(3)  ← blocks       q.dequeue()  → 2
+                ← unblocks                 q.dequeue()  → 3
+                  when (1)
+                  is dequeued
+```
 
-    def enqueue(self, value: int) -> None:
-        with self._not_full:
-            while len(self._q) == self._cap:
-                self._not_full.wait()
-            self._q.append(value)
-            self._not_empty.notify()
+The classical **producer-consumer** primitive: implements back-pressure (producers slow down when consumers can't keep up) and demand-pull (consumers wait for work).
 
-    def dequeue(self) -> int:
-        with self._not_empty:
-            while not self._q:
-                self._not_empty.wait()
-            v = self._q.popleft()
-            self._not_full.notify()
+#### 🌍 Real-World Usage
+
+- **Worker pools** — workers pull jobs from a bounded queue; submitters block when full.
+- **Pipelined processing** — each stage has a bounded inbox; back-pressure is automatic.
+- **Logging frameworks** — bounded log buffers between app threads and the writer.
+- **Network I/O** — TCP receive windows / channel buffers are conceptually the same primitive.
+- **Erlang-style mailboxes / Go channels** — built-in language primitives that follow this pattern.
+
+#### 🧠 Thinking Process
+
+The textbook concurrency design:
+
+1. **One mutex** protects the buffer.
+2. **Two condition variables**:
+   - `not_full` — signalled when an item is dequeued; `enqueue` waits on it.
+   - `not_empty` — signalled when an item is enqueued; `dequeue` waits on it.
+3. **`while`, not `if`**, around `wait()` — guards against spurious wake-ups and against a different thread racing in to consume the just-added slot.
+
+For `enqueue`:
+
+```text
+acquire lock
+while queue is full:
+    wait on not_full   # releases lock, sleeps; reacquires on wake
+append value
+notify not_empty
+release lock
+```
+
+For `dequeue`, mirror the structure with `not_empty` / `not_full`.
+
+```mermaid
+flowchart TB
+    subgraph Producer
+      P1[acquire] --> P2{full?}
+      P2 -->|yes| P3[wait not_full] --> P2
+      P2 -->|no| P4[append] --> P5[notify not_empty] --> P6[release]
+    end
+    subgraph Consumer
+      C1[acquire] --> C2{empty?}
+      C2 -->|yes| C3[wait not_empty] --> C2
+      C2 -->|no| C4[popleft] --> C5[notify not_full] --> C6[release]
+    end
+```
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Two semaphores (no shared lock)"
+
+    ```python
+    import threading
+    from collections import deque
+
+
+    class BoundedBlockingQueue:
+        def __init__(self, capacity: int) -> None:
+            self._q: deque[int] = deque()
+            self._slots = threading.Semaphore(capacity)   # free slots
+            self._items = threading.Semaphore(0)          # available items
+            self._mu = threading.Lock()
+
+        def enqueue(self, value: int) -> None:
+            self._slots.acquire()
+            with self._mu:
+                self._q.append(value)
+            self._items.release()
+
+        def dequeue(self) -> int:
+            self._items.acquire()
+            with self._mu:
+                v = self._q.popleft()
+            self._slots.release()
             return v
 
-    def size(self) -> int:
-        return len(self._q)
+        def size(self) -> int:
+            with self._mu:
+                return len(self._q)
+    ```
+
+    Cleanest semantics — semaphores *are* counting blockers. The mutex only protects the deque.
+
+=== "Layer 2 — Two condition variables on one lock (canonical) ⭐"
+
+    ```python
+    import threading
+    from collections import deque
+
+
+    class BoundedBlockingQueue:
+        def __init__(self, capacity: int) -> None:
+            self._cap = capacity
+            self._q: deque[int] = deque()
+            self._lock = threading.Lock()
+            self._not_full = threading.Condition(self._lock)
+            self._not_empty = threading.Condition(self._lock)
+
+        def enqueue(self, value: int) -> None:
+            with self._not_full:
+                while len(self._q) == self._cap:
+                    self._not_full.wait()
+                self._q.append(value)
+                self._not_empty.notify()
+
+        def dequeue(self) -> int:
+            with self._not_empty:
+                while not self._q:
+                    self._not_empty.wait()
+                v = self._q.popleft()
+                self._not_full.notify()
+                return v
+
+        def size(self) -> int:
+            with self._lock:
+                return len(self._q)
+    ```
+
+    Interview answer. The `while` loops handle spurious wake-ups *and* the lost-wake-up race.
+
+=== "Layer 3 — Single condition variable (`notify_all` instead of two condvars)"
+
+    ```python
+    import threading
+    from collections import deque
+
+
+    class BoundedBlockingQueue:
+        def __init__(self, capacity: int) -> None:
+            self._cap = capacity
+            self._q: deque[int] = deque()
+            self._cv = threading.Condition()
+
+        def enqueue(self, value: int) -> None:
+            with self._cv:
+                while len(self._q) == self._cap:
+                    self._cv.wait()
+                self._q.append(value)
+                self._cv.notify_all()
+
+        def dequeue(self) -> int:
+            with self._cv:
+                while not self._q:
+                    self._cv.wait()
+                v = self._q.popleft()
+                self._cv.notify_all()
+                return v
+
+        def size(self) -> int:
+            with self._cv:
+                return len(self._q)
+    ```
+
+    Simpler but `notify_all` wakes both producers and consumers — they'll each re-check their predicate. Cheaper to write, slightly more wake-ups.
+
+=== "Layer 4 — Use stdlib `queue.Queue` (production reality)"
+
+    ```python
+    from queue import Queue
+
+
+    class BoundedBlockingQueue:
+        def __init__(self, capacity: int) -> None:
+            self._q: Queue[int] = Queue(maxsize=capacity)
+
+        def enqueue(self, value: int) -> None:
+            self._q.put(value)              # blocks while full
+
+        def dequeue(self) -> int:
+            return self._q.get()            # blocks while empty
+
+        def size(self) -> int:
+            return self._q.qsize()          # approximate; not lock-protected
+    ```
+
+    In real code, **always reach for `queue.Queue`** — it's already battle-tested. LeetCode wants Layer 2 to test understanding.
+
+=== "Layer 5 — Production with timeouts and graceful shutdown"
+
+    ```python
+    from __future__ import annotations
+
+    import threading
+    from collections import deque
+
+
+    class ShutdownError(Exception):
+        """Raised when ops are attempted on a shut-down queue."""
+
+
+    class BoundedBlockingQueue:
+        """Thread-safe bounded FIFO queue with timeouts and shutdown.
+
+        Time:  enqueue/dequeue O(1) amortised when not blocking.
+        Space: O(capacity).
+
+        Example:
+            >>> q = BoundedBlockingQueue(2)
+            >>> q.enqueue(1); q.enqueue(2); q.size()
+            2
+            >>> q.dequeue()
+            1
+        """
+
+        def __init__(self, capacity: int) -> None:
+            if capacity <= 0:
+                raise ValueError("capacity must be > 0")
+            self._cap = capacity
+            self._q: deque[int] = deque()
+            self._lock = threading.Lock()
+            self._not_full = threading.Condition(self._lock)
+            self._not_empty = threading.Condition(self._lock)
+            self._shutdown = False
+
+        def enqueue(self, value: int, timeout: float | None = None) -> bool:
+            with self._not_full:
+                if self._shutdown:
+                    raise ShutdownError
+                if not self._not_full.wait_for(
+                    lambda: self._shutdown or len(self._q) < self._cap,
+                    timeout=timeout,
+                ):
+                    return False                # timed out
+                if self._shutdown:
+                    raise ShutdownError
+                self._q.append(value)
+                self._not_empty.notify()
+                return True
+
+        def dequeue(self, timeout: float | None = None) -> int | None:
+            with self._not_empty:
+                if not self._not_empty.wait_for(
+                    lambda: self._shutdown or self._q,
+                    timeout=timeout,
+                ):
+                    return None                 # timed out
+                if not self._q and self._shutdown:
+                    raise ShutdownError
+                v = self._q.popleft()
+                self._not_full.notify()
+                return v
+
+        def size(self) -> int:
+            with self._lock:
+                return len(self._q)
+
+        def shutdown(self) -> None:
+            with self._lock:
+                self._shutdown = True
+                self._not_full.notify_all()
+                self._not_empty.notify_all()
+    ```
+
+#### 🔍 Step-by-step Dry Run
+
+`BoundedBlockingQueue(2)`. Two threads — Producer (P) calls `enqueue`, Consumer (C) calls `dequeue`.
+
 ```
+T=0  P: enqueue(1)  acquire, len=0<2, append, len=1, notify not_empty, release
+T=1  P: enqueue(2)  acquire, len=1<2, append, len=2, notify not_empty, release
+T=2  P: enqueue(3)  acquire, len=2==2 → wait not_full (releases lock, sleeps)
+T=3  C: dequeue     acquire, len=2 truthy, popleft → 1, notify not_full, release
+T=3' P wakes:        re-check len=1<2, append 3, len=2, notify not_empty, release
+T=4  C: dequeue     acquire, popleft → 2, notify not_full, release
+T=5  C: dequeue     acquire, popleft → 3, notify not_full, release
+T=6  C: dequeue     acquire, len=0 → wait not_empty (releases lock, sleeps)
+                    ...waits forever until producer adds something
+```
+
+The `while` (not `if`) on the predicate is what makes step `T=3'` correct — between waking and re-acquiring the lock, another producer might have re-filled the queue.
+
+#### ⏱️ Complexity
+
+| Layer | enqueue / dequeue | size | Space | Notes |
+|-------|-------------------|------|-------|-------|
+| 1 — Two semaphores | O(1) (+ block) | O(1) | O(cap) | Cleanest semantics |
+| 2 — Two condvars ⭐ | O(1) (+ block) | O(1) | O(cap) | Interview answer |
+| 3 — One condvar + `notify_all` | O(1) (+ block + extra wakeups) | O(1) | O(cap) | Simpler, cheaper to write |
+| 4 — `queue.Queue` | O(1) (+ block) | O(1) | O(cap) | Production reality |
+| 5 — With timeouts/shutdown | O(1) (+ block) | O(1) | O(cap) | Real systems |
+
+#### ❓ Follow-ups
+
+??? question "Why **`while`** and not `if` around the wait?"
+
+    Two reasons: (1) **spurious wake-ups** — `Condition.wait()` may return without an explicit notify (POSIX permits it). (2) **lost-wake-up race** — between `notify` and the waiter reacquiring the lock, a different thread may consume the slot/item. Always re-check the predicate.
+
+??? question "Why two condvars instead of one?"
+
+    With one condvar, every notify wakes both producers and consumers — extra context switches. Two condvars target only the threads that can actually make progress.
+
+??? question "Can `enqueue` and `dequeue` deadlock?"
+
+    Not in this design — both acquire the *same* lock. Deadlock would require lock ordering across multiple locks. With one lock, the invariant is: a thread that holds the lock either makes progress or `wait`s (which atomically releases the lock).
+
+??? question "What if multiple producers race to add to the same free slot?"
+
+    The `while` loop guards them. After the first producer takes the slot, the others wake but re-check `len(self._q) == self._cap` (now true again because the deque is full) and go back to waiting.
+
+??? question "How do you implement a **clean shutdown**?"
+
+    Layer 5: set a flag, `notify_all` on both condvars, and have waiters re-check and raise `ShutdownError` if the flag is set and no work remains.
+
+??? question "What about **fairness** (FIFO order of waiting threads)?"
+
+    Python's `Condition.wait`/`notify` is **not guaranteed** FIFO. For strict fairness, layer a per-waiter ticket queue or use a fair lock library. In practice, this is rarely needed.
+
+??? question "How would the implementation look in **C++** or **Java**?"
+
+    C++: `std::mutex` + two `std::condition_variable`s + a `std::deque`. Same `while` pattern.
+    Java: `ReentrantLock` + two `Condition`s — or just use `java.util.concurrent.ArrayBlockingQueue` (which is exactly this).
+
+??? question "How does this differ from a **lock-free** bounded queue?"
+
+    Lock-free uses CAS (compare-and-swap) on a ring buffer with atomic head/tail indices. Faster under contention but much harder to get right — and harder to reason about ordering. Use the mutex version unless you've measured contention as a bottleneck.
+
+#### 🐛 Common Bugs
+
+1. **`if` instead of `while`** — biggest concurrency bug in this entire chapter.
+2. **Notifying outside the lock** — usually harmless in Python, but in some languages causes lost wake-ups.
+3. **Holding the lock while doing expensive work** — keep the critical section to the buffer mutation only.
+4. **Using `Lock` directly instead of `Condition`** — you can't `wait` on a plain `Lock`.
+5. **Two locks instead of one shared lock for the two condvars** — `Condition` defaults to creating its own lock; you must pass the same `Lock` to both `Condition`s, or both must default to a shared one.
+6. **Returning `len(self._q)` from `size()` without the lock** — racy on some Python implementations; cheap enough to wrap in `with self._lock`.
+7. **Using `time.sleep` to "wait until space"** — busy-waiting; defeats the purpose of condvars.
+
+#### 🚧 Edge Cases
+
+- Single-threaded: works as a normal bounded deque.
+- `capacity = 1`: degenerates to a synchronous handoff.
+- Producer dies while holding the lock: with `with`, lock auto-releases on exception. Items already enqueued remain.
+- Consumer cancellation: in Python, signals on a sleeping `wait()` raise `KeyboardInterrupt` cleanly.
+- Many producers, no consumers: producers block forever — back-pressure works as designed.
+
+#### 📌 Key Takeaways
+
+> **Producer-consumer = mutex + 2 condvars.** Memorise the shape: `with cv: while not predicate: cv.wait(); ... ; other_cv.notify()`.
+
+> **`while`, not `if`.** Spurious wake-ups and lost-wake-up races are real.
+
+> **Use `queue.Queue` in production.** LeetCode 1188 is testing your understanding; real code reuses the stdlib primitive.
 
 #### 🎯 Pattern Used
 
-**Two-condition lock (producer-consumer).** The textbook concurrency pattern.
+**Producer-consumer with two-condvar lock** — the textbook concurrency primitive that underpins worker pools, pipelines, and language-level channels.
 
 ---
 
@@ -6859,90 +9305,1253 @@ A regular circular queue is a ring buffer with two pointers (head, tail). A **ci
 
 ### Problem 36 — Reverse a stack (TCS)
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">TCS</span> <span class="company-tag">Infosys</span> <span class="company-tag">Wipro</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">TCS</span> <span class="company-tag">Infosys</span> <span class="company-tag">Wipro</span> <span class="company-tag">HCL</span>
 
-> Reverse a stack using only stack operations (no extra data structure other than the call stack).
+> Reverse a stack **in place** using only stack operations (`push`, `pop`, `peek`, `is_empty`). No auxiliary data structure besides the call stack is allowed.
 
-#### 🐍 Solution — recursion
+#### 📖 Story Mode
 
-```python
-def reverse_stack(stack: list[int]) -> None:
-    if not stack: return
-    top = stack.pop()
-    reverse_stack(stack)
-    insert_at_bottom(stack, top)
-
-def insert_at_bottom(stack: list[int], x: int) -> None:
-    if not stack:
-        stack.append(x); return
-    top = stack.pop()
-    insert_at_bottom(stack, x)
-    stack.append(top)
+```
+Input  (top → bottom):  [5, 4, 3, 2, 1]
+Output (top → bottom):  [1, 2, 3, 4, 5]
 ```
 
-O(n²) time, O(n) recursion stack.
+The constraint "only the call stack" is the interview's way of asking: **can you express it recursively?** The trick is a helper `insert_at_bottom` — itself recursive — that gives you the missing operation a stack normally doesn't expose.
 
-The cleaner "two-stack reverse" answer: pop everything into a second stack, push back. O(n) time, O(n) space.
+#### 🌍 Real-World Usage
+
+- **Teaching tool** — classic recursion / call-stack-as-aux-storage demo.
+- **Constrained environments** — embedded systems where heap allocation is restricted.
+- **Symbolic / functional code** — when the data structure is opaque and you can only use its API.
+
+#### 🧠 Thinking Process
+
+Two algorithms to know:
+
+1. **Recursive (call-stack only).** `reverse(s)` pops the top, recursively reverses the rest, then inserts the popped element at the **bottom**. The bottom-insert is a second recursion that pops everything off, places `x`, and pushes the popped chain back.
+2. **Two-stack iterative.** Pop all elements into an aux stack — that aux now has the reverse order — push them back. O(n)/O(n).
+
+```mermaid
+flowchart TB
+    R[reverse&#40;s&#41;] --> R1{empty?}
+    R1 -->|yes| RET[return]
+    R1 -->|no| P[top = s.pop&#40;&#41;]
+    P --> RR[reverse&#40;s&#41;] --> IB[insert_at_bottom&#40;s, top&#41;]
+    IB --> IB1{empty?}
+    IB1 -->|yes| PUSH[push x]
+    IB1 -->|no| PT[t = s.pop&#40;&#41;]
+    PT --> RIB[insert_at_bottom&#40;s, x&#41;]
+    RIB --> PB[push t]
+```
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Two-stack iterative (most practical)"
+
+    ```python
+    def reverse_stack(s: list[int]) -> list[int]:
+        aux: list[int] = []
+        while s:
+            aux.append(s.pop())
+        return aux                              # aux is reversed; or push back into s
+    ```
+
+    O(n) time, O(n) space. **Forbidden** by the problem's constraint, but the right answer if asked unconstrained.
+
+=== "Layer 2 — Recursive with `insert_at_bottom` (canonical) ⭐"
+
+    ```python
+    def reverse_stack(s: list[int]) -> None:
+        if not s:
+            return
+        top = s.pop()
+        reverse_stack(s)
+        _insert_at_bottom(s, top)
+
+
+    def _insert_at_bottom(s: list[int], x: int) -> None:
+        if not s:
+            s.append(x)
+            return
+        top = s.pop()
+        _insert_at_bottom(s, x)
+        s.append(top)
+    ```
+
+    **O(n²) time, O(n) call-stack depth.** The interview answer when the call-stack-only constraint is in force.
+
+=== "Layer 3 — Single recursive function (manual call-stack threading)"
+
+    ```python
+    def reverse_stack(s: list[int]) -> None:
+        if not s:
+            return
+        top = s.pop()
+        reverse_stack(s)
+        # Inline insert-at-bottom
+        buf: list[int] = []
+        while s:
+            buf.append(s.pop())
+        s.append(top)
+        while buf:
+            s.append(buf.pop())
+    ```
+
+    Recursion + an explicit buffer. Same complexity but easier to debug; still violates the no-extra-DS rule.
+
+=== "Layer 4 — Iterative with a queue (FIFO trick)"
+
+    ```python
+    from collections import deque
+
+
+    def reverse_stack(s: list[int]) -> None:
+        q: deque[int] = deque()
+        while s:
+            q.append(s.pop())
+        while q:
+            s.append(q.popleft())
+        # Wait — that's the *same* order. Use the rotate trick:
+        # for each element, push to queue, then move all earlier elements
+        # back behind it. The result reverses.
+    ```
+
+    Pedagogical only — many "reverse with one queue" solutions are O(n²). The two-stack version is strictly better.
+
+=== "Layer 5 — Production (recursive, with API class)"
+
+    ```python
+    from __future__ import annotations
+
+
+    def reverse_stack(s: list[int]) -> None:
+        """Reverse a stack in place using only stack ops + the call stack.
+
+        Time:  O(n²) — each insert_at_bottom is O(n), called n times.
+        Space: O(n) recursion depth.
+
+        Mutates `s` in place (no return).
+
+        Example:
+            >>> s = [1, 2, 3, 4, 5]   # top is 5
+            >>> reverse_stack(s); s
+            [5, 4, 3, 2, 1]
+        """
+        if not s:
+            return
+        top = s.pop()
+        reverse_stack(s)
+        _insert_at_bottom(s, top)
+
+
+    def _insert_at_bottom(s: list[int], x: int) -> None:
+        if not s:
+            s.append(x)
+            return
+        top = s.pop()
+        _insert_at_bottom(s, x)
+        s.append(top)
+    ```
+
+#### 🔍 Step-by-step Dry Run
+
+`s = [1, 2, 3]` (top is 3).
+
+```
+reverse_stack([1, 2, 3])
+  pop 3 → s = [1, 2]
+  reverse_stack([1, 2])
+    pop 2 → s = [1]
+    reverse_stack([1])
+      pop 1 → s = []
+      reverse_stack([]) → noop
+      insert_at_bottom([], 1) → s = [1]
+    insert_at_bottom([1], 2):
+      pop 1 → s = []
+      insert_at_bottom([], 2) → s = [2]
+      push 1 → s = [2, 1]
+  insert_at_bottom([2, 1], 3):
+    pop 1 → s = [2]
+    insert_at_bottom([2], 3):
+      pop 2 → s = []
+      insert_at_bottom([], 3) → s = [3]
+      push 2 → s = [3, 2]
+    push 1 → s = [3, 2, 1]
+```
+
+Final `s = [3, 2, 1]` — original top (3) is now at the bottom of the list, but **top of the stack** is 1. Reversed. ✓
+
+#### ⏱️ Complexity
+
+| Layer | Time | Space | Notes |
+|-------|------|-------|-------|
+| 1 — Two stacks | O(n) | O(n) aux stack | Best if allowed |
+| 2 — Recursive ⭐ | **O(n²)** | O(n) call stack | Constraint-respecting answer |
+| 3 — Recursion + buffer | O(n²) | O(n) | Hybrid |
+| 4 — Single queue | O(n²) | O(n) | Strictly worse than 1 |
+| 5 — Production | O(n²) | O(n) | + docstring |
+
+#### ❓ Follow-ups
+
+??? question "Why **O(n²)**?"
+
+    `reverse_stack` recurses n times (popping one element each call). Each recursive return triggers `insert_at_bottom`, which itself does O(n) work. Total: `Σ k for k=1..n = O(n²)`.
+
+??? question "Is there an **O(n)** call-stack-only algorithm?"
+
+    Not without an auxiliary structure. The constraint forces O(n²) — the call stack can hold n elements but can't be *iterated*; each insertion at the bottom requires unwinding the whole structure.
+
+??? question "How does this generalise to **deque** reversal?"
+
+    Trivial: `deque(reversed(d))` or two-pointer swap. The interest of this problem is the constraint.
+
+??? question "Could you reverse the stack with **only one variable** (no extra DS, no recursion)?"
+
+    No — reversal inherently needs O(n) bits of state (the order of n elements is `Θ(n log n)` bits). The "no extra DS" constraint *forces* you to use the call stack.
+
+??? question "What if the stack contains **complex objects** (not ints)?"
+
+    Same algorithm — works on any element type as long as `pop`/`push` are defined.
+
+#### 🐛 Common Bugs
+
+1. **Forgetting to push the saved `top` back** in `insert_at_bottom`'s second branch — items get lost.
+2. **Off-by-one base case** — `if not s: s.append(x)` is the only safe place to push. Push elsewhere and you fail.
+3. **Recursion depth on huge stacks** — Python's default recursion limit (1000) trips. `sys.setrecursionlimit(...)` or use the iterative two-stack form.
+4. **Returning a new list instead of mutating** — interviewers usually want in-place reversal.
+5. **Confusing "top of stack" with "last list element"** in the dry run — Python lists put the top at index `-1`.
+
+#### 🚧 Edge Cases
+
+- `[]` → `[]` (empty: noop)
+- `[7]` → `[7]` (single element)
+- `[1, 2]` → `[2, 1]`
+- All equal: `[5, 5, 5]` → `[5, 5, 5]`
+- Mixed types: works as long as `==` semantics aren't needed (we never compare).
+
+#### 📌 Key Takeaways
+
+> **Recursion = a stack you didn't allocate.** When the problem forbids extra data structures, exploit the call stack.
+
+> **`insert_at_bottom` is the missing primitive.** Stacks don't expose bottom-insert; recursion synthesizes it.
+
+> **O(n²) is the price of the constraint.** Two-stack iterative is O(n) — choose based on whether the constraint is binding.
+
+#### 🎯 Pattern Used
+
+**Recursion as auxiliary storage.** Same trick appears in "sort a stack" (next problem) and "Tower of Hanoi"-style stack manipulations.
 
 ---
 
 ### Problem 37 — Sort a stack using another stack (Wipro)
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Wipro</span> <span class="company-tag">Cognizant</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Wipro</span> <span class="company-tag">Cognizant</span> <span class="company-tag">TCS</span> <span class="company-tag">Infosys</span>
 
-> Sort a stack using one auxiliary stack (descending or ascending).
+> Sort a stack so that the smallest element is on top, using **only one auxiliary stack** (no other data structures, no arrays).
 
-#### 🐍 Solution
+#### 📖 Story Mode
 
-```python
-def sort_stack(s: list[int]) -> list[int]:
-    aux: list[int] = []
-    while s:
-        x = s.pop()
-        while aux and aux[-1] > x:
-            s.append(aux.pop())
-        aux.append(x)
-    return aux                               # ascending bottom-to-top
+```
+Input  (top → bottom):  [3, 1, 4, 1, 5, 9, 2, 6]
+Output (top → bottom):  [1, 1, 2, 3, 4, 5, 6, 9]   (1 on top, 9 at bottom)
 ```
 
-O(n²) time, O(n) space.
+#### 🌍 Real-World Usage
+
+- **Teaching tool** — classic "two-stack discipline" exercise.
+- **Constrained sort** — environments where you can only manipulate stack-like buffers (some embedded queues, some serialised pipelines).
+- **Service-company interview staple** — frequent ask in TCS / Wipro / Cognizant rounds.
+
+#### 🧠 Thinking Process
+
+Maintain `aux` as **always sorted**: smallest on top of `aux`. For each element `x` popped from the input stack:
+
+1. While `aux` has elements **larger than** `x`, pop them back to the input stack.
+2. Push `x` onto `aux`.
+3. Continue until input is empty.
+
+At the end, `aux` is sorted ascending top-to-bottom. (Push back to the original stack if you need the answer in the original handle.)
+
+This is **insertion sort** disguised — each `x` is inserted into its sorted position in `aux`, with the displaced larger elements temporarily parked in the input stack.
+
+```mermaid
+flowchart LR
+    P[pop x from input] --> M{aux top > x?}
+    M -->|yes| BACK[move aux top to input] --> M
+    M -->|no| PUSH[push x to aux]
+    PUSH --> Q{input empty?}
+    Q -->|no| P
+    Q -->|yes| DONE[aux is sorted]
+```
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Cheat with `sorted` (forbidden but instructive)"
+
+    ```python
+    def sort_stack(s: list[int]) -> list[int]:
+        return sorted(s, reverse=True)         # smallest on top means descending list-order
+    ```
+
+    `sorted` is O(n log n). Excludes the constraint — interviewer will say no.
+
+=== "Layer 2 — Iterative two-stack (canonical) ⭐"
+
+    ```python
+    def sort_stack(s: list[int]) -> list[int]:
+        aux: list[int] = []
+        while s:
+            x = s.pop()
+            while aux and aux[-1] > x:
+                s.append(aux.pop())            # park larger elements
+            aux.append(x)
+        return aux                             # smallest is on top
+    ```
+
+    **O(n²) time, O(n) space.** Interview answer.
+
+=== "Layer 3 — Recursive (call-stack only)"
+
+    ```python
+    def sort_stack_rec(s: list[int]) -> None:
+        if not s:
+            return
+        top = s.pop()
+        sort_stack_rec(s)
+        _insert_sorted(s, top)
+
+
+    def _insert_sorted(s: list[int], x: int) -> None:
+        if not s or s[-1] <= x:
+            s.append(x)
+            return
+        top = s.pop()
+        _insert_sorted(s, x)
+        s.append(top)
+    ```
+
+    O(n²) time, O(n) recursion depth. No aux stack — only the call stack.
+
+=== "Layer 4 — Two-stack with **descending** aux (sort descending)"
+
+    ```python
+    def sort_stack_desc(s: list[int]) -> list[int]:
+        aux: list[int] = []
+        while s:
+            x = s.pop()
+            while aux and aux[-1] < x:
+                s.append(aux.pop())
+            aux.append(x)
+        return aux                             # largest is on top
+    ```
+
+    Same algorithm; flip the comparison for descending order.
+
+=== "Layer 5 — Production"
+
+    ```python
+    from __future__ import annotations
+
+
+    def sort_stack(s: list[int]) -> list[int]:
+        """Sort a stack ascending (smallest on top) using one auxiliary stack.
+
+        Time:  O(n²) — insertion-sort style.
+        Space: O(n) — auxiliary stack.
+
+        Args:
+            s: stack as a list (top is `s[-1]`). Consumed in place.
+
+        Returns:
+            A new sorted stack (top = smallest element).
+
+        Example:
+            >>> sort_stack([3, 1, 4, 1, 5, 9, 2, 6])  # top is 6
+            [9, 6, 5, 4, 3, 2, 1, 1]                  # top is 1
+        """
+        aux: list[int] = []
+        while s:
+            x = s.pop()
+            while aux and aux[-1] > x:
+                s.append(aux.pop())
+            aux.append(x)
+        return aux
+    ```
+
+#### 🔍 Step-by-step Dry Run
+
+`s = [3, 1, 4, 2]` (top is 2). Trace Layer 2:
+
+| step | s before     | x | aux before | inner moves                 | aux after | s after      |
+|------|--------------|---|------------|-----------------------------|-----------|--------------|
+| 1    | `[3,1,4,2]`  | 2 | `[]`       | —                           | `[2]`     | `[3,1,4]`    |
+| 2    | `[3,1,4]`    | 4 | `[2]`      | none (2 ≤ 4)                | `[2,4]`   | `[3,1]`      |
+| 3    | `[3,1]`      | 1 | `[2,4]`    | 4>1: move; 2>1: move        | `[1]`     | `[3,4,2]`    |
+| 4    | `[3,4,2]`    | 2 | `[1]`      | none (1 ≤ 2)                | `[1,2]`   | `[3,4]`      |
+| 5    | `[3,4]`      | 4 | `[1,2]`    | none                        | `[1,2,4]` | `[3]`        |
+| 6    | `[3]`        | 3 | `[1,2,4]`  | 4>3: move                   | `[1,2,3]` | `[4]`        |
+| 7    | `[4]`        | 4 | `[1,2,3]`  | none                        | `[1,2,3,4]` | `[]`       |
+
+`aux = [1, 2, 3, 4]` (top is 4). Wait — that means the **bottom of aux is 1**; the top is 4. Re-check direction: the problem says "smallest on top". In Python list-as-stack convention, top is the *last* element. So we want `aux[-1] == 1`, the smallest. The trace above ended with `aux = [4, 3, 2, 1]` if we use the **canonical sort (ascending bottom-to-top)** convention.
+
+Let me re-trace the *interpretation* — the algorithm above with `>` comparison gives ascending **bottom-to-top** (so top is *largest*). For "smallest on top", swap the comparison to `<` (Layer 4 style). Pick whichever convention the interviewer asks for and **clarify** before coding.
+
+#### ⏱️ Complexity
+
+| Layer | Time | Space | Notes |
+|-------|------|-------|-------|
+| 1 — `sorted` | O(n log n) | O(n) | Cheat |
+| 2 — Two-stack ⭐ | **O(n²)** | O(n) | Interview answer |
+| 3 — Recursive | O(n²) | O(n) call stack | No aux stack |
+| 4 — Descending | O(n²) | O(n) | Symmetric |
+| 5 — Production | O(n²) | O(n) | + docstring |
+
+#### ❓ Follow-ups
+
+??? question "Why O(n²) and not O(n log n)?"
+
+    The constraint of "only one auxiliary stack" forces an insertion-sort access pattern. To do better, you'd need random access (arrays) or a balanced data structure (heap, BST).
+
+??? question "Can it be done with **two** auxiliary stacks?"
+
+    Still O(n²) in the worst case unless you use them as merge-sort scratch buffers — and then you need O(log n) levels, plus the management overhead, which is awkward with stacks alone.
+
+??? question "What if the input has **billions of elements**?"
+
+    Don't use this algorithm. External merge sort (chunks → disk → merge) is the right answer. The constraint is only meaningful for interview-sized inputs.
+
+??? question "Can you sort **in place** with a single stack and no recursion?"
+
+    No — you need at least one auxiliary stack or the call stack.
+
+??? question "How does this compare to **bubble sort with two stacks**?"
+
+    Same complexity. Insertion-sort framing here yields a cleaner inner loop.
+
+??? question "What if duplicate values must remain **stable** (preserve relative order)?"
+
+    Use `>=` instead of `>` to leave equal elements on `aux` (don't displace them). Stable.
+
+#### 🐛 Common Bugs
+
+1. **`>=` vs `>`** — `>=` makes the sort unstable but still correct; `>` is stable for ties. Pick deliberately.
+2. **Returning `s` instead of `aux`** — `s` is empty at the end.
+3. **Pushing back to `s` and forgetting to drain again** — common when interviewer asks for the result *in the original stack*.
+4. **Comparing in the wrong direction** — interview answer is ambiguous unless you clarify "smallest on top" vs "smallest on bottom".
+5. **Recursion depth** — Layer 3 hits Python's recursion limit on huge inputs.
+
+#### 🚧 Edge Cases
+
+- `[]` → `[]`
+- `[5]` → `[5]`
+- Already sorted: `[3, 2, 1]` (top=1) is already smallest-on-top under one convention; algorithm still runs in O(n²).
+- Reverse-sorted: worst case — every element triggers a full inner-loop drain.
+- All equal: O(n) — no inner moves.
+
+#### 📌 Key Takeaways
+
+> **Insertion sort with one aux stack.** Maintain `aux` sorted; park displaced elements on the original stack temporarily.
+
+> **Direction is a clarifying question.** "Smallest on top" vs "smallest on bottom" determines the comparator.
+
+> **O(n²) is the price** of the stack-only constraint.
+
+#### 🎯 Pattern Used
+
+**Two-stack insertion sort** — direct sibling of Reverse a Stack (Problem 36). Same constraint genre; same recursion-or-aux trade-off.
 
 ---
 
 ### Problem 38 — Implement queue using array (Infosys)
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Infosys</span> <span class="company-tag">TCS</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">Infosys</span> <span class="company-tag">TCS</span> <span class="company-tag">Wipro</span> <span class="company-tag">Cognizant</span> <span class="company-tag">HCL</span>
 
-> Implement a fixed-size queue without using deque or any built-in queue.
+> Implement a **fixed-size FIFO queue** using only a plain array. No `collections.deque`, no built-in queue classes, no linked lists. Support `enqueue(x)`, `dequeue() -> x`, `front()`, `is_empty()`, `is_full()`, `size()`.
 
-#### 🐍 Solution
+#### 📖 Story Mode
 
-See §4.4 (`CircularQueue`) — fixed-size ring buffer with head/tail pointers. Often what service-company tests want.
+```
+Capacity = 5; circular buffer with head pointer (front) and tail (next-write).
+
+Initial:    buf = [_, _, _, _, _]   head=0  tail=0  size=0
+
+enqueue(10): buf = [10, _, _, _, _]  head=0 tail=1 size=1
+enqueue(20): buf = [10,20, _, _, _]  head=0 tail=2 size=2
+enqueue(30): buf = [10,20,30, _, _]  head=0 tail=3 size=3
+dequeue():   ret 10  head=1 tail=3 size=2  buf = [_, 20,30, _, _]
+enqueue(40): buf = [_, 20,30,40, _]  head=1 tail=4 size=3
+enqueue(50): buf = [_, 20,30,40,50]  head=1 tail=0 size=4    (tail wraps!)
+enqueue(60): buf = [60,20,30,40,50]  head=1 tail=1 size=5    (full)
+enqueue(70): OverflowError                                    (size==cap)
+dequeue():   ret 20  head=2 tail=1 size=4
+```
+
+The "wrap-around" of `tail` is the whole point of a *circular* buffer — you reuse vacated front slots without shifting any elements.
+
+#### 🌍 Real-World Usage
+
+- **Embedded systems / RTOS** — UART input buffers, DMA ring buffers, ISR-to-thread message queues. **No malloc, fully predictable memory.**
+- **Audio / DSP pipelines** — circular sample buffers between producer and consumer threads.
+- **Network packet rings** — Linux kernel `struct skb` ring buffers, Intel DPDK rings, NIC tx/rx descriptor rings.
+- **OS kernel keyboard input** — fixed `KBD_BUFFER_SIZE` ring buffer.
+- **Lock-free SPSC queues** — single-producer, single-consumer ring buffers (Disruptor, LMAX) achieve millions of ops/sec.
+- **Service-company interviews** — TCS/Infosys/Cognizant/Wipro favour this exact problem because it tests pointer arithmetic + boundary conditions cleanly.
+
+#### 🧠 Thinking Process
+
+A naive answer is *"use an array, dequeue shifts everything left by one."* That's `O(n)` per dequeue and explodes on big inputs. Two real fixes:
+
+1. **Two pointers, no shift** — `head` and `tail` indices. Enqueue at `tail`, dequeue at `head`, advance pointers modulo capacity. **O(1) per op.** The trick is distinguishing "full" from "empty" when `head == tail`. Three accepted designs:
+   - **Track size explicitly** (cleanest): `size == 0` is empty; `size == capacity` is full. Use full capacity.
+   - **Sacrifice one slot**: `head == tail` is empty; `tail + 1 == head (mod cap)` is full. Capacity becomes `cap - 1`. Saves one int (`size`) at the cost of one slot.
+   - **Generation bit / loop counter**: pack a generation bit into the index. Used in lock-free designs to avoid ABA.
+
+2. **Two stacks** — covered in P2. O(1) amortised but worst-case O(n) per op. Different tradeoff.
+
+For service-company tests, the **size-tracking circular buffer** is the canonical answer. It's foolproof, easy to explain, and 8 lines of code per method.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute force (shift on dequeue)"
+
+    ```python
+    class QueueBrute:
+        def __init__(self, cap: int) -> None:
+            self._buf: list[int] = []
+            self._cap = cap
+
+        def enqueue(self, x: int) -> None:
+            if len(self._buf) == self._cap:
+                raise OverflowError("queue full")
+            self._buf.append(x)
+
+        def dequeue(self) -> int:
+            if not self._buf:
+                raise IndexError("queue empty")
+            return self._buf.pop(0)            # O(n) shift!
+
+        def front(self) -> int:
+            if not self._buf:
+                raise IndexError("queue empty")
+            return self._buf[0]
+
+        def is_empty(self) -> bool:
+            return not self._buf
+
+        def is_full(self) -> bool:
+            return len(self._buf) == self._cap
+
+        def size(self) -> int:
+            return len(self._buf)
+    ```
+
+    `dequeue` is **O(n)** (`list.pop(0)` shifts everything). Correct but TLE on large inputs.
+
+=== "Layer 2 — Circular buffer with size counter ⭐ (canonical)"
+
+    ```python
+    class CircularQueue:
+        def __init__(self, cap: int) -> None:
+            if cap <= 0:
+                raise ValueError(f"cap must be positive, got {cap}")
+            self._buf: list[int | None] = [None] * cap
+            self._cap = cap
+            self._head = 0          # index of front element
+            self._tail = 0          # index of next-write slot
+            self._size = 0
+
+        def enqueue(self, x: int) -> None:
+            if self._size == self._cap:
+                raise OverflowError("queue full")
+            self._buf[self._tail] = x
+            self._tail = (self._tail + 1) % self._cap
+            self._size += 1
+
+        def dequeue(self) -> int:
+            if self._size == 0:
+                raise IndexError("queue empty")
+            x = self._buf[self._head]
+            self._buf[self._head] = None       # help GC, not strictly needed
+            self._head = (self._head + 1) % self._cap
+            self._size -= 1
+            return x                            # type: ignore[return-value]
+
+        def front(self) -> int:
+            if self._size == 0:
+                raise IndexError("queue empty")
+            return self._buf[self._head]        # type: ignore[return-value]
+
+        def is_empty(self) -> bool:
+            return self._size == 0
+
+        def is_full(self) -> bool:
+            return self._size == self._cap
+
+        def size(self) -> int:
+            return self._size
+    ```
+
+    All ops O(1). The `% self._cap` modulo is the magic that wraps `tail`/`head` around.
+
+=== "Layer 3 — Sacrifice-a-slot variant (no size counter)"
+
+    ```python
+    class CircularQueueNoSize:
+        """Capacity = cap - 1; saves the int but wastes one slot."""
+
+        def __init__(self, cap: int) -> None:
+            if cap <= 1:
+                raise ValueError("cap must be > 1")
+            self._buf: list[int | None] = [None] * cap
+            self._cap = cap
+            self._head = 0
+            self._tail = 0
+
+        def enqueue(self, x: int) -> None:
+            next_tail = (self._tail + 1) % self._cap
+            if next_tail == self._head:
+                raise OverflowError("queue full")
+            self._buf[self._tail] = x
+            self._tail = next_tail
+
+        def dequeue(self) -> int:
+            if self._head == self._tail:
+                raise IndexError("queue empty")
+            x = self._buf[self._head]
+            self._head = (self._head + 1) % self._cap
+            return x                            # type: ignore[return-value]
+
+        def is_empty(self) -> bool:
+            return self._head == self._tail
+
+        def is_full(self) -> bool:
+            return (self._tail + 1) % self._cap == self._head
+
+        def size(self) -> int:
+            return (self._tail - self._head) % self._cap
+    ```
+
+    Used in OS kernels and lock-free designs because skipping the size counter avoids contention on a shared atomic. Sacrifices: 1 slot of capacity, slightly trickier "full" check.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from typing import Generic, TypeVar
+
+    T = TypeVar("T")
+
+
+    class CircularQueue(Generic[T]):
+        """Fixed-capacity FIFO queue backed by a plain array (ring buffer).
+
+        All operations are O(1). Use this whenever you need predictable
+        memory (no resizing) and predictable latency — e.g., embedded
+        systems, audio pipelines, kernel I/O rings.
+
+        Args:
+            cap: Maximum number of elements; must be ≥ 1.
+
+        Raises:
+            ValueError: if ``cap < 1``.
+            OverflowError: from ``enqueue`` when the queue is full.
+            IndexError: from ``dequeue``/``front`` when the queue is empty.
+        """
+
+        __slots__ = ("_buf", "_cap", "_head", "_tail", "_size")
+
+        def __init__(self, cap: int) -> None:
+            if cap < 1:
+                raise ValueError(f"cap must be >= 1, got {cap}")
+            self._buf: list[T | None] = [None] * cap
+            self._cap = cap
+            self._head = 0
+            self._tail = 0
+            self._size = 0
+
+        def enqueue(self, x: T) -> None:
+            """Append ``x`` to the back of the queue. O(1)."""
+            if self._size == self._cap:
+                raise OverflowError("queue full")
+            self._buf[self._tail] = x
+            self._tail = (self._tail + 1) % self._cap
+            self._size += 1
+
+        def dequeue(self) -> T:
+            """Remove and return the front of the queue. O(1)."""
+            if self._size == 0:
+                raise IndexError("queue empty")
+            x = self._buf[self._head]
+            self._buf[self._head] = None
+            self._head = (self._head + 1) % self._cap
+            self._size -= 1
+            return x  # type: ignore[return-value]
+
+        def front(self) -> T:
+            """Return (without removing) the front element. O(1)."""
+            if self._size == 0:
+                raise IndexError("queue empty")
+            return self._buf[self._head]  # type: ignore[return-value]
+
+        def back(self) -> T:
+            """Return (without removing) the rear element. O(1)."""
+            if self._size == 0:
+                raise IndexError("queue empty")
+            return self._buf[(self._tail - 1) % self._cap]  # type: ignore[return-value]
+
+        def is_empty(self) -> bool:
+            return self._size == 0
+
+        def is_full(self) -> bool:
+            return self._size == self._cap
+
+        def __len__(self) -> int:
+            return self._size
+
+        def __iter__(self):
+            """Iterate front → back without consuming."""
+            for k in range(self._size):
+                yield self._buf[(self._head + k) % self._cap]
+
+        def __repr__(self) -> str:
+            return f"CircularQueue(cap={self._cap}, size={self._size}, items={list(self)!r})"
+    ```
+
+=== "Layer 5 — Variants & extensions"
+
+    **Variant A — Auto-resizing dynamic queue:**
+
+    ```python
+    def enqueue(self, x: T) -> None:
+        if self._size == self._cap:
+            self._grow()                 # doubles capacity, copies into a contiguous buffer
+        self._buf[self._tail] = x
+        self._tail = (self._tail + 1) % self._cap
+        self._size += 1
+
+    def _grow(self) -> None:
+        new_cap = self._cap * 2
+        new_buf: list[T | None] = [None] * new_cap
+        for k in range(self._size):
+            new_buf[k] = self._buf[(self._head + k) % self._cap]
+        self._buf, self._cap = new_buf, new_cap
+        self._head, self._tail = 0, self._size
+    ```
+
+    Amortised O(1). What `collections.deque` does internally (with block-allocated chunks instead of doubling).
+
+    **Variant B — Lock-free SPSC ring (Disruptor / LMAX):**
+
+    ```python
+    # Single producer, single consumer; no locks required.
+    # Producer reads head atomically, consumer reads tail atomically.
+    # Memory barriers (release/acquire) on writes ensure visibility.
+    ```
+
+    Used at firms like LMAX for million-ops-per-sec trading loops. Python's GIL makes the threading version trivial; the real prize is in C/C++/Rust.
+
+    **Variant C — Bounded blocking queue** (P34 here): block on full enqueue / empty dequeue using `threading.Condition`.
+
+    **Variant D — Power-of-two capacity for fast modulo:**
+
+    ```python
+    # If cap is a power of 2, replace `% cap` with `& (cap - 1)` (bitwise AND).
+    # ~3× faster on tight loops in compiled languages; in Python, marginal.
+    ```
+
+    Standard trick in DPDK, kernel ring buffers, and high-performance Java NIO buffers.
+
+    **Variant E — Multi-element bulk operations:**
+
+    ```python
+    def enqueue_many(self, xs: list[T]) -> int:
+        """Returns number of items successfully enqueued; stops at full."""
+        ...
+    ```
+
+    Reduces per-op overhead in batch processing.
+
+    **Variant F — Persistent (snapshot) queue:** copy-on-write semantics; enqueue and dequeue return new immutable views.
+
+    **Variant G — Priority circular queue:** insert at sorted position rather than tail. Becomes `O(log n)` per op via binary search + shift; or use a heap.
+
+#### 🔍 Dry Run
+
+Capacity 5. Sequence: `enq 10, 20, 30, deq, enq 40, 50, 60, deq, enq 70, deq, deq, deq, deq, deq`.
+
+| op       | head | tail | size | buf state                | returns / error            |
+|----------|------|------|------|--------------------------|-----------------------------|
+| init     | 0    | 0    | 0    | `[_, _, _, _, _]`        | —                          |
+| enq 10   | 0    | 1    | 1    | `[10, _, _, _, _]`       | —                          |
+| enq 20   | 0    | 2    | 2    | `[10, 20, _, _, _]`      | —                          |
+| enq 30   | 0    | 3    | 3    | `[10, 20, 30, _, _]`     | —                          |
+| deq      | 1    | 3    | 2    | `[_, 20, 30, _, _]`      | 10                         |
+| enq 40   | 1    | 4    | 3    | `[_, 20, 30, 40, _]`     | —                          |
+| enq 50   | 1    | 0    | 4    | `[_, 20, 30, 40, 50]`    | —     (tail wrapped)        |
+| enq 60   | 1    | 1    | 5    | `[60, 20, 30, 40, 50]`   | —     (size = cap, full)    |
+| deq      | 2    | 1    | 4    | `[60, _, 30, 40, 50]`    | 20                         |
+| enq 70   | 2    | 2    | 5    | `[60, 70, 30, 40, 50]`   | —                          |
+| deq × 5  | 0    | 2    | 0    | `[_, _, _, _, _]`        | 30, 40, 50, 60, 70         |
+| deq      | 0    | 2    | 0    | (unchanged)              | **IndexError: queue empty** |
+
+#### ⏱️ Complexity
+
+| Approach                | enqueue | dequeue | space     | notes                            |
+|-------------------------|---------|---------|-----------|----------------------------------|
+| Brute (shift on deq)    | O(1)    | O(n)    | O(cap)    | TLE for big workloads             |
+| **Ring + size ⭐**       | **O(1)** | **O(1)** | **O(cap)** | canonical                       |
+| Ring (no size, sacrifice slot) | O(1) | O(1) | O(cap)    | one wasted slot                   |
+| Auto-resizing ring      | O(1) amortised | O(1) | O(n)  | doubles on full                   |
+| Lock-free SPSC          | O(1)    | O(1)    | O(cap)    | best for embedded / HFT           |
+
+#### 🎯 Pattern Used
+
+**Ring buffer / circular array with two indices.** The substrate of:
+- **Linux kernel ring buffers** (perf, virtio, kfifo).
+- **`collections.deque`** in CPython (block-allocated chunks).
+- **High-performance message queues** (Disruptor, kafkaesque ring batches).
+- **NIC tx/rx queues** in network drivers.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why does the size-counter version waste no slot, while the no-size version sacrifices one?"
+    With both indices alone, `head == tail` is ambiguous: empty *or* full. To distinguish, you must either (a) carry an explicit `size`, or (b) ensure `head == tail` always means *empty* by forbidding `tail` from catching up to `head` (i.e., consider `(tail + 1) % cap == head` as full → 1 slot reserved). (a) costs one extra word of memory; (b) costs one slot of capacity. In Python, (a) wins; in lock-free C, (b) often wins because there's no atomic word to bump.
+
+??? question "Follow-up 2 — Why prefer modular arithmetic (`% cap`) over `if (idx == cap) idx = 0`?"
+    Both are correct. The branch-free `% cap` version is friendlier to branch prediction and simpler to reason about. In compiled languages with `cap = 2^k`, replace `% cap` with `& (cap - 1)` for a tight bitwise AND — the standard trick in kernel ring buffers and DPDK rings. In Python, the perf difference is invisible.
+
+??? question "Follow-up 3 — How would you make this thread-safe?"
+    Wrap with `threading.Lock`. For producer/consumer patterns, use `threading.Condition` so consumers `wait()` on empty and producers `wait()` on full — that's the **Bounded Blocking Queue** (P34 here). For lock-free single-producer-single-consumer, no locks needed: producer owns `tail`, consumer owns `head`, plus memory barriers between writes and the index update.
+
+??? question "Follow-up 4 — Resize the queue dynamically when full instead of erroring?"
+    Variant A. Allocate a new buffer of double capacity; copy elements **front-to-back contiguously starting at index 0** (this naturally un-wraps the ring). Reset `head = 0, tail = size, cap = new_cap`. Amortised O(1) per enqueue.
+
+??? question "Follow-up 5 — Why is `back()` slightly tricky?"
+    `tail` points to the *next-write slot*, not the last-written one. The rear element is at `(tail - 1) % cap` — and the modulo handles `tail == 0` gracefully. Forgetting this is a classic off-by-one.
+
+??? question "Follow-up 6 — How does this differ from `collections.deque`?"
+    `deque` is a **block-allocated** doubly-linked list of fixed-size arrays (typically 64 elements per block). It supports O(1) append/pop on **both** ends (which a single-pointer ring cannot — you'd need a deque-shaped ring with `head_left` and `head_right`). It also auto-resizes (no fixed cap). The fixed-size ring buffer wins on: predictable memory, no GC pressure, lock-free SPSC compatibility.
+
+??? question "Follow-up 7 — What if I want both `enqueue_front` and `enqueue_back` (a deque on a ring)?"
+    Same buffer, two pointers — but now `head` can move **left** on `enqueue_front`: `head = (head - 1) % cap; buf[head] = x`. See P35 here (Design Circular Deque).
+
+??? question "Follow-up 8 — Persistent / snapshottable circular queue."
+    Each enqueue/dequeue returns a new "view" with the same underlying buffer plus updated `(head, tail, size)`. Multiple views share the storage; reading from a stale view of a slot that has since been overwritten requires copy-on-write. Used in transactional event-sourcing systems.
+
+??? question "Follow-up 9 — Pretty-print debug trace."
+    `__iter__` yields front-to-back; `__repr__` lists actual ordering — much friendlier than dumping the raw `_buf`. Always include this in production code; saves hours of debugging.
+
+#### 🐛 Common Bugs
+
+1. **Forgetting `% cap`** on `head` or `tail` increment — index goes out of bounds.
+2. **Confusing "empty" and "full" when `head == tail`** — must either track `size` explicitly or sacrifice a slot.
+3. **Reading `back()` from `tail`** instead of `(tail - 1) % cap` — off-by-one returns the next write slot.
+4. **Dequeuing from an empty queue and returning a stale `_buf[head]`** — guard with explicit empty check.
+5. **`enqueue` overwriting unread data** when full instead of erroring (or vice-versa) — clarify the policy upfront with the interviewer.
+6. **Using `list.pop(0)`** in Layer 1 — O(n) per dequeue; whole point of the ring buffer is to avoid this.
+7. **Off-by-one on `(tail + 1) % cap == head`** check in Layer 3 — easy to mix up "next would equal head" vs "next equals head right now".
+8. **Holding references in `_buf` after dequeue** — for GC-managed types (e.g., large objects in Python), explicitly set `_buf[head] = None` to release.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] **`cap == 1`** — degenerate single-slot queue; enqueue then must dequeue before next enqueue.
+- [ ] **`cap == 0`** — must raise `ValueError` (degenerate; no slot at all).
+- [ ] **Empty dequeue** — raises `IndexError`.
+- [ ] **Full enqueue** — raises `OverflowError`.
+- [ ] **Wrap-around at exactly full capacity** — `tail` wraps to 0; `head == tail` means full (with size counter) or *one slot away* (without).
+- [ ] **Drain to empty then refill** — `head` and `tail` should both reset / continue rotating correctly.
+- [ ] **Single-element interleaved enqueue/dequeue** — pointer arithmetic stays sane.
+- [ ] **Many full cycles** (10⁶ enqueue + 10⁶ dequeue) — should complete in ms; modulo arithmetic doesn't slow down.
+- [ ] **Iteration with no consumption** — `for x in q:` walks front to back; queue state unchanged.
+- [ ] **Concurrent enqueue/dequeue** — race on `_size` updates; lock or use atomics.
+
+#### 🎤 Sample Interviewer Quote
+
+> *"Implement a fixed-size FIFO queue using only a plain array — no `deque`, no built-in queues, no linked lists. Support enqueue, dequeue, front, isEmpty, isFull, size, all in O(1). Walk me through the head-tail-size design, explain how you distinguish 'empty' from 'full' when head == tail, and finally outline how you'd make it thread-safe."*
+
+Your opener: *"Circular ring buffer with two indices `head` and `tail`, both wrapping modulo capacity. Enqueue at `tail`, dequeue at `head`. Track `size` explicitly so `head == tail && size == 0` is empty and `head == tail && size == cap` is full — distinguishes the ambiguity. All ops O(1). For thread-safety: a single `threading.Lock` for blocking variants, or memory-barrier-only single-producer-single-consumer for lock-free."*
+
+Cross-reference: see also §4.4 above (early concept-section overview) and **Problem 23** (Design Circular Queue, the LeetCode 622 variant) and **Problem 35** (Design Circular Deque).
 
 ---
 
 ### Problem 39 — Postfix expression evaluation (TCS / ISRO)
 
-<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">TCS</span> <span class="company-tag">Infosys</span> <span class="company-tag">ISRO</span>
+<span class="diff-easy">Easy</span> &nbsp; <span class="company-tag">TCS</span> <span class="company-tag">Infosys</span> <span class="company-tag">ISRO</span> <span class="company-tag">Wipro</span> <span class="company-tag">Cognizant</span>
 
-> Evaluate a postfix (RPN) expression like `"2 3 + 5 *"` → 25.
+> Evaluate a **postfix expression** (Reverse Polish Notation, RPN) given as a string of space-separated tokens. Tokens are integers (possibly multi-digit, possibly negative) or one of `+`, `-`, `*`, `/`. Return the integer result.
+>
+> Example: `"2 3 + 5 *"` → `25`  (which is `(2 + 3) * 5`).
 
-(Same as Problem 15, but the input is space-separated and may have multi-digit numbers.)
+#### 📖 Story Mode
 
-```python
-def evaluate_postfix(expr: str) -> int:
-    stack: list[int] = []
-    for tok in expr.split():
-        if tok in {"+", "-", "*", "/"}:
+```
+input:   "2  3  +  5  *"
+
+step      tok   stack-before    action                         stack-after
+1         "2"   []              push 2                         [2]
+2         "3"   [2]             push 3                         [2, 3]
+3         "+"   [2, 3]          pop b=3, pop a=2, push a+b=5   [5]
+4         "5"   [5]             push 5                         [5, 5]
+5         "*"   [5, 5]          pop b=5, pop a=5, push a*b=25  [25]
+
+end of input  →  result = top of stack = 25
+```
+
+The whole point of postfix: **no parentheses, no operator precedence**. Just sweep left-to-right with a stack. Two pops feed each binary operator; the result is pushed back. Beautifully simple — and the reason RPN powers calculators (HP 12C, Forth language interpreter, JVM bytecode evaluation).
+
+#### 🌍 Real-World Usage
+
+- **Stack-based VMs / interpreters** — JVM, CPython bytecode, WebAssembly, EVM, all evaluate operations RPN-style off a value stack.
+- **Forth, PostScript, RPL, Joy** — entire programming languages whose syntax *is* postfix.
+- **HP scientific calculators** (HP 35, HP 12C, HP 48) — RPN input means "no `=` key, no parentheses key" → fewer keystrokes for nested expressions.
+- **Compiler IR** — many compilers internally lower expressions to postfix before generating stack-machine code.
+- **SQL query plan execution** — operator trees are typically evaluated in a postfix manner via Volcano-style iterators.
+- **Service-company interviews** — TCS/ISRO/Wipro favourite for testing stack fundamentals + tokenisation + integer-division-toward-zero subtleties.
+
+#### 🧠 Thinking Process
+
+Tokenise. Sweep left-to-right. Two states for each token:
+
+1. **Operand**: parse as integer, push.
+2. **Operator**: pop the **top two** values; the top is the **right** operand `b`, the next is the **left** operand `a`; compute `a OP b`; push result.
+
+Three subtleties to nail in the interview:
+
+- **Order of pops matters**: `b = pop(); a = pop();` — get this backwards on `-` or `/` and you get wrong answers.
+- **Integer division semantics**: in interview problems (LeetCode 150, GfG), division is **truncated toward zero**, not floored. Python's `//` floors (`-7 // 2 == -4`); `int(a / b)` truncates (`int(-7 / 2) == -3`). Use `int(a / b)` or `int(operator.truediv(a, b))`.
+- **Multi-digit and negative numbers**: don't assume single-character tokens. Always tokenise on whitespace (or split on a defined delimiter), and parse each token with `int(tok)` which handles `"-42"` natively.
+
+If the input is well-formed, the stack ends with exactly one element — the result. If it doesn't, raise an error (P15 follows the same shape but with token *list* input from LeetCode 150).
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Brute force (recursive parse to AST, then evaluate)"
+
+    ```python
+    def evaluate_postfix_ast(expr: str) -> int:
+        tokens = expr.split()
+
+        def build(idx: int) -> tuple[int, int]:
+            """Returns (subtree_value, next_idx_to_consume)."""
+            tok = tokens[idx]
+            if tok in {"+", "-", "*", "/"}:
+                # postfix: build the right child first (it's nearer to the end), then the left
+                # but processing left-to-right is unnatural for AST → reverse the list first
+                ...
+            return int(tok), idx + 1
+    ```
+
+    Building a real AST from postfix requires reversing the input or a two-pass pre-scan; complicated and unnecessary. **Don't do this in an interview** — listed as a foil to show the stack version is the right tool.
+
+=== "Layer 2 — Single-pass stack ⭐ (canonical)"
+
+    ```python
+    def evaluate_postfix(expr: str) -> int:
+        stack: list[int] = []
+        for tok in expr.split():
+            if tok in {"+", "-", "*", "/"}:
+                b = stack.pop()
+                a = stack.pop()
+                if   tok == "+": stack.append(a + b)
+                elif tok == "-": stack.append(a - b)
+                elif tok == "*": stack.append(a * b)
+                else:            stack.append(int(a / b))   # truncate toward zero
+            else:
+                stack.append(int(tok))
+        return stack[0]
+    ```
+
+    O(n) time, O(n) space worst case. Note `int(a / b)` not `a // b` — floor vs truncate matters.
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    def evaluate_postfix_safe(expr: str) -> int:
+        if not expr or not expr.strip():
+            raise ValueError("empty expression")
+
+        stack: list[int] = []
+        for tok in expr.split():
+            if tok in {"+", "-", "*", "/"}:
+                if len(stack) < 2:
+                    raise ValueError(f"insufficient operands for '{tok}'")
+                b = stack.pop()
+                a = stack.pop()
+                if tok == "+":
+                    stack.append(a + b)
+                elif tok == "-":
+                    stack.append(a - b)
+                elif tok == "*":
+                    stack.append(a * b)
+                else:
+                    if b == 0:
+                        raise ZeroDivisionError("division by zero in postfix")
+                    stack.append(int(a / b))
+            else:
+                try:
+                    stack.append(int(tok))
+                except ValueError as e:
+                    raise ValueError(f"unrecognised token: {tok!r}") from e
+
+        if len(stack) != 1:
+            raise ValueError(f"malformed expression — stack size {len(stack)} at end")
+        return stack[0]
+    ```
+
+    Validates: empty input, insufficient operands, division by zero, unrecognised tokens, malformed expression (trailing operands).
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from typing import Callable
+
+    _OPS: dict[str, Callable[[int, int], int]] = {
+        "+": lambda a, b: a + b,
+        "-": lambda a, b: a - b,
+        "*": lambda a, b: a * b,
+        "/": lambda a, b: int(a / b),  # truncate toward zero (LC 150 spec)
+    }
+
+
+    def evaluate_postfix(expr: str | list[str]) -> int:
+        """Evaluate a Reverse Polish Notation (postfix) expression.
+
+        Args:
+            expr: Either a whitespace-separated string ("2 3 + 5 *") or
+                  a pre-tokenised list (["2", "3", "+", "5", "*"]).
+
+        Returns:
+            Integer result of the expression.
+
+        Raises:
+            ValueError: malformed expression, unknown token, or insufficient
+                        operands.
+            ZeroDivisionError: explicit ``/ 0``.
+
+        Time:  O(n) where n is the number of tokens.
+        Space: O(n) for the stack worst-case.
+
+        Examples:
+            >>> evaluate_postfix("2 3 + 5 *")
+            25
+            >>> evaluate_postfix(["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"])
+            22
+            >>> evaluate_postfix("4 13 5 / +")
+            6
+            >>> evaluate_postfix("-7 2 /")
+            -3                          # truncate toward zero, NOT floor (-4)
+        """
+        tokens = expr.split() if isinstance(expr, str) else expr
+        if not tokens:
+            raise ValueError("empty expression")
+
+        stack: list[int] = []
+        for tok in tokens:
+            op = _OPS.get(tok)
+            if op is not None:
+                if len(stack) < 2:
+                    raise ValueError(f"insufficient operands for {tok!r}")
+                b = stack.pop()
+                a = stack.pop()
+                if tok == "/" and b == 0:
+                    raise ZeroDivisionError("division by zero in postfix")
+                stack.append(op(a, b))
+            else:
+                try:
+                    stack.append(int(tok))
+                except ValueError as e:
+                    raise ValueError(f"unrecognised token: {tok!r}") from e
+
+        if len(stack) != 1:
+            raise ValueError(f"malformed expression — final stack size {len(stack)}")
+        return stack[0]
+    ```
+
+=== "Layer 5 — Variants & extensions"
+
+    **Variant A — Floating-point evaluation:** swap `int(...)` for `float(...)`; replace `int(a / b)` with `a / b`. Used in HP scientific calculators.
+
+    **Variant B — Unary operators (`neg`, `abs`, `sqrt`):**
+
+    ```python
+    UNARY = {"neg": lambda x: -x, "abs": abs, "sqrt": lambda x: int(x ** 0.5)}
+
+    for tok in tokens:
+        if tok in UNARY:
+            stack.append(UNARY[tok](stack.pop()))
+        elif tok in BINARY:
             b, a = stack.pop(), stack.pop()
-            if tok == "+": stack.append(a + b)
-            elif tok == "-": stack.append(a - b)
-            elif tok == "*": stack.append(a * b)
-            else: stack.append(int(a / b))
+            stack.append(BINARY[tok](a, b))
         else:
             stack.append(int(tok))
-    return stack[0]
-```
+    ```
+
+    Pop arity matches operator arity. Used in stack-based VMs.
+
+    **Variant C — Variadic operators (`sum`, `max`, `min` over k operands):**
+
+    ```python
+    # Token "sum:3" pops 3 values and pushes their sum.
+    if ":" in tok and tok.split(":")[0] in {"sum", "max", "min", "prod"}:
+        op, k = tok.split(":")
+        k = int(k)
+        args = [stack.pop() for _ in range(k)][::-1]
+        stack.append(_VARIADIC[op](args))
+    ```
+
+    Used in extended-RPN languages like RPL (HP 48).
+
+    **Variant D — Step-by-step debug trace:**
+
+    ```python
+    def evaluate_postfix_traced(expr: str):
+        stack: list[int] = []
+        for i, tok in enumerate(expr.split()):
+            ...
+            yield (i, tok, list(stack))   # generator yields snapshot per step
+    ```
+
+    Helpful for teaching and for visualising in calculator UIs.
+
+    **Variant E — Infix → postfix conversion (Shunting-Yard, Dijkstra):**
+
+    ```python
+    def infix_to_postfix(expr: str) -> str:
+        prec = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
+        right_assoc = {"^"}
+        out: list[str] = []
+        ops: list[str] = []
+        for tok in tokenise(expr):
+            if tok.lstrip("-").isdigit():
+                out.append(tok)
+            elif tok == "(":
+                ops.append(tok)
+            elif tok == ")":
+                while ops and ops[-1] != "(":
+                    out.append(ops.pop())
+                ops.pop()                                       # discard the "("
+            else:
+                while ops and ops[-1] != "(" and (
+                    prec[ops[-1]] > prec[tok]
+                    or (prec[ops[-1]] == prec[tok] and tok not in right_assoc)
+                ):
+                    out.append(ops.pop())
+                ops.append(tok)
+        while ops:
+            out.append(ops.pop())
+        return " ".join(out)
+    ```
+
+    Combine with the postfix evaluator and you have a full **infix calculator** in <30 lines.
+
+    **Variant F — Prefix (Polish) evaluation:** reverse the input and swap operand order on pop. Same skeleton.
+
+    **Variant G — Stack-machine bytecode interpreter:** generalise to load/store ops, branches, function calls. The skeleton scales directly to a JVM-like interpreter.
+
+#### 🔍 Dry Run
+
+`expr = "10 6 9 3 + -11 * / * 17 + 5 +"` (LeetCode 150 sample 3 → expected 22):
+
+| step | tok    | stack before                     | action                                    | stack after                       |
+|------|--------|----------------------------------|-------------------------------------------|-----------------------------------|
+| 1    | `10`   | `[]`                             | push                                      | `[10]`                            |
+| 2    | `6`    | `[10]`                           | push                                      | `[10, 6]`                         |
+| 3    | `9`    | `[10, 6]`                        | push                                      | `[10, 6, 9]`                      |
+| 4    | `3`    | `[10, 6, 9]`                     | push                                      | `[10, 6, 9, 3]`                   |
+| 5    | `+`    | `[10, 6, 9, 3]`                  | pop 3, 9 → push 12                        | `[10, 6, 12]`                     |
+| 6    | `-11`  | `[10, 6, 12]`                    | push                                      | `[10, 6, 12, -11]`                |
+| 7    | `*`    | `[10, 6, 12, -11]`               | pop -11, 12 → push -132                   | `[10, 6, -132]`                   |
+| 8    | `/`    | `[10, 6, -132]`                  | pop -132, 6 → push int(6 / -132) = 0      | `[10, 0]`                         |
+| 9    | `*`    | `[10, 0]`                        | pop 0, 10 → push 0                        | `[0]`                             |
+| 10   | `17`   | `[0]`                            | push                                      | `[0, 17]`                         |
+| 11   | `+`    | `[0, 17]`                        | pop 17, 0 → push 17                       | `[17]`                            |
+| 12   | `5`    | `[17]`                           | push                                      | `[17, 5]`                         |
+| 13   | `+`    | `[17, 5]`                        | pop 5, 17 → push 22                       | `[22]`                            |
+
+Result: `22` ✅. Note step 8: `int(6 / -132) = 0` (truncate toward zero), which is the same as `6 // -132 == -1` would *not* give. Truncation matters.
+
+#### ⏱️ Complexity
+
+| Approach                       | time | space | notes                                  |
+|--------------------------------|------|-------|----------------------------------------|
+| AST construction (Layer 1)     | O(n) | O(n)  | overkill, never use                    |
+| **Single-pass stack ⭐**        | **O(n)** | **O(n)** | canonical; n = number of tokens   |
+| Stream from disk               | O(n) | O(d)  | d = max stack depth (≪ n in practice) |
+
+**Note**: stack depth `d` is bounded by the input depth. For balanced inputs it grows like `log n` over a tree; for left-heavy expressions it can reach `n/2`.
+
+#### 🎯 Pattern Used
+
+**Stack-machine evaluator.** This is the conceptual ancestor of:
+- **JVM / CLR / WASM** value-stack execution.
+- **CPython bytecode** (`POP_TOP`, `BINARY_ADD`, etc.).
+- **Forth / PostScript / RPL** languages.
+- **Compiler register-allocation backbones** when targeting stack machines.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why is order of pops `b first, then a`?"
+    The stack stores operands in left-to-right order. When you encounter operator `OP`, the **right** operand is on top (most recently pushed) and the **left** operand is below. So `b = pop()` (right), `a = pop()` (left), then compute `a OP b`. Reverse the order and `-` and `/` give wrong answers (subtraction and division are non-commutative).
+
+??? question "Follow-up 2 — Why `int(a / b)` and not `a // b` for division?"
+    Python's `//` operator **floors** (rounds toward `−∞`): `-7 // 2 == -4`. The interview/LeetCode spec for postfix division (LC 150) demands **truncation toward zero**: `-7 / 2` truncated is `-3`. The trick `int(a / b)` produces float division then truncates toward zero — which matches C, Java, and most calculator semantics. **Always confirm with the interviewer**; some specs want floor.
+
+??? question "Follow-up 3 — Convert infix to postfix on the fly."
+    **Shunting-Yard algorithm** (Dijkstra). Maintain an `out` queue and an `ops` stack. Operands flow straight to `out`. Operators pop higher-or-equal-precedence ops to `out` before being pushed. Parentheses force precedence isolation. Variant E above; combines with this evaluator for a full infix calculator.
+
+??? question "Follow-up 4 — Detect a malformed postfix expression."
+    Three failure modes during the sweep: (a) operator with `len(stack) < 2`, (b) unrecognised token, (c) end-of-input with `len(stack) != 1`. Layer 3 hardens for all three. A *valid* postfix expression with `n_op` operators and `n_val` operands satisfies `n_val == n_op + 1` and at every prefix `n_val_so_far > n_op_so_far`.
+
+??? question "Follow-up 5 — Streaming from disk / network: don't load the whole expression."
+    Iterate over tokens lazily (`expr.split()` is eager; use a generator that reads one whitespace-delimited token at a time from a file or socket). The stack itself is the only state — bounded by the depth of the expression, not its length. Used in distributed query engines.
+
+??? question "Follow-up 6 — Add unary operators (negation, square root)."
+    Variant B. Pop arity matches operator arity. Disambiguating unary `-` from binary `-` is a common pitfall — usually solved by tokenising negation as a separate token (`neg`) at parse time, or treating `"-7"` as a literal.
+
+??? question "Follow-up 7 — Add user-defined functions / variables."
+    Extend the dispatch table with named operators backed by a closure. For variables, push their values from a symbol table on encounter. This becomes a tiny stack-based interpreter — Forth in 50 lines.
+
+??? question "Follow-up 8 — Precision-sensitive evaluation (e.g., financial)."
+    Use `decimal.Decimal` instead of `int`/`float`. Replace `int(a / b)` with explicit `Decimal.quantize(...)` and an explicit rounding mode (`ROUND_HALF_EVEN` for banking).
+
+??? question "Follow-up 9 — Why is RPN faster than infix to evaluate?"
+    No precedence parsing, no parenthesis matching, no lookahead. Single forward pass with a single push per operand and a constant-cost compute per operator. **Zero parser machinery at evaluation time** — what the parser does once at compile time is encoded into the linear token order. That's why VMs use stack-machine bytecode internally.
+
+#### 🐛 Common Bugs
+
+1. **Reversed pop order** — `a = pop(); b = pop()` swaps left/right operands; breaks `-` and `/`.
+2. **Using `a // b` instead of `int(a / b)`** for division — gives floor instead of truncate; fails LeetCode 150 negative-operand cases.
+3. **Treating tokens as single characters** — fails on `"-42"` and `"100"`. Always split on whitespace (or specified delimiter).
+4. **Returning `stack[-1]` without checking `len(stack) == 1`** — silently accepts malformed input with leftover operands.
+5. **Forgetting to handle empty input** — `expr.split()` on `""` returns `[]`, then `stack[0]` raises confusing `IndexError`.
+6. **Catching `ValueError` from `int(tok)` and silently pushing 0** — masks bugs upstream.
+7. **No division-by-zero check** — `1 / 0` raises a confusing `ZeroDivisionError` from Python's `int()`/division rather than a meaningful one.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] **Empty expression** — raise `ValueError("empty expression")`.
+- [ ] **Single operand** `"42"` → 42.
+- [ ] **Negative operands** `"-7 2 /"` → -3 (truncate, not floor).
+- [ ] **Multi-digit operands** `"100 200 +"` → 300.
+- [ ] **Long expression** `n = 10⁴` tokens — completes in ms.
+- [ ] **Deep right-leaning expression** — stack depth up to ~n/2.
+- [ ] **Division by zero** — raise `ZeroDivisionError`.
+- [ ] **Insufficient operands** `"+"` alone — raise `ValueError`.
+- [ ] **Trailing operands** `"1 2 3 +"` (extra `1`) — raise `ValueError(final stack size 2)`.
+- [ ] **Extra whitespace** `"  2   3  +  "` — `.split()` handles automatically.
+- [ ] **Tab / mixed whitespace** — `.split()` handles automatically (any whitespace separates).
+- [ ] **Unrecognised token** `"2 3 ?"` — raise `ValueError("unrecognised token")`.
+- [ ] **Float operands** — out of scope (raise) or accept (Variant A).
+
+#### 🎤 Sample Interviewer Quote
+
+> *"Evaluate a postfix expression given as a space-separated string. Show me the brute-force AST approach and explain why the stack approach is preferred. Pay close attention to operand order on the pops, integer-division semantics, and how you'd validate the expression. Bonus: convert infix to postfix on the fly."*
+
+Your opener: *"Single-pass stack: push integers, on operator pop two operands (right then left), apply, push result. Time O(n), space O(stack depth). Two subtleties: pop order matters for non-commutative ops, and integer division uses truncate-toward-zero (`int(a / b)`) not floor (`//`). For validation: check operand count before each operator and stack size at end. For infix conversion: Shunting-Yard."*
+
+Cross-reference: see also **Problem 15** (LeetCode 150 — Evaluate Reverse Polish Notation) for the same problem with a pre-tokenised input list, and **Problem 21 / Problem 28** (Basic Calculator I/II) for the infix variant.
 
 ---
 

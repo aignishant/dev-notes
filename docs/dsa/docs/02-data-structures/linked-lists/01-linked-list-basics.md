@@ -2949,44 +2949,305 @@ Your opener: *"Walk to find length and tail. Reduce k mod length. Close into a c
 
 ### Problem 15 — Swap Nodes in Pairs
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Apple</span>
 
-> Swap every two adjacent nodes. You may not modify values — actual node swaps required.
+> Given a linked list, swap every two adjacent nodes and return its head. You **may not modify the values** in the list's nodes — only nodes themselves may be changed. (LeetCode 24.)
 
 #### 📖 Story Mode
 
-`1 → 2 → 3 → 4` → `2 → 1 → 4 → 3`.
+```
+input :   1 → 2 → 3 → 4
+output:   2 → 1 → 4 → 3
 
-#### 🐍 Solution
+input :   1 → 2 → 3              (odd length)
+output:   2 → 1 → 3              (last element stays put)
 
-Special case of Reverse-in-K-Groups (Problem 26) with k=2. The compact iterative version:
+input :   1                      (single node)
+output:   1
 
-```python
-def swap_pairs(head):
-    dummy = ListNode(0, head)
-    prev = dummy
-    while prev.next and prev.next.next:
-        a = prev.next
-        b = a.next
-        a.next = b.next
-        b.next = a
-        prev.next = b
-        prev = a
-    return dummy.next
+input :   (empty)
+output:   (empty)
 ```
 
-O(n) time, O(1) space.
+The "no value swap" constraint is the heart of the problem — it forces you to **rewire pointers**, which is where the bookkeeping lives.
 
-#### 🔄 Interviewer Follow-ups
+#### 🌍 Real-World Usage
 
-??? question "Follow-up 1 — Recursive."
-    `b = head.next; head.next = swap_pairs(b.next); b.next = head; return b`.
+- **Doubly linked list reversal in pairs** — UI list-shuffle animations rotate adjacent items by pointer flips, not value swaps, because the DOM elements are themselves the data.
+- **Token reordering in lexers** — when a parser must commute two adjacent tokens it cannot copy them (they hold side-effectful state).
+- **Persistent data structures** — value mutation is forbidden by design; you can only re-link nodes.
+- **Audio/video frame reordering** — frames are large objects; pointer flips are O(1) instead of O(frame-size).
+- **Foundation for Reverse Nodes in k-Group (P26)** — pairs are the k=2 special case.
 
-??? question "Follow-up 2 — Generalize to swap k-groups."
-    See Problem 26.
+#### 🧠 Thinking Process
 
-??? question "Follow-up 3 — Allowed to modify values?"
-    Walk in pairs, swap `a.val, b.val = b.val, a.val`. Trivial. The interview usually disallows it.
+The local move on each pair `a → b` is to produce `b → a`. The trick is: for the result to chain correctly, we need a **handle on the node before the pair** (so we can hook it to the new head `b` of the pair) and we need to know `b.next` (so we can hook the old head `a`'s `.next` to it).
+
+A **dummy head** node is the standard mechanism to give us a uniform "previous" pointer for the first pair, eliminating the special case where the original head changes.
+
+The four pointer flips per pair are:
+
+```
+prev → a → b → rest
+becomes
+prev → b → a → rest
+
+# Pointer surgery, in order:
+a.next = b.next       # 'a' jumps over 'b' to point at rest
+b.next = a            # 'b' now points at 'a'
+prev.next = b         # the chain before us now reaches 'b'
+prev = a              # advance 'prev' to the tail of the swapped pair
+```
+
+The recursive version is famously tiny: swap the head pair, then recurse on the rest. Use it to discuss tradeoffs (stack depth on huge lists).
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Brute force: copy values into a list, swap pairs, rebuild"
+
+    Violates the "no value modification" constraint, but useful as a sanity check.
+
+    ```python
+    from __future__ import annotations
+
+
+    def swap_pairs_via_array(head: ListNode | None) -> ListNode | None:
+        vals: list[int] = []
+        cur = head
+        while cur:
+            vals.append(cur.val)
+            cur = cur.next
+        for i in range(0, len(vals) - 1, 2):
+            vals[i], vals[i + 1] = vals[i + 1], vals[i]
+        # Rebuild
+        dummy = ListNode()
+        tail = dummy
+        for v in vals:
+            tail.next = ListNode(v)
+            tail = tail.next
+        return dummy.next
+    ```
+
+    O(n) time, O(n) space. **Disallowed by the problem** but presented to motivate why we do pointer surgery.
+
+=== "Layer 2 — Iterative pointer surgery (canonical) ⭐"
+
+    Dummy head + four-pointer flip per pair.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def swap_pairs(head: ListNode | None) -> ListNode | None:
+        dummy = ListNode(0, head)
+        prev = dummy
+        while prev.next and prev.next.next:
+            a = prev.next
+            b = a.next
+            # Re-wire
+            a.next = b.next
+            b.next = a
+            prev.next = b
+            # Advance
+            prev = a
+        return dummy.next
+    ```
+
+    O(n) time, **O(1) space** — no recursion stack. The interview default.
+
+=== "Layer 3 — Recursive (elegant, but watch the stack)"
+
+    Each call swaps the front pair and recurses on the remainder.
+
+    ```python
+    from __future__ import annotations
+
+
+    def swap_pairs_recursive(head: ListNode | None) -> ListNode | None:
+        if head is None or head.next is None:
+            return head
+        a, b = head, head.next
+        a.next = swap_pairs_recursive(b.next)
+        b.next = a
+        return b
+    ```
+
+    O(n) time, **O(n/2) recursion stack**. Beautiful but blows up at n ≈ 10⁵ in CPython (default recursion limit 1000). Mention it; don't ship it.
+
+=== "Layer 4 — Variant: swap pairs in a doubly linked list"
+
+    With back-pointers we have to update *six* pointers per pair instead of three.
+
+    ```python
+    from __future__ import annotations
+
+
+    class DListNode:
+        def __init__(self, val: int = 0) -> None:
+            self.val = val
+            self.prev: "DListNode | None" = None
+            self.next: "DListNode | None" = None
+
+
+    def swap_pairs_doubly(head: DListNode | None) -> DListNode | None:
+        dummy = DListNode()
+        dummy.next = head
+        if head: head.prev = dummy
+
+        prev = dummy
+        while prev.next and prev.next.next:
+            a = prev.next
+            b = a.next
+            after = b.next
+
+            # Forward links
+            prev.next = b
+            b.next = a
+            a.next = after
+
+            # Back links
+            b.prev = prev
+            a.prev = b
+            if after: after.prev = a
+
+            prev = a
+
+        result = dummy.next
+        if result: result.prev = None
+        return result
+    ```
+
+    Same O(n) time, O(1) space. Easy to mess up the back pointers — quiz yourself by drawing it.
+
+=== "Layer 5 — Production: swap pairs in chunks of an immutable persistent list"
+
+    For interviews at functional-programming-flavored shops (Jane Street, Hudson River Trading) the question often becomes: don't mutate; build a *new* list whose adjacent pairs are swapped, sharing tails when possible.
+
+    ```python
+    from __future__ import annotations
+
+
+    def swap_pairs_persistent(head: ListNode | None) -> ListNode | None:
+        # Tail-recursive helper accumulating reversed pair-swapped result.
+        def go(node: ListNode | None, acc: ListNode | None) -> ListNode | None:
+            if node is None or node.next is None:
+                # Odd tail (or empty). Prepend in original order to acc; reverse acc.
+                if node is not None:
+                    acc = ListNode(node.val, acc)
+                return _reverse_copy(acc)
+            # Build new pair (b', a') and prepend to acc in REVERSE pair order
+            # so that after a final reverse the order is (b, a, ...).
+            acc = ListNode(node.val, ListNode(node.next.val, acc))   # a, b appended in order
+            return go(node.next.next, acc)
+
+        def _reverse_copy(n: ListNode | None) -> ListNode | None:
+            out = None
+            while n:
+                out = ListNode(n.val, out)
+                n = n.next
+            return out
+
+        return go(head, None)
+    ```
+
+    Allocates O(n) new nodes (no shared tails because every pair changes), but never mutates. The variant where the trailing tail is preserved by reference is left as a follow-up.
+
+#### 🔎 Step-by-Step Dry Run
+
+`head = 1 → 2 → 3 → 4`. We use Layer 2.
+
+Initial: `dummy → 1 → 2 → 3 → 4`. `prev = dummy`.
+
+**Iteration 1**: `prev.next = 1`, `prev.next.next = 2` ✅ enter loop. `a = 1`, `b = 2`.
+
+| Step          | Pointer flip                | Resulting list (with `prev` marker)              |
+|---------------|-----------------------------|--------------------------------------------------|
+| `a.next = b.next` | `1.next = 3`            | `dummy[prev] → 1 → 3 → 4`, `2 → 1 → ...` (orphan-ish) |
+| `b.next = a` | `2.next = 1`                 | `dummy[prev] → 1 → 3 → 4`, `2 → 1 → 3 → 4`       |
+| `prev.next = b` | `dummy.next = 2`         | `dummy[prev] → 2 → 1 → 3 → 4`                    |
+| `prev = a`   | `prev = 1`                  | `dummy → 2 → 1[prev] → 3 → 4`                    |
+
+**Iteration 2**: `prev = 1`, `prev.next = 3`, `prev.next.next = 4` ✅ enter. `a = 3`, `b = 4`.
+
+| Step          | Pointer flip                | Resulting list                                    |
+|---------------|-----------------------------|--------------------------------------------------|
+| `a.next = b.next` | `3.next = None`         | `... → 1[prev] → 3 → None`, `4 → 3 → None`       |
+| `b.next = a`  | `4.next = 3`                | `... → 1[prev] → 3 → None`, `4 → 3 → None`       |
+| `prev.next = b` | `1.next = 4`              | `dummy → 2 → 1[prev] → 4 → 3 → None`             |
+| `prev = a`    | `prev = 3`                  | `dummy → 2 → 1 → 4 → 3[prev] → None`             |
+
+**Iteration 3**: `prev.next = None` → exit. Return `dummy.next = 2`.
+
+Final: `2 → 1 → 4 → 3 → None` ✅.
+
+#### 📊 Complexity
+
+| Layer                          | Time | Space                | Notes                                            |
+|--------------------------------|------|-----------------------|--------------------------------------------------|
+| Layer 1 — value-array rebuild  | O(n) | O(n)                 | Disallowed; for sanity only                      |
+| Layer 2 — iterative ⭐         | O(n) | **O(1)**             | The interview default                            |
+| Layer 3 — recursive            | O(n) | O(n/2) stack         | Elegant; recursion depth dangerous on big inputs |
+| Layer 4 — doubly linked list   | O(n) | O(1)                 | Six pointers per pair instead of three           |
+| Layer 5 — persistent / no-mut  | O(n) | O(n) new nodes       | Functional shops; never mutates input            |
+
+#### ❓ Follow-ups
+
+??? question "Why use a dummy head?"
+    Because the first pair's predecessor doesn't exist in the original list — without a dummy, you'd need a separate special case to detect "is this the very first pair?" and update `head` accordingly. The dummy gives every pair a uniform predecessor.
+
+??? question "Can you do it without a dummy head?"
+    Yes, but the code branches: handle the first pair separately to obtain the new head, then loop with a `prev` pointer. It's the same algorithm with worse readability. **Always prefer the dummy.**
+
+??? question "What's the recursion-stack issue with Layer 3 in practice?"
+    CPython's default recursion limit is 1000. Layer 3 recurses `n/2` times → at n = 2000 it errors. You can `sys.setrecursionlimit(...)` but that's a smell — the iterative version is strictly better.
+
+??? question "Can you swap **every k-th pair** (i.e. only odd-indexed pairs)?"
+    Yes — keep a counter; flip when counter is odd, just advance otherwise. The pointer surgery is identical; the loop body branches on the counter parity.
+
+??? question "What about reversing **every k consecutive nodes**?"
+    That's Reverse Nodes in k-Group (Problem 26). The pair version is just k=2 — but the general version needs a length probe (or a try-then-rewind approach) so that the trailing < k nodes are left untouched.
+
+??? question "How would you swap pairs in a circular linked list?"
+    Detach the cycle (find tail; tail.next = None), run the standard algorithm, then re-attach the new tail to the new head. O(n) time, O(1) space.
+
+??? question "What if the input could be arbitrary directed graphs (not just lists)?"
+    The problem's premise — *adjacent* pairs in *linear* order — doesn't apply. You'd need a traversal order definition first.
+
+#### 🐛 Common Bugs
+
+1. **Doing `b.next = a` before `a.next = b.next`** — overwrites the path forward to `rest`, losing the rest of the list to garbage collection.
+2. **Forgetting to advance `prev = a`** (writing `prev = b` instead) — `prev` ends up at the new head of the pair, not the new tail; the next iteration looks at the wrong pair.
+3. **Updating `head` directly without a dummy** — drops back into the special-case branch, easy to mis-handle empty/single-node inputs.
+4. **In the doubly-linked variant, forgetting to null the **prev** pointer of the new head** at the end — the head still points back to the dummy.
+5. **Using value swaps when the problem forbids them** — hidden constraint; many candidates miss it on first read.
+6. **In Layer 5, sharing the trailing tail when the tail's pair was modified** — would mutate the original. Only share unmodified suffixes.
+
+#### ⚠️ Edge Cases
+
+- `head is None` → returns `None`. The `while` loop never fires.
+- Single node `1` → returns `1`. `prev.next.next` is `None` → loop exits.
+- Two nodes `1 → 2` → returns `2 → 1` after exactly one iteration.
+- Three nodes `1 → 2 → 3` → returns `2 → 1 → 3`. After one iteration `prev = 1`, `prev.next = 3`, `prev.next.next = None` → exit. The lone tail stays in place.
+- Even vs odd length: even-length lists fully pair; odd-length lists leave the last node untouched.
+- Cycles: the algorithm doesn't detect cycles. If the input is cyclic, you'll loop forever. Spec usually rules this out.
+
+#### 🔑 Key Takeaways
+
+> **Dummy head** is the standard tool for any problem that re-points `head` mid-flight — it converts a special case into the general case.
+>
+> Pointer-surgery problems live or die by the **order of assignments**. Always do `a.next = b.next` **first** (preserve the path forward), then `b.next = a` (build the new pair), then `prev.next = b` (splice into the chain), then `prev = a` (advance to the new tail).
+>
+> Recursion is shorter but stack-bound. For lists with > 1000 nodes always use iterative.
+
+#### 🎯 Pattern Used
+
+**Dummy-head + group-local pointer surgery.** Same template: Reverse Nodes in k-Group (P26), Reorder List (P12), Reverse Linked List II range (P11).
 
 ---
 
@@ -2994,21 +3255,32 @@ O(n) time, O(1) space.
 
 <span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
 
-> If the linked list has a cycle, return the **node where the cycle begins**. Otherwise, return None.
+> If the linked list has a cycle, return the **node where the cycle begins**. Otherwise, return None. (LeetCode 142.)
 
 #### 📖 Story Mode
 
-`1 → 2 → 3 → 4 → 5 → 3 (cycle back to node 3)` → return node `3`.
+`1 → 2 → 3 → 4 → 5 → 3 (back to node 3)` → return node `3`.
+
+```
+   ┌────────── back-edge ──────────┐
+   ↓                               │
+1 → 2 → 3 → 4 → 5 ──────────────────┘
+        ↑
+    cycle start (the answer)
+```
 
 #### 🌍 Real-World Usage
 
-Same as Problem 3 plus root-cause analysis — knowing *where* the cycle starts helps fix it.
+- **Memory-leak hunting** — chasing a circular reference and identifying the *node that closed the loop* is what gives you the bug fix.
+- **Garbage-collector cycle detection** — mark-and-sweep first finds the cycle; sometimes the start is needed for finalization order.
+- **Linked-state machines** — locating where a stream of transitions started repeating itself (a "trap state").
+- **Function-call recursion analyzers** — the cycle-start is the first repeated frame when detecting infinite recursion patterns.
 
 #### 🧠 Thinking Process
 
 **Floyd's algorithm, two phases:**
 
-1. **Phase 1 — meet:** standard tortoise and hare. If they meet, cycle exists.
+1. **Phase 1 — meet:** standard tortoise (1 step) and hare (2 steps). If they meet, cycle exists.
 2. **Phase 2 — find start:** restart one pointer from `head`; advance both at speed 1. They meet at the cycle start.
 
 **Why does this work?** Let:
@@ -3016,13 +3288,29 @@ Same as Problem 3 plus root-cause analysis — knowing *where* the cycle starts 
 - `a` = distance from head to cycle start.
 - `b` = distance from cycle start to meet point (within cycle).
 - `c` = remaining distance from meet point back to start.
-- Cycle length = `b + c`.
+- Cycle length = `L = b + c`.
 
-When slow has traveled `a + b`, fast has traveled `2(a + b) = a + b + k(b + c)` for some k. So `a + b = k(b + c)` → `a = k(b + c) - b = (k-1)(b + c) + c`. Starting from `head` and from the meet point at speed 1, both arrive at the cycle start after exactly `a` steps.
+When slow has traveled `a + b`, fast has traveled `2(a + b) = a + b + k·L` for some k ≥ 1. So `a + b = k·L` → `a = k·L − b = (k−1)·L + c`. Starting from `head` and from the meet point at speed 1, both arrive at the cycle start after exactly `a` steps (the second pointer laps `k−1` times then walks the final `c`).
 
 #### 🐍 5 Layers of Solution
 
-=== "Layer 2 — Two-phase Floyd"
+=== "Layer 1 — Hash set (intuitive)"
+
+    ```python
+    def detect_cycle_set(head):
+        seen = set()
+        node = head
+        while node:
+            if node in seen:
+                return node
+            seen.add(node)
+            node = node.next
+        return None
+    ```
+
+    O(n) time, **O(n) space.** Easy to explain — interviewers often want this stated even if you go straight to Floyd.
+
+=== "Layer 2 — Two-phase Floyd ⭐"
 
     ```python
     def detect_cycle(head):
@@ -3039,7 +3327,28 @@ When slow has traveled `a + b`, fast has traveled `2(a + b) = a + b + k(b + c)` 
         return None
     ```
 
-    O(n) time, O(1) space.
+    O(n) time, O(1) space — the canonical answer.
+
+=== "Layer 3 — Edge-case-hardened"
+
+    ```python
+    def detect_cycle(head):
+        if head is None or head.next is None:
+            return None
+        slow = fast = head
+        while fast is not None and fast.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+            if slow is fast:
+                ptr = head
+                while ptr is not slow:
+                    ptr = ptr.next
+                    slow = slow.next
+                return ptr
+        return None
+    ```
+
+    Explicit guards on empty / single-node head; identical asymptotics.
 
 === "Layer 4 — Production-ready"
 
@@ -3049,14 +3358,18 @@ When slow has traveled `a + b`, fast has traveled `2(a + b) = a + b + k(b + c)` 
 
 
     def detect_cycle(head: Optional[ListNode]) -> Optional[ListNode]:
-        """Return the first node of the cycle, or None if no cycle.
+        """Return the first node of the cycle, or None if there is no cycle.
+
+        Uses Floyd's tortoise-and-hare in two phases. Both phases are O(n) and
+        the algorithm uses O(1) extra memory.
 
         Time:  O(n).
         Space: O(1).
         """
-        slow = fast = head
+        slow: Optional[ListNode] = head
+        fast: Optional[ListNode] = head
         while fast is not None and fast.next is not None:
-            slow = slow.next
+            slow = slow.next  # type: ignore[union-attr]
             fast = fast.next.next
             if slow is fast:
                 ptr: Optional[ListNode] = head
@@ -3069,32 +3382,92 @@ When slow has traveled `a + b`, fast has traveled `2(a + b) = a + b + k(b + c)` 
 
 === "Layer 5 — Variants"
 
-    **Variant A — find LENGTH of the cycle.** Once met, count one more lap.
+    **Variant A — find the LENGTH of the cycle.** After phase 1, freeze `slow`, advance a pointer until it returns; count steps.
 
-    **Variant B — break the cycle.** After locating the start, walk back to the node whose next is the start, set it to None.
+    **Variant B — break the cycle.** After locating the start, walk back to the node whose `next` is the start; set its `next = None`.
 
-    **Variant C — Brent's algorithm.** Sometimes fewer iterations than Floyd's; same big-O.
+    **Variant C — Brent's algorithm.** Doubles the search radius instead of fixed 2:1 — sometimes fewer iterations, same big-O, slightly more complex code.
+
+    **Variant D — find any node IN the cycle (not the start).** The phase-1 meeting point itself works for this weaker question.
+
+#### 🔍 Dry Run
+
+`1 → 2 → 3 → 4 → 5 → 3` (back-edge from 5 to 3). a=2 (head→3), L=3 (cycle 3→4→5→3).
+
+| step | slow | fast | meet? |
+|------|------|------|-------|
+| init | 1 | 1 | — |
+| 1 | 2 | 3 | no |
+| 2 | 3 | 5 | no |
+| 3 | 4 | 4 | **yes** (meet at node 4) |
+
+So `b = 1` (3→4), `c = 2` (4→5→3). Phase 2: ptr starts at head=1, slow at meet=4.
+
+| step | ptr | slow |
+|------|-----|------|
+| init | 1 | 4 |
+| 1 | 2 | 5 |
+| 2 | 3 | 3 ✅ |
+
+Returns node `3` — the cycle start. ✅
 
 #### ⏱️ Complexity
 
-- **Time: O(n)**.
-- **Space: O(1)**.
+| Approach | Time | Space |
+|----------|------|-------|
+| Hash set | O(n) | O(n) |
+| **Floyd 2-phase** ⭐ | **O(n)** | **O(1)** |
+| Brent's | O(n) | O(1) |
 
 #### 🎯 Pattern Used
 
-**Floyd's tortoise and hare with the math trick.** Worth memorizing the proof.
+**Floyd's tortoise and hare + math trick.** Worth memorizing the `a = (k−1)·L + c` derivation; interviewers often probe the "why does phase 2 work?" question.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Prove phase 2 mathematically."
+    See "Thinking Process." Slow has gone `a + b` steps, fast has gone `2(a + b)` steps and is `k` laps ahead, so `a + b = k·L` → `a = k·L − b = (k−1)·L + c`. From head, walk `a` steps. From meet point, walk `(k−1)·L + c` steps — `(k−1)·L` is full laps that land back at meet point, then `c` lands at the cycle start. They meet at the cycle start.
+
+??? question "Follow-up 2 — Find the cycle length."
+    After phase 1 meeting, fix one pointer at the meet, advance the other one step at a time, count until it returns. O(L) time.
+
+??? question "Follow-up 3 — Without modifying the list, can you also report `a` and `L`?"
+    Yes. Run phase 2 to get the start node and count the steps — that's `a`. Then run Variant A on the cycle to get `L`.
+
+??? question "Follow-up 4 — What if the list is doubly linked?"
+    Same algorithm. The reverse pointers don't help here because you don't know the cycle exists yet; you'd still walk forward.
+
+??? question "Follow-up 5 — Hash-set version uses O(n) memory; can we get O(1) but no Floyd tricks?"
+    No simple way without Floyd-style logic. Brent's algorithm is the standard alternative.
+
+??? question "Follow-up 6 — Detect cycle in a directed graph (multiple successors per node)."
+    Different problem — needs DFS with recursion stack / colors (white-gray-black). Linked-list cycle detection only works because each node has exactly one successor.
+
+??? question "Follow-up 7 — Stream of values where you can only walk once and can't revisit."
+    Then you can't apply Floyd — you need either a hash of seen nodes (O(n) memory) or a probabilistic structure like Bloom filters (false positives possible).
 
 #### 🐛 Common Bugs
 
-1. **Skipping phase 1 confirmation** — phase 2 only runs after a confirmed meet.
-2. **Restarting from `head.next`** — must be `head`.
-3. **`ptr is slow` vs `ptr.val == slow.val`** — identity, not value.
+1. **Skipping phase 1 confirmation** — phase 2 only runs after a confirmed meet. Don't run it at every iteration.
+2. **Restarting from `head.next`** — must be `head` exactly. The math fails if you start one node ahead.
+3. **`ptr is slow` vs `ptr.val == slow.val`** — identity, not value. Two distinct nodes can share a value.
+4. **Returning `slow` (the meet point)** instead of `ptr` (the cycle start) at the end of phase 2.
+5. **Walking with `slow.next.next`** in phase 2 — phase 2 advances both pointers at speed 1, not 2.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Empty list (`head = None`) → None
+- [ ] Single node, no cycle → None
+- [ ] Single node, self-loop (`head.next = head`) → head
+- [ ] Two nodes, both in cycle → first node (the entry into the cycle from the meet)
+- [ ] Cycle covers entire list (head is cycle-start) → head
+- [ ] No cycle, long list → None (the while-loop terminates)
 
 #### 🏢 Sample Interviewer Quote
 
 > *"Find the start of the cycle in this linked list."*
 
-Your opener: *"Floyd's two-phase. Phase 1: standard slow/fast meet. Phase 2: restart one pointer from head, advance both at speed 1; they meet at the cycle start. The math: a = (k-1)(b+c) + c, so they take exactly a steps to meet."*
+Your opener: *"Floyd's two-phase. Phase 1: standard slow/fast meet — if they meet, there's a cycle. Phase 2: restart one pointer from head, advance both at speed 1 until they meet again — that's the cycle start. The math: if `a` is the head-to-start distance and `L` is the cycle length, the meet point is `a + b` from head where slow has gone half of fast's `2(a+b) = a + b + kL` steps; solving gives `a = (k−1)L + c`. O(n) time, O(1) space."*
 
 ---
 
@@ -3102,29 +3475,51 @@ Your opener: *"Floyd's two-phase. Phase 1: standard slow/fast meet. Phase 2: res
 
 <span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
 
-> Sort a linked list in `O(n log n)` time and `O(1)` extra space (ignoring recursion stack).
+> Sort a linked list in `O(n log n)` time and `O(1)` extra space (ignoring recursion stack). (LeetCode 148.)
 
 #### 📖 Story Mode
 
-`4 → 2 → 1 → 3` → `1 → 2 → 3 → 4`.
+`4 → 2 → 1 → 3` → `1 → 2 → 3 → 4`. The catch: it's a linked list, not an array — quicksort's random-access partition is awkward and degrades; merge sort is the natural fit because splitting and merging both work in pointer-time.
 
 #### 🌍 Real-World Usage
 
-- **External sort** of huge data that can't fit in memory; the algorithm naturally streams.
-- **Sort-merge join** in databases.
-- **Polynomial / sparse-vector ordering** by exponent.
+- **External sort** of huge data that can't fit in memory — the algorithm naturally streams runs.
+- **Sort-merge join** in databases — sorted runs from each side merged on the fly.
+- **Polynomial / sparse-vector ordering** by exponent before addition or multiplication.
+- **Log compaction** — sorting timestamped log entries that arrive as a chain.
+- **Concurrent skip-list rebuild** — bottom-up merge sort can be parallelised across runs.
 
 #### 🧠 Thinking Process
 
-**Merge sort** is the natural fit. Quicksort on linked lists is awkward (no random access). Merge sort:
+**Merge sort** is the natural fit. Quicksort on linked lists is awkward (no random access for partition; pivot selection degrades) and not stable. Merge sort:
 
-1. Find the middle and split.
+1. Find the middle (slow/fast) and split into two halves.
 2. Recursively sort each half.
-3. Merge the two sorted halves (Problem 2).
+3. Merge the two sorted halves with the standard two-pointer merge (Problem 2).
 
-Bottom-up merge sort avoids recursion entirely — true O(1) extra space.
+**Two flavours:**
+
+- **Top-down (recursive):** clear and short; O(log n) recursion stack.
+- **Bottom-up (iterative):** doubles run width each round; true O(1) extra space, no stack.
 
 #### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Convert, sort, rebuild (brute)"
+
+    ```python
+    def sort_list_brute(head):
+        vals = []
+        node = head
+        while node:
+            vals.append(node.val); node = node.next
+        vals.sort()
+        node = head
+        for v in vals:
+            node.val = v; node = node.next
+        return head
+    ```
+
+    O(n log n) time but **O(n) extra space** (the array). Often disqualified by the explicit "O(1) extra space" requirement; useful as a sanity baseline and for testing.
 
 === "Layer 2 — Top-down recursive merge sort"
 
@@ -3144,7 +3539,7 @@ Bottom-up merge sort avoids recursion entirely — true O(1) extra space.
 
     O(n log n) time, O(log n) recursion stack.
 
-=== "Layer 3 — Bottom-up merge sort (true O(1) space)"
+=== "Layer 3 — Bottom-up merge sort (true O(1) space) ⭐"
 
     Iterate `width` from 1, doubling each round, merging adjacent pairs of sorted runs.
 
@@ -3185,6 +3580,8 @@ Bottom-up merge sort avoids recursion entirely — true O(1) extra space.
         return dummy.next
     ```
 
+    True O(1) extra space — no recursion, no auxiliary array.
+
 === "Layer 4 — Production-ready (top-down for simplicity)"
 
     ```python
@@ -3219,32 +3616,86 @@ Bottom-up merge sort avoids recursion entirely — true O(1) extra space.
 
     **Variant A — descending order.** Flip the comparison in merge.
 
-    **Variant B — sort by custom key.** Pass a key function.
+    **Variant B — sort by custom key.** Pass a key function and compare `key(a.val) <= key(b.val)`.
 
     **Variant C — stable.** Already stable — merge takes from `l1` first on tie.
 
     **Variant D — sort with dups by group then ungroup.** Group by key into chains, concat.
 
+    **Variant E — in-place quicksort with three-way partition.** Possible but ugly; typically avoided unless interviewer insists.
+
+#### 🔍 Dry Run
+
+`4 → 2 → 1 → 3` (top-down):
+
+| call | head passed | mid split | left half | right half | result after merge |
+|------|-------------|-----------|-----------|------------|--------------------|
+| sort([4,2,1,3]) | [4,2,1,3] | slow→2 | [4,2] | [1,3] | merged below |
+| sort([4,2]) | [4,2] | slow→4 | [4] | [2] | [2,4] |
+| sort([1,3]) | [1,3] | slow→1 | [1] | [3] | [1,3] |
+| **outer merge** | — | — | [2,4] | [1,3] | **[1,2,3,4]** ✅ |
+
 #### ⏱️ Complexity
 
-- **Time: O(n log n)**.
-- **Space: O(log n)** recursion (or O(1) with bottom-up).
+| Approach | Time | Space |
+|----------|------|-------|
+| Brute (array) | O(n log n) | O(n) |
+| Top-down merge | O(n log n) | O(log n) recursion |
+| **Bottom-up merge** ⭐ | **O(n log n)** | **O(1)** |
+
+The recurrence `T(n) = 2T(n/2) + O(n)` gives `O(n log n)`. Each level of merging touches all n nodes once.
 
 #### 🎯 Pattern Used
 
-**Merge sort on a linked list.** Pillar of "sort linked structure" problems.
+**Merge sort on a linked list.** Pillar of "sort linked structure" problems. The slow/fast split + two-pointer merge is the same toolset that drives Reorder List (P12), Palindrome Linked List (P6), and Merge K Sorted Lists (P27).
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why merge sort, not quicksort?"
+    No random access on a linked list, so picking a good pivot is awkward; the partition step has to walk to find the pivot's position. Quicksort also degrades to O(n²) on already-sorted input (worst case for the simplest pivot strategies). Merge sort guarantees O(n log n) and is naturally stable.
+
+??? question "Follow-up 2 — True O(1) space."
+    Bottom-up (Layer 3). No recursion, no extra arrays.
+
+??? question "Follow-up 3 — Sort by a custom comparator."
+    Pass a comparator/key into the merge step. Idiomatic Python: take a `key=` callable and compare `key(a.val) <= key(b.val)`.
+
+??? question "Follow-up 4 — What if the list contains duplicates?"
+    Already handled. Merge takes from `l1` first on tie — the algorithm is stable.
+
+??? question "Follow-up 5 — Sort a doubly linked list."
+    Same algorithm. After merging, fix `prev` pointers in a second pass — or update them inside `merge` as you splice.
+
+??? question "Follow-up 6 — Parallelize."
+    Bottom-up is embarrassingly parallel: each round of merges across non-overlapping runs is independent. Fork-join parallel merge sort.
+
+??? question "Follow-up 7 — External sort with chunks that don't fit in memory."
+    Each run becomes a file on disk. Merge step uses a min-heap (k-way merge, see P27). The same intuition as the linked-list bottom-up merge sort applies.
 
 #### 🐛 Common Bugs
 
-1. **Forgetting `slow.next = None`** — leaves the two halves connected.
-2. **Off-by-one in split** for small inputs.
-3. **Bottom-up merge: not advancing tail to the new end** — the merged list ends up double-linked.
+1. **Forgetting `slow.next = None`** — leaves the two halves connected; recursion never terminates.
+2. **Off-by-one in split** for small inputs (length 2: should split into [a]/[b], not [a,b]/[]).
+3. **Bottom-up merge: not advancing tail to the new end** — the merged list keeps stale pointers and ends up looking longer than `n`.
+4. **Using `slow, fast = head, head`** instead of `slow, fast = head, head.next` — for length 2, slow ends at the second node and the right half is empty.
+5. **Recursing on the original `head`** after splitting — only safe if you cut the list with `slow.next = None` first.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Empty list (`head = None`) → None
+- [ ] Single node → unchanged
+- [ ] Two nodes already sorted → unchanged
+- [ ] Two nodes reversed → swapped
+- [ ] All-equal values → unchanged (stability)
+- [ ] Already sorted → unchanged but does the work (O(n log n) regardless)
+- [ ] Reverse-sorted (worst-case-ish input)
+- [ ] Very long list — recursion stack must hold log n frames
 
 #### 🏢 Sample Interviewer Quote
 
-> *"Sort this linked list in O(n log n)."*
+> *"Sort this linked list in O(n log n) time and O(1) extra space."*
 
-Your opener: *"Merge sort. Split with slow/fast, recurse on each half, merge them with the standard two-pointer merge. O(n log n) time, O(log n) recursion."*
+Your opener: *"Merge sort. The top-down version splits with slow/fast, recurses on each half, merges with the standard two-pointer merge — O(n log n) time, O(log n) recursion stack. For true O(1) extra space, bottom-up merge sort iterates `width = 1, 2, 4, ...` and merges adjacent runs in place — same time, no recursion."*
 
 ---
 
@@ -3252,7 +3703,7 @@ Your opener: *"Merge sort. Split with slow/fast, recurse on each half, merge the
 
 <span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Meta</span> <span class="company-tag">Bloomberg</span>
 
-> A linked list where each node has both `next` and `random` (which points to any node in the list, or None). Return a deep copy.
+> A linked list where each node has both `next` and `random` (which points to any node in the list, or None). Return a **deep copy**: every node duplicated, every pointer rewired to refer to the duplicates. (LeetCode 138.)
 
 #### 📖 Story Mode
 
@@ -3260,30 +3711,56 @@ Your opener: *"Merge sort. Split with slow/fast, recurse on each half, merge the
 Original:    A → B → C
 Random:      A.random = C, B.random = A, C.random = B
 Output:      A' → B' → C' with corresponding random pointers.
+
+i.e. the copy must be a structurally identical list with NO pointers
+into the original. After the copy, deleting / mutating original nodes
+must not affect the clone.
 ```
 
 #### 🌍 Real-World Usage
 
-- **Deep cloning** any graph that has internal references.
-- **Skip lists, B-trees** with horizontal sibling pointers.
-- **Document object models (DOM)** with parent / sibling pointers.
+- **Deep cloning** any graph that has internal references — serialization roundtrips.
+- **Skip lists, B-trees** with horizontal sibling pointers — clone for snapshotting.
+- **Document object models (DOM)** with parent / sibling pointers — copy a subtree.
+- **Undo-redo stacks** that need an immutable snapshot of a mutable graph.
+- **Graph isomorphism utilities** in compiler IR — clone a CFG node-for-node before transforming.
 
 #### 🧠 Thinking Process
 
-**Hash map approach:** map original node → its clone. Walk twice:
+**Recursive memoized DFS** (the "graph clone" pattern, but simpler because we have explicit `next` order). Visit each original; clone if not yet cloned; recurse into `next` and `random` to get/clone their counterparts.
 
-1. Pass 1: create a clone for each node, store mapping.
+**Hash-map two-pass** is the iterative, easier-to-explain version of the same idea:
+
+1. Pass 1: create a clone for each node, store mapping `original → clone`.
 2. Pass 2: wire up `next` and `random` for each clone using the mapping.
 
-**O(1) interleaving trick:**
+**O(1) interleaving trick** (clever):
 
 1. Insert each clone right after its original: `A → A' → B → B' → C → C'`.
-2. For each original `A`, set `A'.random = A.random.next`.
-3. Detangle: separate the two interleaved lists.
+2. For each original `X`, set `X'.random = X.random.next` (the clone of X's random target sits right after X's random target).
+3. Detangle: separate the two interleaved lists, restoring the original.
 
 #### 🐍 5 Layers of Solution
 
-=== "Layer 2 — Hash map (intuitive)"
+=== "Layer 1 — Recursive DFS with memoization"
+
+    ```python
+    def copy_random_list_rec(head):
+        memo = {}
+        def clone(node):
+            if node is None: return None
+            if node in memo: return memo[node]
+            new = ListNode(node.val)
+            memo[node] = new                         # set BEFORE recursing
+            new.next = clone(node.next)
+            new.random = clone(node.random)
+            return new
+        return clone(head)
+    ```
+
+    O(n) time, O(n) space. The `memo[node] = new` assignment **must** happen before the recursive calls; otherwise a `random` pointer that loops back triggers infinite recursion.
+
+=== "Layer 2 — Hash map two-pass (canonical) ⭐"
 
     ```python
     def copy_random_list(head):
@@ -3300,7 +3777,7 @@ Output:      A' → B' → C' with corresponding random pointers.
         return m[head]
     ```
 
-    O(n) time, O(n) space.
+    O(n) time, O(n) space. Most interviewers accept this; cleanest to whiteboard.
 
 === "Layer 3 — O(1) space interleaving"
 
@@ -3355,7 +3832,8 @@ Output:      A' → B' → C' with corresponding random pointers.
         Time:  O(n).
         Space: O(n) — the mapping dict.
 
-        Example: structural correctness; not a one-liner doctest.
+        The map keyed on identity (default __hash__) is what makes pass 2 O(1)
+        per pointer-fixup. None-target pointers stay None via the dict.get fallback.
         """
         if head is None:
             return None
@@ -3377,30 +3855,89 @@ Output:      A' → B' → C' with corresponding random pointers.
 
     **Variant A — copy with arbitrary K extra pointers per node.** Hash map approach generalizes immediately.
 
-    **Variant B — copy a tree with sibling pointers.** Same shape — DFS twice.
+    **Variant B — copy a tree with sibling pointers.** Same shape — recursive DFS with memo.
 
-    **Variant C — concurrent / immutable copy.** Use a versioned map.
+    **Variant C — copy with a parent pointer.** After cloning, walk and set `c.parent = clone_of[orig.parent]`.
+
+    **Variant D — concurrent / immutable copy.** Use a versioned map; or freeze the original behind an RWLock during the copy.
+
+    **Variant E — clone a general graph (Clone Graph, LC 133).** Same memoized DFS — but graphs have arbitrary adjacency, not the linear `next` spine.
+
+#### 🔍 Dry Run
+
+`A(1) → B(2) → C(3)` with `A.random=C, B.random=A, C.random=B`. Hash-map approach:
+
+| pass | step | action | state |
+|------|------|--------|-------|
+| 1 | n=A | create A' | m = {A→A'} |
+| 1 | n=B | create B' | m = {A→A', B→B'} |
+| 1 | n=C | create C' | m = {A→A', B→B', C→C'} |
+| 2 | A | A'.next=B', A'.random=C' | A'→B' (random→C') |
+| 2 | B | B'.next=C', B'.random=A' | B'→C' (random→A') |
+| 2 | C | C'.next=None, C'.random=B' | C'→None (random→B') |
+
+Returns `m[A] = A'`. Verify: walking A'→B'→C' gives values [1,2,3]; A'.random.val=3, B'.random.val=1, C'.random.val=2 ✅.
 
 #### ⏱️ Complexity
 
-- **Time: O(n)** for both approaches.
-- **Space: O(n)** (hash) or O(1) (interleave).
+| Approach | Time | Space |
+|----------|------|-------|
+| Recursive DFS | O(n) | O(n) memo + recursion |
+| **Hash map 2-pass** ⭐ | **O(n)** | **O(n)** |
+| Interleave (Layer 3) | O(n) | O(1) extra |
 
 #### 🎯 Pattern Used
 
-**Hash-map-from-old-to-new** for graph/list cloning. The interleave trick is a beautiful but tricky O(1)-space alternative.
+**Hash-map-from-old-to-new** for graph / list cloning. Same template clones any directed graph (Clone Graph, P133). The interleave trick is the elegant O(1)-space alternative — beautiful but error-prone, so most interviewers accept the hash-map answer.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — How does the interleave trick achieve O(1) space?"
+    Each clone is woven inline into the original list, so the list itself encodes the `original → clone` mapping (clone is always at `original.next`). No external map needed. The detangle step restores the original.
+
+??? question "Follow-up 2 — What if random can point at any node, including self or earlier nodes?"
+    Already handled. The hash map / memo doesn't care about pointer direction. Self-loops (`X.random = X`) work because `clone_of[X]` is set in pass 1.
+
+??? question "Follow-up 3 — Why must `memo[node] = new` happen BEFORE recursing in Layer 1?"
+    Because `random` can form a cycle: `A.random = B, B.random = A`. If we recurse into `clone(node.random)` before saving the new clone, we'd try to clone B, which would recurse into clone(A), and we'd loop forever. Setting the memo first breaks the cycle — the second visit returns the in-progress clone.
+
+??? question "Follow-up 4 — What if random is broken (points outside the list)?"
+    Defensive code: in pass 2 use `clone_of.get(node.random)`. If absent, leave the clone's random as None (or raise, depending on contract).
+
+??? question "Follow-up 5 — Compare hash map vs interleave."
+    Hash map is cleaner, easier to whiteboard, easier to debug. Interleave is O(1) extra space — pick when constrained, but expect to walk through three passes carefully.
+
+??? question "Follow-up 6 — Make it stable under concurrent reads."
+    Snapshot via interleave (the original list is *temporarily* corrupted, so this isn't safe!). Better: lock the list, hash-map clone, unlock. Or use a copy-on-write versioned representation.
+
+??? question "Follow-up 7 — What if values are large (e.g., big strings) — should we deep-copy them?"
+    Depends on contract. Strings are immutable in Python, so sharing them is fine. For mutable payloads (lists, dicts), `copy.deepcopy(node.val)` per clone — O(n × |val|) instead of O(n).
 
 #### 🐛 Common Bugs
 
-1. **Forgetting random can be None.**
-2. **Using `node.random.next` without null check** in the interleave step.
-3. **Detangle step: not restoring original's `next`.**
+1. **Forgetting random can be None** — `m[node.random]` raises KeyError. Use `.get` or guard explicitly.
+2. **Using `node.random.next` without null check** in the interleave step — segfaults when random is None.
+3. **Detangle step: not restoring original's `next`** — caller's list ends up mangled.
+4. **Recursive DFS without memoization** — infinite loop on a random-cycle.
+5. **Setting memo AFTER recursing** in Layer 1 — also infinite loop on a cycle.
+6. **Returning `m[head]` when head was None** — `m[None]` is a KeyError. Guard early.
+7. **Using `id(node)` as the dict key** — works, but redundant; nodes are hashable by identity by default.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Empty list (`head = None`) → None
+- [ ] Single node, no random (random = None) → cloned single node with random = None
+- [ ] Single node, self-random (`node.random = node`) → clone's random points to clone
+- [ ] All nodes share the same random target
+- [ ] Random forms a cycle through several nodes
+- [ ] Some nodes have random = None, others don't
+- [ ] Original list contains duplicate values — clones must still be distinct objects
 
 #### 🏢 Sample Interviewer Quote
 
 > *"Deep copy this linked list that has both next and random pointers."*
 
-Your opener: *"Two approaches. With a hash map: pass 1 clones every node, pass 2 wires up next and random via the map. O(n) time, O(n) space. For O(1) extra space, interleave clones inline, set their randoms, then detangle. Same time."*
+Your opener: *"Two approaches. With a hash map: pass 1 clones every node into a `original → clone` dict, pass 2 wires up `next` and `random` on every clone using the dict — O(n) time, O(n) space. For O(1) extra space, interleave each clone right after its original, set `clone.random = original.random.next`, then detangle. Same time."*
 
 ---
 
@@ -3408,214 +3945,1441 @@ Your opener: *"Two approaches. With a hash map: pass 1 clones every node, pass 2
 
 <span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span>
 
-> A doubly linked list where each node has `prev`, `next`, and a `child` pointer to a separate doubly linked list (which itself can have children). Flatten into a single-level doubly linked list, depth-first.
+> A doubly linked list where each node has `prev`, `next`, and a `child` pointer to a separate doubly linked list (which itself can have children). Flatten into a single-level doubly linked list, **depth-first**. After flattening, every node's `child` pointer is None and the resulting list is properly doubly linked. (LeetCode 430.)
 
 #### 📖 Story Mode
 
 ```
-1 - 2 - 3 - 4 - 5
+1 - 2 - 3 - 4 - 5 - 6
         |
-        6 - 7
+        7 - 8 - 9 - 10
             |
-            8 - 9
+            11 - 12
 ```
 
-Flattens to `1 - 2 - 3 - 6 - 7 - 8 - 9 - 4 - 5`.
+Flattens to `1 - 2 - 3 - 7 - 8 - 11 - 12 - 9 - 10 - 4 - 5 - 6` (DFS, child stream is "spliced in" before continuing). Every `child` becomes None; `prev` pointers are fixed to make the result a valid DLL.
 
 #### 🌍 Real-World Usage
 
-- **Document outlines** with sub-bullets.
-- **Filesystem traversal in DFS order.**
-- **Hierarchical UI components** flattened for serialization.
+- **Document outlines** with sub-bullets — flatten a tree of sections for linear rendering.
+- **Filesystem traversal in DFS order** — convert a directory hierarchy into a streaming list.
+- **Hierarchical UI components** flattened for serialization — collapse a nested view tree into a flat node list with depth annotations.
+- **JSON / DOM linearization** — produce a token stream from a tree structure for diff'ing or templating.
+- **Compiler IR lowering** — flattening nested basic blocks into a single linear instruction stream.
 
 #### 🧠 Thinking Process
 
-DFS with a stack. Whenever we encounter a child, push the current next, recurse into the child, splice, and continue.
+The structure is essentially a tree where each node has 0..1 children and 0..1 next siblings. We need an in-order DFS that, on every node with a child, splices the child sub-stream in front of the current next, then continues.
 
-#### 🐍 Solution Sketch
+**Two clean approaches:**
 
-```python
-def flatten(head):
-    if not head: return head
-    stack = []
-    curr = head
-    while curr:
-        if curr.child:
-            if curr.next:
-                stack.append(curr.next)
-            curr.next = curr.child
-            curr.child.prev = curr
-            curr.child = None
-        if not curr.next and stack:
-            nxt = stack.pop()
-            curr.next = nxt
-            nxt.prev = curr
-        curr = curr.next
-    return head
+- **Iterative with explicit stack:** push the saved `next` whenever we descend into a `child`; pop and reconnect when the current chain ends.
+- **Recursive DFS returning the tail:** flatten each child branch, get its tail, splice between current and current's next. Cleaner code; uses recursion stack.
+
+After splicing, three invariants must hold per node:
+
+1. `child = None`.
+2. `prev` correctly points to the previous node in the flattened order.
+3. `next` correctly points to the next node in the flattened order.
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Build a list, rewire (brute)"
+
+    ```python
+    def flatten_brute(head):
+        if not head: return head
+        order = []                                  # DFS sequence
+        def dfs(node):
+            while node:
+                order.append(node)
+                if node.child:
+                    dfs(node.child); node.child = None
+                node = node.next
+        dfs(head)
+        for i, n in enumerate(order):
+            n.prev = order[i-1] if i > 0 else None
+            n.next = order[i+1] if i + 1 < len(order) else None
+        return head
+    ```
+
+    O(n) time, O(n) extra (the array). Trivially correct; a fine baseline.
+
+=== "Layer 2 — Iterative with stack ⭐"
+
+    ```python
+    def flatten(head):
+        if not head: return head
+        stack = []
+        curr = head
+        while curr:
+            if curr.child:
+                if curr.next:
+                    stack.append(curr.next)
+                curr.next = curr.child
+                curr.child.prev = curr
+                curr.child = None
+            if not curr.next and stack:
+                nxt = stack.pop()
+                curr.next = nxt
+                nxt.prev = curr
+            curr = curr.next
+        return head
+    ```
+
+    O(n) time, O(d) stack where d is max nesting depth.
+
+=== "Layer 3 — Recursive DFS returning tail"
+
+    ```python
+    def flatten_rec(head):
+        def dfs(node):
+            """Flatten the chain starting at `node` and return its tail."""
+            tail = node
+            curr = node
+            while curr:
+                nxt = curr.next
+                if curr.child:
+                    child_tail = dfs(curr.child)
+                    # splice
+                    curr.next = curr.child
+                    curr.child.prev = curr
+                    curr.child = None
+                    if nxt:
+                        child_tail.next = nxt
+                        nxt.prev = child_tail
+                    tail = child_tail
+                else:
+                    tail = curr
+                curr = nxt
+            return tail
+
+        if head:
+            dfs(head)
+        return head
+    ```
+
+    O(n) time, O(d) recursion stack. No explicit stack — easier to reason about.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from typing import Optional
+
+
+    class MultiNode:
+        __slots__ = ("val", "prev", "next", "child")
+        def __init__(self, val: int = 0,
+                     prev: Optional["MultiNode"] = None,
+                     next: Optional["MultiNode"] = None,
+                     child: Optional["MultiNode"] = None) -> None:
+            self.val = val
+            self.prev = prev
+            self.next = next
+            self.child = child
+
+
+    def flatten(head: Optional[MultiNode]) -> Optional[MultiNode]:
+        """Flatten a multilevel DLL in DFS order.
+
+        After return: every `child` is None, the result is a valid DLL with
+        correct `prev` and `next` pointers throughout.
+
+        Time:  O(n).
+        Space: O(d) — d is the maximum nesting depth.
+        """
+        if head is None:
+            return None
+        stack: list[MultiNode] = []
+        curr: Optional[MultiNode] = head
+        while curr is not None:
+            if curr.child is not None:
+                if curr.next is not None:
+                    stack.append(curr.next)
+                curr.next = curr.child
+                curr.child.prev = curr
+                curr.child = None
+            if curr.next is None and stack:
+                nxt = stack.pop()
+                curr.next = nxt
+                nxt.prev = curr
+            curr = curr.next
+        return head
+    ```
+
+=== "Layer 5 — Variants"
+
+    **Variant A — flatten BFS (level-order) instead of DFS.** Use a queue; each level becomes a contiguous run in the output.
+
+    **Variant B — flatten with a depth-marker on each node.** Annotate every node with its original depth before flattening; useful for serialization.
+
+    **Variant C — un-flatten given the depth markers.** Inverse operation; useful for round-trip tests.
+
+    **Variant D — N-ary tree of doubly linked lists.** Generalize: each node has a list of children; iterate over them in order before continuing.
+
+    **Variant E — concurrent flatten** is dangerous because the structure is being mutated during the walk. Snapshot first, or guard with a lock.
+
+#### 🔍 Dry Run
+
+```
+1 - 2 - 3
+    |
+    4 - 5
+        |
+        6
 ```
 
-O(n) time, O(depth) space.
+Stack-based walk:
+
+| step | curr | action | stack | list state |
+|------|------|--------|-------|------------|
+| 1 | 1 | no child, advance | [] | 1 — 2 — 3 (4→5→6 hidden) |
+| 2 | 2 | child=4: push 3, splice 4 | [3] | 1 — 2 — 4 — 5; 5.child=6 |
+| 3 | 4 | no child, advance | [3] | same |
+| 4 | 5 | child=6: nothing to push (5.next=None), splice 6 | [3] | 1 — 2 — 4 — 5 — 6 |
+| 5 | 6 | no child, no next, pop 3 | [] | 1 — 2 — 4 — 5 — 6 — 3 |
+| 6 | 3 | no child, no next, stack empty | [] | done ✅ |
+
+Final: `1 ↔ 2 ↔ 4 ↔ 5 ↔ 6 ↔ 3`. Every `child` is None.
 
 #### ⏱️ Complexity
 
-O(n) time, O(d) stack where d is max nesting depth.
+| Approach | Time | Space |
+|----------|------|-------|
+| Build-then-rewire | O(n) | O(n) |
+| **Iterative stack** ⭐ | **O(n)** | **O(d)** |
+| Recursive DFS | O(n) | O(d) |
+
+#### 🎯 Pattern Used
+
+**DFS with splice-on-descent + stack-of-suspended-nexts.** Same pattern flattens any tree where children must be inlined into the parent's sibling chain.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why DFS, not BFS?"
+    The problem specifies depth-first ordering: a child stream must be spliced *between* its parent and the parent's next sibling. BFS would interleave siblings before descending, producing a different (and incorrect, per the spec) order.
+
+??? question "Follow-up 2 — Recursive vs iterative — which is better?"
+    Equivalent in time and space. Recursive (Layer 3) has fewer pointer-bookkeeping bugs; iterative (Layer 2) avoids stack-overflow on extremely deep input.
+
+??? question "Follow-up 3 — Maximum recursion / stack depth."
+    Both versions use O(d) where d is the max nesting depth. For pathological lists where d ≈ n (a deep chain of single-child nodes), expect O(n) stack.
+
+??? question "Follow-up 4 — How do you confirm `prev` is correct?"
+    Walk the flattened list forward, then walk back via `prev` from the tail. They should produce the same node sequence in reverse.
+
+??? question "Follow-up 5 — What if the input has a cycle (corrupted input)?"
+    Add a `visited` set in DFS; raise on revisit. Production code should defend against malformed input even if the spec promises a tree.
+
+??? question "Follow-up 6 — Restore the original structure given the flattened result."
+    Not generally possible without storing each node's original depth (Variant B). Flattening is one-way unless you track metadata.
+
+??? question "Follow-up 7 — Memory layout for cache efficiency."
+    Pre-allocating a single array of nodes (Layer 1's `order` list) gives sequential access patterns. The pointer-based versions thrash cache for deeply nested input.
 
 #### 🐛 Common Bugs
 
-1. **Forgetting `child = None`** after flattening — the result is supposed to be single-level.
-2. **Not fixing `prev`** for the spliced-in nodes.
+1. **Forgetting `child = None`** after splicing — the result claims to be single-level but the child pointer leaks.
+2. **Not fixing `prev`** for the spliced-in head node — the DLL is broken on backward traversal.
+3. **Forgetting to push the suspended `next`** when `curr.next is not None` and there's a child.
+4. **Popping the stack too eagerly** — only pop when `curr.next` is None AND stack is non-empty.
+5. **Mutating `curr.child` after using `curr.child.prev`** — order matters: set `prev` first, then null out `child`.
+6. **Recursive version forgetting to return the tail** — caller can't splice properly.
+7. **Splicing the wrong direction** — `curr → child → ... → child_tail → curr.next_original`. Easy to get inverted under pressure.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Empty list (`head = None`) → None
+- [ ] Single node, no child → unchanged
+- [ ] Single node with child but no next → child is spliced; original child = None
+- [ ] All nodes at the same level (no children anywhere) → unchanged
+- [ ] Single deeply nested chain (each node has only `child`, no `next`)
+- [ ] Last node has a child (no next to push)
+- [ ] Multiple siblings each with children
+- [ ] After flatten, every `child` is None and `prev`/`next` form a valid DLL
 
 #### 🏢 Sample Interviewer Quote
 
 > *"Flatten this multilevel doubly linked list in DFS order."*
 
-Your opener: *"DFS with a stack. On hitting a child, push the saved next, splice the child in, clear the child pointer. When the current chain ends and the stack is non-empty, pop and reconnect."*
+Your opener: *"DFS with an explicit stack. On hitting a node with a child, push the saved `next`, splice the child in (set `curr.next = child`, `child.prev = curr`, `curr.child = None`), and continue. When `curr.next` is None and the stack is non-empty, pop and reconnect — that resumes the parent's sibling chain. O(n) time, O(d) stack where d is max depth."*
 
 ---
 
 ### Problem 20 — Remove Duplicates from Sorted List II
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Apple</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Apple</span> <span class="company-tag">Bloomberg</span>
 
-> Given a sorted linked list, delete **every node** that has duplicates, leaving only nodes that appear exactly once.
+> Given the head of a sorted linked list, delete **every node** that has duplicates, leaving only nodes that appear **exactly once**. Return the linked list **sorted as well**. (LeetCode 82.)
 
 #### 📖 Story Mode
 
-`1 → 2 → 3 → 3 → 4 → 4 → 5` → `1 → 2 → 5`.
+```
+input :   1 → 2 → 3 → 3 → 4 → 4 → 5
+output:   1 → 2 → 5
 
-#### 🐍 Solution
+input :   1 → 1 → 1 → 2 → 3
+output:   2 → 3                          (head itself is a duplicate)
 
-Dummy head + look-ahead.
+input :   1 → 1
+output:   (empty list)                   (everything was duplicated)
 
-```python
-def delete_duplicates_ii(head):
-    dummy = ListNode(0, head)
-    prev = dummy
-    while head:
-        if head.next and head.val == head.next.val:
-            while head.next and head.val == head.next.val:
-                head = head.next
-            prev.next = head.next
-        else:
-            prev = prev.next
-        head = head.next
-    return dummy.next
+input :   1 → 2 → 3
+output:   1 → 2 → 3                      (no duplicates)
 ```
 
-O(n) time, O(1) space.
+The contrast with **LC 83 (Remove Duplicates from Sorted List I)** is the heart: in 83 we keep one copy of each duplicate; in 82 we drop them all.
+
+#### 🌍 Real-World Usage
+
+- **Database deduplication with DISTINCT-only-once-occurrences semantics** — sometimes you want only "anomalies" — values that were never repeated.
+- **Outlier extraction in time series** — keep only the unique sentinel readings.
+- **Streaming log filters** — remove every line that ever recurred (signal of a noisy source).
+- **Set-symmetric-difference style operations** on a sorted stream.
+- **Cleanup pass after a merge** that accidentally introduced duplicates you don't want any of.
+
+#### 🧠 Thinking Process
+
+The list is sorted, so all duplicates of any given value sit in a **contiguous run**. The algorithm is then:
+
+1. Walk with two pointers: `prev` (last *kept* node) and `head` (the current scanning position).
+2. If `head.val == head.next.val`, we hit the start of a duplicate run. Advance `head` past the **entire** run, then splice `prev.next` to point past the run.
+3. Otherwise, `head` is unique — advance `prev`.
+
+The dummy head solves the case where the original head is itself a duplicate (the new head becomes whatever survives the first cleanup pass).
+
+The trap is the **second pointer move**: after deleting a run, you must NOT advance `prev`. Only `head` moves forward, because `prev.next` now points at a node we haven't yet inspected.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Brute force: count via dict, rebuild"
+
+    Walk once to count, walk again rebuilding only nodes with count == 1.
+
+    ```python
+    from __future__ import annotations
+    from collections import Counter
+
+
+    def delete_duplicates_ii_count(head: ListNode | None) -> ListNode | None:
+        cnt: Counter[int] = Counter()
+        cur = head
+        while cur:
+            cnt[cur.val] += 1
+            cur = cur.next
+        dummy = ListNode()
+        tail = dummy
+        cur = head
+        while cur:
+            if cnt[cur.val] == 1:
+                tail.next = cur
+                tail = cur
+            cur = cur.next
+        tail.next = None
+        return dummy.next
+    ```
+
+    O(n) time, O(n) space. Works for *unsorted* lists too — useful generalisation but heavier than the sorted-input solution.
+
+=== "Layer 2 — Dummy head + look-ahead (canonical) ⭐"
+
+    Exploit sortedness so that all duplicates of a value are adjacent.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def delete_duplicates_ii(head: ListNode | None) -> ListNode | None:
+        dummy = ListNode(0, head)
+        prev = dummy
+        cur = head
+        while cur:
+            if cur.next and cur.val == cur.next.val:
+                # Walk past the entire duplicate run
+                dup_val = cur.val
+                while cur and cur.val == dup_val:
+                    cur = cur.next
+                prev.next = cur                # splice out the run
+            else:
+                prev = cur
+                cur = cur.next
+        return dummy.next
+    ```
+
+    O(n) time, O(1) space — the interview default.
+
+=== "Layer 3 — Recursive"
+
+    Treat each "run" recursively.
+
+    ```python
+    from __future__ import annotations
+
+
+    def delete_duplicates_ii_recursive(head: ListNode | None) -> ListNode | None:
+        if head is None or head.next is None:
+            return head
+        if head.val == head.next.val:
+            dup = head.val
+            while head and head.val == dup:
+                head = head.next
+            return delete_duplicates_ii_recursive(head)
+        head.next = delete_duplicates_ii_recursive(head.next)
+        return head
+    ```
+
+    O(n) time, O(n) recursion stack. Same blow-up risk as P15.
+
+=== "Layer 4 — Variant: keep one copy of duplicates (LC 83 contrast)"
+
+    Side-by-side comparison so candidates internalize the difference.
+
+    ```python
+    from __future__ import annotations
+
+
+    def delete_duplicates_keep_one(head: ListNode | None) -> ListNode | None:
+        """LeetCode 83 — keep one copy of each value."""
+        cur = head
+        while cur and cur.next:
+            if cur.val == cur.next.val:
+                cur.next = cur.next.next       # skip the duplicate
+            else:
+                cur = cur.next                 # advance only on uniqueness
+        return head
+    ```
+
+    No dummy needed (the head itself never gets dropped). Notice we *don't* advance when we skip — we keep checking the new neighbor.
+
+=== "Layer 5 — Production: streaming / lazy variant"
+
+    Useful when the list is huge or comes from a generator: emit values only after we've seen the next one and confirmed no duplicate.
+
+    ```python
+    from __future__ import annotations
+    from typing import Iterator
+
+
+    def unique_only_sorted(stream: Iterator[int]) -> Iterator[int]:
+        """Stream version of LC 82: yields values that appear exactly once
+        in a sorted stream. Uses O(1) memory."""
+        try:
+            cur = next(stream)
+        except StopIteration:
+            return
+        count = 1
+        for v in stream:
+            if v == cur:
+                count += 1
+            else:
+                if count == 1:
+                    yield cur
+                cur, count = v, 1
+        if count == 1:
+            yield cur
+    ```
+
+    Generalises the LC-82 idea to any sorted stream (file, DB cursor, network feed) without materialising the full list. O(1) memory.
+
+#### 🔎 Step-by-Step Dry Run
+
+`head = 1 → 2 → 3 → 3 → 4 → 4 → 5`. Layer 2.
+
+Initial: `dummy → 1 → 2 → 3 → 3 → 4 → 4 → 5`. `prev = dummy`, `cur = 1`.
+
+| Iter | `cur` | `cur.next?` | duplicate? | action                                         | state after                                    |
+|------|-------|-------------|------------|------------------------------------------------|------------------------------------------------|
+| 1    | 1     | 2           | 1 ≠ 2 → no | `prev = 1`, `cur = 2`                          | `dummy → 1 → 2 → ...`, `prev=1`, `cur=2`       |
+| 2    | 2     | 3           | 2 ≠ 3 → no | `prev = 2`, `cur = 3`                          | `prev=2`, `cur=3`                              |
+| 3    | 3     | 3           | yes        | walk: cur → 3 (the second), cur → 4. `prev.next = 4`. | `dummy → 1 → 2 → 4 → 4 → 5`, `prev=2`, `cur=4` |
+| 4    | 4     | 4           | yes        | walk: cur → 4 (second), cur → 5. `prev.next = 5`. | `dummy → 1 → 2 → 5`, `prev=2`, `cur=5`         |
+| 5    | 5     | None        | no         | `prev = 5`, `cur = None`                       | exit                                           |
+
+Return `dummy.next = 1 → 2 → 5` ✅.
+
+Notice rows 3 and 4: `prev` does NOT advance — that's the subtle part.
+
+#### 📊 Complexity
+
+| Layer                          | Time | Space    | Notes                                          |
+|--------------------------------|------|----------|------------------------------------------------|
+| Layer 1 — Counter rebuild      | O(n) | O(n)     | Generalises to unsorted; hash overhead         |
+| Layer 2 — dummy + look-ahead ⭐| O(n) | O(1)     | The interview default                          |
+| Layer 3 — recursive            | O(n) | O(n)     | Stack-bound; elegant but risky                 |
+| Layer 4 — LC 83 contrast       | O(n) | O(1)     | Side-by-side teaching companion                |
+| Layer 5 — streaming generator  | O(1) per yield | O(1) | Production-grade for huge sorted streams |
+
+#### ❓ Follow-ups
+
+??? question "Why does Layer 2 NOT advance `prev` after deleting a run?"
+    Because `prev.next` now points to a node we haven't inspected yet — it could itself be the start of *another* duplicate run. Advancing `prev` would skip the check and let a duplicate-of-the-next-value through.
+
+??? question "Why use a dummy head?"
+    Because the original head can be deleted (e.g., `1 → 1 → 2 → ...`). The dummy ensures `prev` always exists, so the first cleanup splice has somewhere to attach.
+
+??? question "Solve LC 82 for an **unsorted** linked list."
+    Two options. (a) Walk twice with a hash count (Layer 1) — O(n) time, O(n) space. (b) Sort first (merge sort, P17) then run Layer 2 — O(n log n) time, O(log n) stack. The hash version is usually preferred at interviews.
+
+??? question "What if the values are large strings or arbitrary objects?"
+    The algorithm only uses `==` on adjacent nodes, so it works for any equality-comparable type. For sortedness you need ordering; for the hash version (Layer 1) you need hashability.
+
+??? question "Can you do this **in-place** without a dummy head?"
+    You can — special-case the leading run by walking it off the front, then run the standard loop. It's strictly worse to read, so use the dummy.
+
+??? question "How would you adapt this to remove values appearing **more than k times**?"
+    Same skeleton: count the run length while walking. If `len ≤ k`, append it back; if `len > k`, splice it out. O(n) time.
+
+??? question "What about a doubly linked list?"
+    Same logic, but each splice updates `next` and the next node's `prev`. The dummy still helps; remember to null the new head's `prev` at the end.
 
 #### 🐛 Common Bugs
 
-1. **Advancing `prev` even when we just deleted a duplicate cluster.**
-2. **Off-by-one inner-while.**
+1. **Advancing `prev` after deleting a run** — most common bug. Re-inspect: only advance `prev` when the current node is unique.
+2. **Inner-loop `cur.val == cur.next.val` but forgetting `cur.next` could be None** — guard with `while cur and cur.val == dup_val`, not `while cur.next and ...`.
+3. **Forgetting the dummy** — silently breaks when the head is duplicated; the returned list still starts with the duplicates.
+4. **Using `==` to compare reference identity** rather than value — works in Python by accident (because integers are interned for small values), but breaks for large integers or custom objects without `__eq__`.
+5. **Recursion depth on long lists** in Layer 3 — silently raises `RecursionError` on n > ~10⁴.
+
+#### ⚠️ Edge Cases
+
+- Empty list → returns `None`.
+- Single node → returns the node unchanged.
+- All duplicates (e.g. `1 → 1 → 1 → 1`) → returns empty list.
+- Head is duplicated but tail is unique (e.g. `1 → 1 → 2`) → returns `2`.
+- Tail is duplicated but head is unique (e.g. `1 → 2 → 2`) → returns `1`.
+- Multiple runs (`1 → 1 → 2 → 3 → 3 → 4`) → returns `2 → 4`.
+- Mixed runs of varying lengths (`1 → 1 → 1 → 2 → 3 → 3`) → returns `2`.
+
+#### 🔑 Key Takeaways
+
+> When the list is sorted, **duplicates form contiguous runs** — the algorithm walks each run as a single unit.
+>
+> The crucial invariant is: `prev` is always the last node we **kept**, and `prev.next` always points to the **next node still under inspection**. After a delete, we update `prev.next` but **don't** move `prev`.
+>
+> **Dummy head + two pointers** is the universal pattern for "delete contiguous segments" in linked lists. Same template appears in P19, P21, P26.
+
+#### 🎯 Pattern Used
+
+**Dummy head + sliding two-pointer (kept-tail and inspector).** Cousins: Remove Duplicates from Sorted List I (LC 83), Remove Element (LC 27), Remove Linked List Elements (LC 203).
 
 ---
 
 ### Problem 21 — Partition List
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Adobe</span>
 
-> Given a linked list and a value `x`, partition it such that all nodes < x come before all nodes >= x. Preserve the original relative order of nodes within each partition.
+> Given the head of a linked list and a value `x`, partition it such that all nodes with value **< x** come before all nodes with value **≥ x**. You must preserve the **original relative order** of the nodes in each of the two partitions. (LeetCode 86.)
 
 #### 📖 Story Mode
 
-`1 → 4 → 3 → 2 → 5 → 2`, `x = 3` → `1 → 2 → 2 → 4 → 3 → 5`.
+```
+input :   1 → 4 → 3 → 2 → 5 → 2,   x = 3
+output:   1 → 2 → 2 → 4 → 3 → 5
 
-#### 🐍 Solution
+   left chain  (< 3): 1 → 2 → 2
+   right chain (≥ 3): 4 → 3 → 5
+   concatenate:       1 → 2 → 2 → 4 → 3 → 5
 
-Two chains, one for `< x`, one for `>= x`. Concatenate.
+input :   2 → 1,                    x = 2
+output:   1 → 2
 
-```python
-def partition(head, x):
-    less_dummy = ListNode(); less = less_dummy
-    geq_dummy = ListNode(); geq = geq_dummy
-    while head:
-        if head.val < x: less.next = head; less = less.next
-        else: geq.next = head; geq = geq.next
-        head = head.next
-    geq.next = None              # important: terminate
-    less.next = geq_dummy.next
-    return less_dummy.next
+input :   1,                        x = 0
+output:   1                          (everything goes right)
+
+input :   (empty),                  x = 5
+output:   (empty)
 ```
 
-O(n) time, O(1) extra space.
+The "stable partition" requirement is the spice — you can't sort or rearrange within each side, only merge two preserved orders.
+
+#### 🌍 Real-World Usage
+
+- **Stable partition in sorting algorithms** — quicksort's partition step is unstable; this is the stable variant used in merge-sort-flavored implementations.
+- **Priority queues with categorical buckets** — split a stream into "urgent" vs "non-urgent" while preserving FIFO order in each bucket.
+- **Network packet QoS** — split a queue into latency-sensitive vs bulk in original arrival order.
+- **Memory allocators with size classes** — partition a free-list around a size threshold while preserving allocation order.
+- **Database query plan ordering** — separate predicates with index access from those requiring scans, preserving execution order.
+
+#### 🧠 Thinking Process
+
+The naive idea: collect all nodes into a list, walk it twice, output `< x` then `≥ x`. Works but O(n) extra space.
+
+The unlock: build **two parallel chains** in a single pass — `less_tail` always pointing to the last "< x" node we appended, `geq_tail` to the last "≥ x" node. Each input node goes into exactly one chain; we don't allocate anything new (we re-use the original nodes).
+
+At the end, splice the chains: `less_tail.next = geq_dummy.next`. The kicker: we must **terminate** the geq chain with `geq_tail.next = None`, otherwise it still points at whatever its original node's `.next` was — typically a node already in the *less* chain — creating a cycle.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Brute force: collect into two arrays, rebuild"
+
+    ```python
+    from __future__ import annotations
+
+
+    def partition_via_arrays(head: ListNode | None, x: int) -> ListNode | None:
+        less: list[int] = []
+        geq: list[int] = []
+        cur = head
+        while cur:
+            (less if cur.val < x else geq).append(cur.val)
+            cur = cur.next
+        dummy = ListNode()
+        tail = dummy
+        for v in less + geq:
+            tail.next = ListNode(v)
+            tail = tail.next
+        return dummy.next
+    ```
+
+    O(n) time, O(n) space. Allocates new nodes; doesn't reuse the input. Acceptable, not elegant.
+
+=== "Layer 2 — Two-chain in-place ⭐"
+
+    The canonical solution. Reuse the original nodes; build two chains; splice.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def partition(head: ListNode | None, x: int) -> ListNode | None:
+        less_dummy = ListNode()
+        geq_dummy = ListNode()
+        less_tail = less_dummy
+        geq_tail = geq_dummy
+
+        cur = head
+        while cur:
+            if cur.val < x:
+                less_tail.next = cur
+                less_tail = cur
+            else:
+                geq_tail.next = cur
+                geq_tail = cur
+            cur = cur.next
+
+        geq_tail.next = None              # CRITICAL: terminate to avoid cycle
+        less_tail.next = geq_dummy.next   # splice
+        return less_dummy.next
+    ```
+
+    O(n) time, O(1) extra space.
+
+=== "Layer 3 — Single-chain in-place insert (advanced)"
+
+    A cleverer one-pass version that maintains a single "split point" and inserts each node either before or after it. Harder to read, no real perf gain.
+
+    ```python
+    from __future__ import annotations
+
+
+    def partition_single_chain(head: ListNode | None, x: int) -> ListNode | None:
+        dummy = ListNode(0, head)
+        # split: last node guaranteed to be in the "< x" partition
+        split = dummy
+        # advance split to the end of the leading "< x" prefix already in place
+        while split.next and split.next.val < x:
+            split = split.next
+
+        prev = split
+        while prev.next:
+            if prev.next.val < x:
+                # detach prev.next; insert after split
+                node = prev.next
+                prev.next = node.next
+                node.next = split.next
+                split.next = node
+                split = node
+            else:
+                prev = prev.next
+        return dummy.next
+    ```
+
+    O(n) time, O(1) space; the splices are subtle. Use Layer 2 unless an interviewer specifically asks "without two chains."
+
+=== "Layer 4 — Variant: 3-way partition (Dutch National Flag on a list)"
+
+    Generalise to `< x`, `== x`, `> x`:
+
+    ```python
+    from __future__ import annotations
+
+
+    def partition_three_way(head: ListNode | None, x: int) -> ListNode | None:
+        d_lt = ListNode(); t_lt = d_lt
+        d_eq = ListNode(); t_eq = d_eq
+        d_gt = ListNode(); t_gt = d_gt
+        cur = head
+        while cur:
+            if cur.val < x:
+                t_lt.next = cur; t_lt = cur
+            elif cur.val == x:
+                t_eq.next = cur; t_eq = cur
+            else:
+                t_gt.next = cur; t_gt = cur
+            cur = cur.next
+        t_lt.next = d_eq.next or d_gt.next
+        t_eq.next = d_gt.next
+        t_gt.next = None
+        return d_lt.next
+    ```
+
+    O(n) time, O(1) space; useful for sorting around a pivot in merge-style list quicksort.
+
+=== "Layer 5 — Production: lazy generator (streaming)"
+
+    For an infinite or very long sorted stream where the consumer wants `< x` first then `≥ x`:
+
+    ```python
+    from __future__ import annotations
+    from typing import Iterator
+
+
+    def partition_stream(stream: Iterator[int], x: int) -> Iterator[int]:
+        """Yields all values < x first (in order), then all >= x (in order).
+        Buffers the >= group in memory but streams the < group eagerly.
+        Memory: O(|>= group|)."""
+        deferred: list[int] = []
+        for v in stream:
+            if v < x:
+                yield v
+            else:
+                deferred.append(v)
+        yield from deferred
+    ```
+
+    For an infinite stream this never terminates the first phase, so the caller must understand the contract. Useful only when the stream is bounded but huge.
+
+#### 🔎 Step-by-Step Dry Run
+
+`head = 1 → 4 → 3 → 2 → 5 → 2`, `x = 3`. Layer 2.
+
+Initial: `less_dummy → ∅`, `geq_dummy → ∅`. `less_tail = less_dummy`, `geq_tail = geq_dummy`.
+
+| Step | `cur` | val | bucket | less chain                   | geq chain                  |
+|------|-------|-----|--------|------------------------------|----------------------------|
+| 1    | 1     | 1   | <      | `less_dummy → 1`             | `geq_dummy → ∅`            |
+| 2    | 4     | 4   | ≥      | `less_dummy → 1`             | `geq_dummy → 4`            |
+| 3    | 3     | 3   | ≥      | `less_dummy → 1`             | `geq_dummy → 4 → 3`        |
+| 4    | 2     | 2   | <      | `less_dummy → 1 → 2`         | `geq_dummy → 4 → 3`        |
+| 5    | 5     | 5   | ≥      | `less_dummy → 1 → 2`         | `geq_dummy → 4 → 3 → 5`    |
+| 6    | 2     | 2   | <      | `less_dummy → 1 → 2 → 2`     | `geq_dummy → 4 → 3 → 5`    |
+
+After loop, before splicing: `less_tail = 2 (last)`, `geq_tail = 5`.
+
+⚠ Critical step: `geq_tail.next = None`. Why? Because the original `5.next` pointed to the second `2`, which now lives in the *less* chain. Without termination, `4 → 3 → 5 → 2 → 2 → ?` creates a cycle (`2 → 2 → 2 → ...` because last `2`'s `.next` was originally the next iteration's input, which is `None` here, but in larger inputs would be a stale pointer).
+
+Splice: `less_tail.next = geq_dummy.next = 4`. So:
+
+`less_dummy → 1 → 2 → 2 → 4 → 3 → 5 → None`.
+
+Return `less_dummy.next = 1 → 2 → 2 → 4 → 3 → 5` ✅.
+
+#### 📊 Complexity
+
+| Layer                          | Time | Space      | Notes                                          |
+|--------------------------------|------|------------|------------------------------------------------|
+| Layer 1 — array rebuild        | O(n) | O(n)       | Allocates new nodes; rarely the right answer   |
+| Layer 2 — two-chain ⭐         | O(n) | **O(1)**   | The interview default                          |
+| Layer 3 — single-chain insert  | O(n) | O(1)       | Subtle; only on demand                         |
+| Layer 4 — 3-way Dutch flag     | O(n) | O(1)       | Useful as a building block for list quicksort  |
+| Layer 5 — streaming generator  | O(n) | O(\|≥ group\|) | Only safe when the stream is bounded       |
+
+#### ❓ Follow-ups
+
+??? question "Why is `geq_tail.next = None` mandatory?"
+    Because the original `geq_tail`'s `.next` still points to whatever came after it in the input. If the next input node went into the *less* chain, that pointer is now an alias into a different chain — creating a cycle when we splice. **Always terminate the tail of any rebuilt chain.**
+
+??? question "Is the algorithm stable?"
+    Yes. Each pass through the input appends to whichever tail; we never reorder within a chain. The relative order in each partition equals the relative order in the input.
+
+??? question "Can the partition be done unstably for less work?"
+    No real win. The two-chain version is already O(n) time and O(1) space. Unstable variants (e.g. Hoare-style swap-from-ends) require random access, which a singly linked list doesn't provide cheaply. Stability is essentially free here.
+
+??? question "How would you partition around the **median** without precomputing it?"
+    Two passes: one to find the median (e.g., quickselect), one to partition. Or randomised in-place quicksort-on-list (Hoare scheme), which combines them at the cost of stability.
+
+??? question "What about partitioning in place with **pointers only** (no dummies)?"
+    You can, but you'll need 4 separate special cases for "less chain empty," "geq chain empty," "neither," "both" — far uglier. Always use dummies.
+
+??? question "How does this generalise to a doubly linked list?"
+    Identical structure; each move also rewires the `.prev` pointer. After splicing, the new head's `.prev = None`.
+
+??? question "What if `x` is not present in the list?"
+    Doesn't matter — the partition is defined by `< x` vs `≥ x`, not by `== x`. The algorithm is correct regardless.
+
+??? question "How would you partition into k buckets given threshold values `[x₁ < x₂ < ... < xₖ₋₁]`?"
+    k chains, each with its own dummy + tail. After the loop, splice them in order, terminating each tail. Generalises Layer 4. O(n) time, O(k) extra pointers.
 
 #### 🐛 Common Bugs
 
-1. **Forgetting `geq.next = None`** — leaves a stale pointer that creates a cycle.
+1. **Forgetting `geq_tail.next = None`** — most common bug. Creates a cycle, the function returns a list that prints forever.
+2. **Splicing `less_tail.next = geq_dummy`** instead of `geq_dummy.next` — leaks the dummy node into the result.
+3. **Mutating `head` while iterating** — using `head = head.next` after `less_tail = head` is fine, but `cur.next` must be read before reassignment. The provided `cur = cur.next` at the loop bottom does this correctly.
+4. **Using `<=` instead of `<`** — the spec says strictly less; mixing the boundary moves nodes between buckets.
+5. **Returning `less_dummy` instead of `less_dummy.next`** — leaks the sentinel.
+6. **In Layer 4, splicing `less → eq → gt` while one chain is empty** — guard with `or` chains, or build dummies + tails for emptiness safety.
+
+#### ⚠️ Edge Cases
+
+- Empty list → returns `None`. Both dummies stay empty; splice is `less_dummy.next = None`.
+- All `< x`: `geq_dummy.next = None`; `less_tail.next = None`; result is the original chain.
+- All `≥ x`: `less_dummy.next = None`; `less_tail = less_dummy`; `less_tail.next = geq_dummy.next` correctly returns the geq chain. The result starts at `less_dummy.next` which is now `geq_dummy.next` ✅.
+- Single node `< x`: trivially placed in less chain, geq stays empty.
+- Single node `≥ x`: placed in geq, less empty; splice gives `less_dummy.next = the_node`.
+- All values equal `x`: all go to geq (≥); less empty; result preserves original.
+
+#### 🔑 Key Takeaways
+
+> **Dummy heads** turn "did the chain start yet?" into a non-question. Build every list-rebuilding solution with them.
+>
+> **Always terminate tails** when rebuilding from existing nodes — the original `.next` is a landmine.
+>
+> The two-chain pattern generalises: 3-way (Dutch flag), k-way (radix-style), or even arbitrary predicates — each predicate gets its own dummy + tail.
+
+#### 🎯 Pattern Used
+
+**Two-chain stable partition with dummy heads.** Same template: 3-way Dutch flag (Layer 4), Odd Even Linked List (P13), Sort List bucket merge (P17, building block).
 
 ---
 
 ### Problem 22 — Add Two Numbers II
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Google</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Google</span> <span class="company-tag">Apple</span>
 
-> Same as Problem 9 but with **most-significant digit first**. (LeetCode 445.)
+> You are given two non-empty linked lists representing two non-negative integers. The most significant digit comes **first** and each node contains a single digit. Add the two numbers and return the sum as a linked list. **You may not modify the input lists.** (LeetCode 445.)
 
 #### 📖 Story Mode
 
-`(7 → 2 → 4 → 3) + (5 → 6 → 4)` → `(7 → 8 → 0 → 7)` (= 7243 + 564 = 7807).
+```
+input :   l1 = 7 → 2 → 4 → 3        (the number 7243)
+          l2 =     5 → 6 → 4        (the number 564)
+output:        7 → 8 → 0 → 7        (the number 7807)
 
-#### 🐍 Solution
+7243 + 564 = 7807
 
-Two natural approaches:
+input :   l1 = 0,  l2 = 0
+output:   0
 
-**Approach A — reverse both, add (Problem 9), reverse result.**
+input :   l1 = 9 → 9 → 9,  l2 = 1
+output:   1 → 0 → 0 → 0     (carry rippling through every digit)
 
-**Approach B — stacks.** Push all digits onto two stacks; pop in lockstep with carry; build the result list by prepending.
-
-```python
-def add_two_numbers_ii(l1, l2):
-    s1, s2 = [], []
-    while l1: s1.append(l1.val); l1 = l1.next
-    while l2: s2.append(l2.val); l2 = l2.next
-    head = None; carry = 0
-    while s1 or s2 or carry:
-        d1 = s1.pop() if s1 else 0
-        d2 = s2.pop() if s2 else 0
-        total = d1 + d2 + carry
-        carry, digit = divmod(total, 10)
-        head = ListNode(digit, head)        # prepend
-    return head
+input :   l1 = 5,  l2 = 5
+output:   1 → 0
 ```
 
-O(n + m) time, O(n + m) space.
+The contrast with **LC 2 (Add Two Numbers)** is the digit ordering: in LC 2 the **least** significant digit is first (so addition starts at the head); here the **most** significant is first, so the natural addition order is the *reverse* of the traversal order.
+
+#### 🌍 Real-World Usage
+
+- **Big-number arithmetic** in cryptography (RSA, ECC) where numbers don't fit in a single CPU word.
+- **Arbitrary-precision arithmetic** (Python's `int`, Java's `BigInteger`) — internally the digit/word ordering matters.
+- **Date/time math with mixed bases** (60s/60m/24h) — same idea, non-uniform base; carry into the next position.
+- **Polynomial addition** with most-significant-coefficient first — same algorithm, base-X carries.
+- **Cumulative ledger reconciliation** — adding two balance histories with newest-first ordering.
+
+#### 🧠 Thinking Process
+
+There are three respectable approaches and an interview *trap* to navigate.
+
+**Approach A — Reverse both lists, add LSB-first (LC 2 style), reverse the result.**
+Simple but **mutates input**, which the spec usually forbids. Acceptable only if you copy first.
+
+**Approach B — Stacks.**
+Walk both lists, push digits onto two stacks. Pop in lockstep — popping gives least-significant first, exactly what addition wants. Build the result by **prepending** to a head pointer (so the most-significant digit ends up at the front).
+
+**Approach C — Length-align then recurse.**
+Find both lengths; align them with leading zeros; recursive add returns `(carry, head)`. Elegant but recursion depth = length of longer list.
+
+The interview-trap: it's tempting to reverse the inputs in place and "remember to reverse them back." If you do that you've mutated and un-mutated, technically still mutating mid-flight (concurrent readers see broken state). For thread-safe code: copy + reverse copy, or use the stack approach.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Convert to int, add, rebuild"
+
+    Quickest to write; relies on Python's arbitrary-precision int.
+
+    ```python
+    from __future__ import annotations
+
+
+    def add_two_numbers_ii_int(l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
+        def to_int(n: ListNode | None) -> int:
+            v = 0
+            while n:
+                v = v * 10 + n.val
+                n = n.next
+            return v
+
+        s = to_int(l1) + to_int(l2)
+        if s == 0:
+            return ListNode(0)
+        # Build digits MSB-first
+        digits: list[int] = []
+        while s:
+            digits.append(s % 10)
+            s //= 10
+        head: ListNode | None = None
+        for d in digits:                       # digits is LSB-first; build by prepending
+            head = ListNode(d, head)
+        return head
+    ```
+
+    O(n + m) time, O(n + m) space. **Demonstrates correctness** but defeats the point of the problem (interviewers want to see digit-by-digit logic). Mention it as a sanity check; don't lead with it.
+
+=== "Layer 2 — Two-stack lockstep ⭐"
+
+    The canonical interview answer.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def add_two_numbers_ii(l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
+        s1: list[int] = []
+        s2: list[int] = []
+        while l1:
+            s1.append(l1.val); l1 = l1.next
+        while l2:
+            s2.append(l2.val); l2 = l2.next
+
+        head: ListNode | None = None
+        carry = 0
+        while s1 or s2 or carry:
+            d1 = s1.pop() if s1 else 0
+            d2 = s2.pop() if s2 else 0
+            total = d1 + d2 + carry
+            carry, digit = divmod(total, 10)
+            head = ListNode(digit, head)        # prepend → MSB-first result
+        return head
+    ```
+
+    O(n + m) time, O(n + m) space. **Does not mutate** the inputs.
+
+=== "Layer 3 — Reverse + add + reverse (mutating, must restore)"
+
+    Standard LC 2 algorithm sandwiched between two reversals. Faster constant factor (no stacks), but mutates.
+
+    ```python
+    from __future__ import annotations
+
+
+    def add_two_numbers_ii_reverse(l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
+        def reverse(head: ListNode | None) -> ListNode | None:
+            prev = None
+            cur = head
+            while cur:
+                cur.next, prev, cur = prev, cur, cur.next
+            return prev
+
+        a = reverse(l1)
+        b = reverse(l2)
+        dummy = ListNode()
+        tail = dummy
+        carry = 0
+        while a or b or carry:
+            d1 = a.val if a else 0
+            d2 = b.val if b else 0
+            total = d1 + d2 + carry
+            carry, digit = divmod(total, 10)
+            tail.next = ListNode(digit)
+            tail = tail.next
+            if a: a = a.next
+            if b: b = b.next
+        result = reverse(dummy.next)
+        # Restore inputs by reversing them back (preserves caller's view)
+        reverse(a)  # 'a' is now None at this point in the loop -- restore from saved
+        return result
+    ```
+
+    Caveat: the snippet is sketchy if the spec forbids any mid-call mutation. A clean version copies both lists first, then reverses the copies. Layer 2 sidesteps the whole issue.
+
+=== "Layer 4 — Recursive with length alignment"
+
+    Pad the shorter list with leading zeros, then recurse to compute carry from the deepest position upward.
+
+    ```python
+    from __future__ import annotations
+
+
+    def add_two_numbers_ii_recursive(l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
+        def length(n: ListNode | None) -> int:
+            k = 0
+            while n: k += 1; n = n.next
+            return k
+
+        def go(a: ListNode | None, b: ListNode | None) -> tuple[int, ListNode | None]:
+            """Returns (carry, head_of_result_for_this_subproblem).
+            Both lists must be the same length."""
+            if a is None:
+                return (0, None)
+            carry, tail = go(a.next, b.next if b else None)
+            total = a.val + (b.val if b else 0) + carry
+            new_carry, digit = divmod(total, 10)
+            return (new_carry, ListNode(digit, tail))
+
+        n1, n2 = length(l1), length(l2)
+        # Pad shorter with virtual zeros by skipping ahead in the longer
+        if n1 < n2:
+            l1, l2 = l2, l1
+            n1, n2 = n2, n1
+        gap = n1 - n2
+        # Walk down l1 by 'gap' steps, building zeros for the lower-order positions
+        # ... Actually clean way: split into front_only + paired
+        cur = l1
+        front_vals: list[int] = []
+        for _ in range(gap):
+            front_vals.append(cur.val)
+            cur = cur.next
+        carry, paired_head = go(cur, l2)
+        # Add the leading-only digits, propagating carry through them too
+        head: ListNode | None = paired_head
+        for v in reversed(front_vals):
+            total = v + carry
+            carry, digit = divmod(total, 10)
+            head = ListNode(digit, head)
+        if carry:
+            head = ListNode(carry, head)
+        return head
+    ```
+
+    O(n + m) time, O(n + m) recursion stack. Beautiful but stack-bound for very long numbers.
+
+=== "Layer 5 — Production: streaming big-number arithmetic"
+
+    For multi-gigabyte numbers stored on disk in MSB-first chunks, you can't buffer everything. The two-stack approach can be replaced by a **chunked reverse-and-stream**:
+
+    ```python
+    from __future__ import annotations
+    from typing import Iterator
+
+
+    def add_streamed_msb_first(stream_a: Iterator[int], stream_b: Iterator[int]) -> Iterator[int]:
+        """Both streams yield digits MSB-first. Buffers each fully (necessary)
+        because addition starts from LSB. Returns digits MSB-first.
+        For truly huge inputs, the buffer is the bottleneck; consider chunked
+        addition with carry-propagation passes."""
+        a = list(stream_a)
+        b = list(stream_b)
+        i, j = len(a) - 1, len(b) - 1
+        carry = 0
+        out: list[int] = []
+        while i >= 0 or j >= 0 or carry:
+            d1 = a[i] if i >= 0 else 0
+            d2 = b[j] if j >= 0 else 0
+            total = d1 + d2 + carry
+            carry, digit = divmod(total, 10)
+            out.append(digit)
+            i -= 1; j -= 1
+        # Yield MSB-first
+        for d in reversed(out):
+            yield d
+    ```
+
+    For the *truly* gigantic case, big-number libraries chunk the digits into 64-bit limbs and use SIMD adders. Outside interview scope; mention as the production answer.
+
+#### 🔎 Step-by-Step Dry Run
+
+`l1 = 7 → 2 → 4 → 3` (7243), `l2 = 5 → 6 → 4` (564). Layer 2.
+
+After walking the inputs:
+
+```
+s1 = [7, 2, 4, 3]      (top → 3, the LSB)
+s2 = [5, 6, 4]         (top → 4, the LSB)
+```
+
+| iter | s1 (top last) | s2 (top last) | d1 | d2 | carry in | total | carry out | digit | head built so far          |
+|------|---------------|---------------|----|----|----------|-------|-----------|-------|-----------------------------|
+| 1    | [7,2,4,3]     | [5,6,4]       | 3  | 4  | 0        | 7     | 0         | 7     | `7`                         |
+| 2    | [7,2,4]       | [5,6]         | 4  | 6  | 0        | 10    | 1         | 0     | `0 → 7`                     |
+| 3    | [7,2]         | [5]           | 2  | 5  | 1        | 8     | 0         | 8     | `8 → 0 → 7`                 |
+| 4    | [7]           | []            | 7  | 0  | 0        | 7     | 0         | 7     | `7 → 8 → 0 → 7`             |
+| 5    | []            | []            |    |    | 0 (loop exits) |       |           |       |                             |
+
+Return `head = 7 → 8 → 0 → 7` ✅ (= 7807).
+
+Trace the carry in the `999 + 1` example:
+
+```
+s1 = [9,9,9], s2 = [1]
+iter 1: d1=9, d2=1, carry=0, total=10, carry=1, digit=0     head: 0
+iter 2: d1=9, d2=0, carry=1, total=10, carry=1, digit=0     head: 0 → 0
+iter 3: d1=9, d2=0, carry=1, total=10, carry=1, digit=0     head: 0 → 0 → 0
+iter 4: d1=0 (s1 empty), d2=0, carry=1, total=1, carry=0, digit=1   head: 1 → 0 → 0 → 0
+```
+
+The fourth iteration handles the *leading-1 carry-out*. The `or carry` in the loop condition is what enables it.
+
+#### 📊 Complexity
+
+| Layer                          | Time    | Space          | Mutates input? | Notes                             |
+|--------------------------------|---------|-----------------|----------------|-----------------------------------|
+| Layer 1 — int conversion       | O(n+m)  | O(n+m)          | No             | Cheats; demo only                 |
+| Layer 2 — two-stack ⭐         | O(n+m)  | O(n+m)          | No             | The interview default             |
+| Layer 3 — reverse-add-reverse  | O(n+m)  | O(1) extra      | **Yes**        | Restore inputs at the end         |
+| Layer 4 — recursive align      | O(n+m)  | O(n+m) stack    | No             | Stack-bound for huge inputs       |
+| Layer 5 — streaming big-num    | O(n+m)  | O(n+m) buffer   | No             | Production scaffolding            |
+
+#### ❓ Follow-ups
+
+??? question "Why does prepending (`head = ListNode(digit, head)`) produce the result MSB-first?"
+    Because we pop LSB-first. The first digit we compute is the *units* place. Prepending makes the second-computed (tens) sit ahead of it, the third (hundreds) ahead of that, and so on. The final list reads MSB → LSB, exactly what we want.
+
+??? question "Why must the loop condition include `or carry`?"
+    Otherwise we'd terminate when both stacks empty, missing the final carry-out (e.g. 999 + 1 should produce a leading 1).
+
+??? question "How would you do this **without** any extra space (no stacks, no recursion, no input mutation)?"
+    Two passes for length, then traverse the longer list `gap` steps, then walk both in lockstep but with no add yet — basically you'd need to write the result MSB-first too, which means knowing carries from later digits, which is impossible without a back-walk. The cleanest "extra-space-free" path is Layer 3 (mutation). Truly extra-space-free is generally impossible without one of stacks/recursion/mutation.
+
+??? question "What if the digits aren't 0-9 (e.g. base 16)?"
+    Replace the `divmod(total, 10)` with `divmod(total, BASE)`. The algorithm is base-agnostic.
+
+??? question "How do you handle leading zeros in the input?"
+    The spec says non-negative integers, no leading zeros except for the number 0 itself. If you receive `0 → 0 → 7`, treat it as the number 7. Most algorithms here are tolerant; just confirm with the interviewer.
+
+??? question "How does this generalise to **subtraction**?"
+    Stacks again, but propagate **borrow** instead of carry. If the larger number is unknown, do a magnitude comparison (lengths first, then digit-by-digit) and swap operands so you always subtract smaller from larger; track a sign separately.
+
+??? question "What about multiplication or division on linked-list big-numbers?"
+    Convert to int (Layer 1) for sanity, or implement schoolbook in stacks: outer loop over one number's digits, inner loop produces partial products, accumulate via this Add-Two-Numbers-II algorithm. Production: switch to FFT-based multiplication for n ≥ thousands of digits.
+
+??? question "What if the lists could be **doubly linked**?"
+    With back-pointers you can walk from tail to head in O(1) per step — no stacks needed. Walk both tails simultaneously, build the result by prepending. O(1) extra space.
 
 #### 🐛 Common Bugs
 
-1. **Reversing the inputs and forgetting to restore** — sometimes the spec disallows mutation.
-2. **Ordering when popping** — left-most-significant on top of one stack, right-most-significant for the other; double-check.
+1. **Forgetting `or carry` in the loop condition** — drops the final carry-out, giving wrong answers like `999 + 1 = 0 → 0 → 0`.
+2. **Appending instead of prepending** when building the result — produces LSB-first output (the LC 2 ordering).
+3. **Mutating the inputs in Layer 3 and forgetting to restore** — caller sees a destroyed list.
+4. **Off-by-one in `divmod`** — using `total // 10, total % 10` is fine; using `total / 10` (true division) gives a float and breaks the next iteration.
+5. **Skipping `if a: a = a.next`** when `a` is shorter than `b` — `NoneType has no attribute 'next'`.
+6. **Layer 4: handling the gap incorrectly** — the front-only digits still receive carries from below, easy to forget.
+
+#### ⚠️ Edge Cases
+
+- Both inputs `0`: returns `0`. Don't return `None`.
+- One input empty: not allowed per spec (non-empty), but defensive code returns the other.
+- Different lengths (`7 → 2 → 4 → 3` and `5 → 6 → 4`): handled by `s1 or s2` continuing the loop with `d=0` for the empty side.
+- Carry produces a new leading digit: handled by `or carry`.
+- Both lists single nodes summing to ≥ 10: returns a 2-node list.
+- Very long inputs (10⁵ digits each): Layer 2 is O(n+m) time and space; Layer 4 risks stack overflow.
+
+#### 🔑 Key Takeaways
+
+> **Stacks are the universal trick** for "process linked-list nodes back-to-front without mutating them." Same idea: P6 (palindrome alternative), P12 (reorder list), P22 here.
+>
+> Always include the **carry** in the loop condition (`while a or b or carry`) — the final overflow digit is otherwise dropped silently.
+>
+> When building a result list MSB-first, **prepend each new digit to the head**; when LSB-first, append to the tail. The choice of construction direction is dictated by which digit you compute first.
+
+#### 🎯 Pattern Used
+
+**Two-stack lockstep digit-by-digit arithmetic** (a.k.a. *back-traversal via auxiliary stack*). Same template: any "process MSB-first linked numbers without mutation" problem.
 
 ---
 
 ### Problem 23 — Insertion Sort List
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Amazon</span>
 
-> Sort a linked list using **insertion sort**.
+> Sort a linked list using **insertion sort** in ascending order. Return the sorted list. (LeetCode 147.)
 
 #### 📖 Story Mode
 
-Educational. Real-world you'd use merge sort. Insertion sort on a linked list is O(n²) but conceptually clean.
+```
+input :   4 → 2 → 1 → 3
+output:   1 → 2 → 3 → 4
 
-#### 🐍 Solution
+The "insertion sort" requirement means:
+  - Maintain a sorted prefix.
+  - For each unsorted node, splice it into the right place in the prefix.
+  - Linked lists let you splice in O(1) once you find the spot — but
+    finding the spot is still O(n) per insertion.
 
-```python
-def insertion_sort_list(head):
-    dummy = ListNode()
-    curr = head
-    while curr:
-        nxt = curr.next
-        prev = dummy
-        while prev.next and prev.next.val <= curr.val:
-            prev = prev.next
-        curr.next = prev.next
-        prev.next = curr
-        curr = nxt
-    return dummy.next
+input :   -1 → 5 → 3 → 4 → 0
+output:   -1 → 0 → 3 → 4 → 5
+
+input :   1
+output:   1
+
+input :   (empty)
+output:   (empty)
 ```
 
-O(n²) time, O(1) space.
+This problem is **pedagogical**: real-world list sorting uses merge sort (Problem 17, O(n log n)). Insertion sort survives in interviews because it (a) introduces dummy-head splicing patterns and (b) tests whether you can do *any* sorting on a structure without random access.
+
+#### 🌍 Real-World Usage
+
+- **Online insertion into a sorted list** — the natural one-element-at-a-time variant.
+- **TimSort's bucket phase** — for very small runs (< 32 elements), Python's TimSort uses insertion sort because the constants beat merge sort for tiny n.
+- **Embedded systems with tight memory** — insertion sort is in-place with O(1) extra; merge sort needs O(log n) splits.
+- **Nearly-sorted inputs** — insertion sort runs in O(n + k) where k is the number of inversions; for almost-sorted data it can outperform O(n log n).
+- **Educational / pedagogical** — the algorithm teaches splice-based linked-list manipulation cleanly.
+
+#### 🧠 Thinking Process
+
+The standard array insertion sort scans backward through the sorted prefix to find an insertion point. Linked lists don't have backward pointers (without doubling memory), so we **scan the sorted prefix from the head**. That's why this is O(n²) even though splicing is O(1).
+
+Two pieces of bookkeeping:
+
+1. **Detach** the current node from the unsorted suffix. Save `nxt = cur.next` because the splice will rewire `cur.next`.
+2. **Find** the predecessor in the sorted prefix: walk from the dummy until `prev.next.val > cur.val` (or `prev.next is None`). Then splice: `cur.next = prev.next; prev.next = cur`.
+
+The tiny optimization that catches many interviewers' eyes: **skip the inner walk when the new node belongs at the tail** — track a `sorted_tail` pointer and check `cur.val >= sorted_tail.val` first.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Naïve insertion sort"
+
+    The textbook version. Walk every node, find its spot via inner scan, splice.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def insertion_sort_list_basic(head: ListNode | None) -> ListNode | None:
+        dummy = ListNode()
+        cur = head
+        while cur:
+            nxt = cur.next                           # save before we mutate cur.next
+            prev = dummy
+            while prev.next and prev.next.val <= cur.val:
+                prev = prev.next
+            cur.next = prev.next
+            prev.next = cur
+            cur = nxt
+        return dummy.next
+    ```
+
+    O(n²) worst case, O(n) best (already sorted), O(1) extra space.
+
+=== "Layer 2 — With sorted-tail shortcut ⭐"
+
+    Cache the tail of the sorted prefix; if the new node ≥ tail, append it directly without scanning.
+
+    ```python
+    from __future__ import annotations
+
+
+    def insertion_sort_list(head: ListNode | None) -> ListNode | None:
+        dummy = ListNode()
+        sorted_tail: ListNode | None = None          # tail of the sorted prefix
+        cur = head
+        while cur:
+            nxt = cur.next
+            if sorted_tail is None or sorted_tail.val <= cur.val:
+                # Append at tail — O(1) common case for already-sorted input
+                if sorted_tail is None:
+                    dummy.next = cur
+                else:
+                    sorted_tail.next = cur
+                sorted_tail = cur
+                cur.next = None
+            else:
+                # Scan from head to find the right spot
+                prev = dummy
+                while prev.next and prev.next.val <= cur.val:
+                    prev = prev.next
+                cur.next = prev.next
+                prev.next = cur
+                # sorted_tail unchanged
+            cur = nxt
+        return dummy.next
+    ```
+
+    Same O(n²) worst case, but **O(n) on already-sorted input** — a 100× speedup on near-sorted streams.
+
+=== "Layer 3 — Using a min-priority-queue (heap-sort flavor)"
+
+    Cheating, since the problem says "use insertion sort" — but worth seeing for contrast.
+
+    ```python
+    from __future__ import annotations
+    import heapq
+
+
+    def sort_list_via_heap(head: ListNode | None) -> ListNode | None:
+        heap: list[tuple[int, int, ListNode]] = []
+        i = 0
+        cur = head
+        while cur:
+            heapq.heappush(heap, (cur.val, i, cur))   # i breaks ties (heap doesn't compare nodes)
+            cur = cur.next
+            i += 1
+        dummy = ListNode()
+        tail = dummy
+        while heap:
+            _, _, n = heapq.heappop(heap)
+            tail.next = n
+            tail = n
+        tail.next = None
+        return dummy.next
+    ```
+
+    O(n log n) time, O(n) space. **Not** insertion sort. Only show this when the interviewer relaxes the constraint.
+
+=== "Layer 4 — Recursive (educational)"
+
+    A nice mental model: "sort the tail, then insert head."
+
+    ```python
+    from __future__ import annotations
+
+
+    def insertion_sort_list_recursive(head: ListNode | None) -> ListNode | None:
+        if head is None or head.next is None:
+            return head
+        sorted_rest = insertion_sort_list_recursive(head.next)
+        # Insert `head` into `sorted_rest`
+        if sorted_rest is None or head.val <= sorted_rest.val:
+            head.next = sorted_rest
+            return head
+        cur = sorted_rest
+        while cur.next and cur.next.val < head.val:
+            cur = cur.next
+        head.next = cur.next
+        cur.next = head
+        return sorted_rest
+    ```
+
+    O(n²) time, O(n) recursion stack. Pretty, but stack-bound.
+
+=== "Layer 5 — Production: hybrid (use merge sort for n ≥ 32)"
+
+    Real-world list-sort thresholds: insertion sort is only competitive for tiny n. The standard production move is to dispatch on length.
+
+    ```python
+    from __future__ import annotations
+
+
+    INSERTION_THRESHOLD = 32
+
+
+    def list_length(n: ListNode | None) -> int:
+        k = 0
+        while n: k += 1; n = n.next
+        return k
+
+
+    def sort_list_hybrid(head: ListNode | None) -> ListNode | None:
+        n = list_length(head)
+        if n < INSERTION_THRESHOLD:
+            return insertion_sort_list(head)
+        # Otherwise, merge sort (Problem 17) — O(n log n)
+        from .merge_sort import sort_list                # hypothetical import
+        return sort_list(head)
+    ```
+
+    The threshold of 32 mirrors what TimSort does in CPython's `list.sort()`. The constant-factor advantage of insertion sort below 32 is real and consistent across CPU generations.
+
+#### 🔎 Step-by-Step Dry Run
+
+`head = 4 → 2 → 1 → 3`. Use Layer 1.
+
+State: `dummy → ∅`. `cur = 4`.
+
+| Iter | `cur` | `nxt` | Inner scan from dummy                     | `prev` lands on            | After splice                          |
+|------|-------|-------|--------------------------------------------|----------------------------|----------------------------------------|
+| 1    | 4     | 2     | `dummy.next = None` → exit immediately     | `dummy`                    | `dummy → 4`                            |
+| 2    | 2     | 1     | `dummy → 4`. `4 <= 2`? No → exit.          | `dummy`                    | `dummy → 2 → 4`                        |
+| 3    | 1     | 3     | `dummy → 2`. `2 <= 1`? No → exit.          | `dummy`                    | `dummy → 1 → 2 → 4`                    |
+| 4    | 3     | None  | `dummy → 1`. `1 ≤ 3` ✓ → prev=1. `2 ≤ 3` ✓ → prev=2. `4 ≤ 3`? No → exit. | `2`                        | `dummy → 1 → 2 → 3 → 4`                |
+
+Return `dummy.next = 1 → 2 → 3 → 4` ✅.
+
+Notice each iteration's inner scan: O(k) where k is the current sorted-prefix length. Sum over all iterations = O(n²).
+
+For Layer 2's optimization: imagine the input was already sorted `1 → 2 → 3 → 4`. Each iteration, `sorted_tail.val ≤ cur.val`, so we take the O(1) tail-append branch. Total: O(n).
+
+#### 📊 Complexity
+
+| Layer                          | Time worst | Time best | Space         | Notes                                    |
+|--------------------------------|------------|-----------|---------------|------------------------------------------|
+| Layer 1 — naïve                | O(n²)      | O(n²)     | O(1)          | Inner scan even on sorted input          |
+| Layer 2 — sorted-tail shortcut ⭐ | O(n²)   | **O(n)**  | O(1)          | Wins on near-sorted data                 |
+| Layer 3 — heap (not insertion) | O(n log n) | O(n log n)| O(n)          | Cheats; only for contrast                |
+| Layer 4 — recursive            | O(n²)      | O(n²)     | O(n) stack    | Educational; risky for n > ~10⁴          |
+| Layer 5 — hybrid               | O(n log n) | O(n log n) for big n; O(n) for small n | O(log n) | Production answer                       |
+
+#### ❓ Follow-ups
+
+??? question "Why is linked-list insertion sort still O(n²) when each splice is O(1)?"
+    Because we have to **find** the splice point. Without random access, the inner walk from `dummy` is O(k) for the k-th insertion. Sum is `0 + 1 + 2 + ... + (n-1) = O(n²)`. The splice itself is fast; the search dominates.
+
+??? question "Why use `<=` in `prev.next.val <= cur.val` instead of `<`?"
+    It's a stability choice. `<=` means equal-valued nodes stay in their original order (stable sort). If you used `<`, equal values would reverse-flip; the sort becomes unstable. Most interviews don't care, but the standard insertion sort is **stable** by convention.
+
+??? question "Why not maintain the sorted prefix in **descending** order to make insertions cheaper?"
+    Doesn't help — you still scan O(k) per insertion regardless of order. And you'd have to reverse the result at the end. Net: same complexity, more code.
+
+??? question "Can you do insertion sort on a linked list in O(n log n)?"
+    Not while staying "insertion sort." The algorithm is O(n²) by definition. If you want O(n log n), use merge sort (P17) or skip-list-based sorting. The hybrid in Layer 5 is the right production answer.
+
+??? question "What's the best case for insertion sort?"
+    On an array: O(n) for already-sorted input (each "insertion" is one comparison). On a linked list with the naïve algorithm: still O(n²) because we walk from the dummy each time. Layer 2's tail-shortcut restores the O(n) best case.
+
+??? question "How does this compare to **bubble sort** on a linked list?"
+    Bubble sort is also O(n²) but with worse constants and worse memory access patterns. Insertion sort wins in practice. Both are pedagogical only.
+
+??? question "Can you use insertion sort to detect duplicates while sorting?"
+    Yes — during the inner walk, if `prev.next.val == cur.val`, you can flag it. Sorts in O(n²) and detects duplicates in the same pass. Useful for tiny lists where allocating a hash set is wasteful.
+
+#### 🐛 Common Bugs
+
+1. **Saving `cur.next` AFTER mutating `cur.next`** — classic bug. Always save `nxt = cur.next` *before* the splice.
+2. **Walking the inner loop with `<` instead of `<=`** — makes the sort unstable for duplicates. Spec usually doesn't penalize, but interviewers may probe.
+3. **Forgetting to terminate `cur.next = None`** when appending at the tail (Layer 2 with the shortcut) — leaves a stale pointer into the unsorted region, creating a cycle.
+4. **Using `dummy.next` as a starting point for iteration but then accidentally writing back to `dummy.val`** (which is meant to be unused).
+5. **Layer 4: forgetting the base case `head.next is None`** — infinite recursion on a single node.
+6. **Mixing up `prev` and `prev.next` semantics** — `prev` points to the node *before* the insertion point, so the splice is `cur.next = prev.next; prev.next = cur`.
+
+#### ⚠️ Edge Cases
+
+- Empty list → returns `None`. The outer loop never fires.
+- Single node → returns the node unchanged.
+- Already sorted → Layer 2 runs in O(n); Layer 1 still wastes inner scans for O(n²).
+- Reverse sorted → worst case for both layers, O(n²).
+- All equal values → stable algorithm preserves original order; each insertion lands at the tail of equal-valued prefix.
+- Negative values mixed with positive → no issue; comparisons are signed.
+
+#### 🔑 Key Takeaways
+
+> **Insertion sort on a linked list is O(n²)** — splicing is O(1), but finding the splice point is O(k). The dominant cost is the search, not the rewrite.
+>
+> **Always save `cur.next` before splicing.** This is the most common bug across all linked-list rebuild problems.
+>
+> The **sorted-tail shortcut** (Layer 2) is essentially free to add and turns near-sorted input from O(n²) to O(n). Worth knowing for production code.
+>
+> For real workloads, **don't ship insertion sort** unless n is provably tiny. Merge sort (P17) wins at n ≥ 32 and the difference grows with n.
+
+#### 🎯 Pattern Used
+
+**Dummy-head + sorted-prefix scan-and-splice.** Same template: Insert into a Sorted Circular Linked List (P31), Sort List bucket-merge phase (P17 cousin).
 
 ---
 
@@ -3771,56 +5535,379 @@ Your opener: *"Hash map for O(1) lookup, doubly linked list ordered by recency f
 
 ### Problem 25 — Convert Sorted List to BST
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Apple</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Amazon</span> <span class="company-tag">Microsoft</span> <span class="company-tag">Apple</span> <span class="company-tag">Google</span>
 
-> Given the head of a sorted linked list, convert it to a height-balanced BST.
+> Given the head of a singly linked list whose elements are **sorted in ascending order**, convert it to a **height-balanced** binary search tree. A height-balanced BST is one where the depth of the two subtrees of every node differs by at most 1. (LeetCode 109.)
 
 #### 📖 Story Mode
 
-`-10 → -3 → 0 → 5 → 9` → BST rooted at 0 with left subtree of {-10, -3} and right of {5, 9}.
+```
+input :   -10 → -3 → 0 → 5 → 9
+
+A balanced BST in-ordered to that sequence:
+
+              0
+             / \
+           -3   9
+           /   /
+         -10  5
+
+(One of multiple valid balanced shapes.)
+
+input :   1 → 3
+output:        3
+              /
+             1                 (or symmetric)
+
+input :   1
+output:   1
+
+input :   (empty)
+output:   None
+```
+
+The "height-balanced" requirement is the spice: a sorted list contains all the keys, but many BST shapes are possible. Picking the **middle** element as root at each level gives a tree of height ⌈log₂ n⌉ + 1.
+
+#### 🌍 Real-World Usage
+
+- **Database index reconstruction** — a sorted leaf scan rebuilt as a balanced search tree (rebalancing after a load).
+- **Persistent data structures** — building a balanced finger tree from a sorted snapshot.
+- **Bulk-load of search structures** — Cassandra/LSM compaction merges sorted runs into balanced trees.
+- **In-memory caches** — converting a sorted log of keys into a balanced search tree for fast lookups.
+- **Educational** — clarifies the contract between "sorted sequence" (linear) and "BST" (in-order traversal yields the sequence).
 
 #### 🧠 Thinking Process
 
-**Brute force:** copy values to an array, then standard sorted-array-to-BST recursion. **O(n) time, O(n) extra space.**
+Two natural strategies:
 
-**Optimal — in-order construction:** use a global pointer that walks the list and a recursive function that builds the BST size-first. The recursion descends to allocate the leftmost leaf, then "consumes" the head of the list as it unwinds. **O(n) time, O(log n) recursion depth.**
+1. **Materialize → array → divide and conquer.** Copy the list values into an array; build the BST by picking the array's middle as root and recursing on the halves. O(n) time, **O(n) extra space**.
 
-#### 🐍 Solution
+2. **Find-the-middle on the linked list.** Use slow/fast pointers to locate the middle, make it the root, recurse on the prefix and suffix. **O(n log n) time** (each level does a full middle-find), O(log n) recursion.
 
-```python
-def sorted_list_to_bst(head):
-    # Count length.
-    n = 0; node = head
-    while node: n += 1; node = node.next
+3. **In-order construction (the elegant one).** Walk the list **once** in left-to-right order, but build the tree **bottom-up** so that "consume the next list node" produces the in-order sequence. The recursion is sized — `build(n)` builds a balanced BST of n nodes — and the list pointer advances exactly when we attach a `root.val`. **O(n) time, O(log n) recursion**.
 
-    state = {"node": head}
-    def build(size: int):
-        if size <= 0: return None
-        left = build(size // 2)
-        root = TreeNode(state["node"].val)
-        state["node"] = state["node"].next
-        root.left = left
-        root.right = build(size - size // 2 - 1)
+The third approach is the trick everyone wants you to find. The intuition: a balanced BST's in-order traversal *is* the sorted sequence. So if we recursively build the left subtree first, the current list-head **is** the root of that subtree's parent. Match the recursion's structure to in-order traversal order, and the list serves itself.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Array materialization (O(n) extra space)"
+
+    Convert to a list of values, then standard sorted-array → BST.
+
+    ```python
+    from __future__ import annotations
+
+
+    class TreeNode:
+        def __init__(self, val: int = 0, left: "TreeNode | None" = None, right: "TreeNode | None" = None) -> None:
+            self.val = val
+            self.left = left
+            self.right = right
+
+
+    def sorted_list_to_bst_array(head: ListNode | None) -> TreeNode | None:
+        vals: list[int] = []
+        cur = head
+        while cur:
+            vals.append(cur.val)
+            cur = cur.next
+
+        def build(lo: int, hi: int) -> TreeNode | None:
+            if lo > hi:
+                return None
+            mid = (lo + hi) // 2
+            return TreeNode(vals[mid], build(lo, mid - 1), build(mid + 1, hi))
+
+        return build(0, len(vals) - 1)
+    ```
+
+    O(n) time, O(n) extra space + O(log n) stack. Easy to write; not space-optimal.
+
+=== "Layer 2 — In-order construction (O(n) time, O(log n) space) ⭐"
+
+    The canonical solution. Sized recursion + a moving "current" pointer.
+
+    ```python
+    from __future__ import annotations
+
+
+    def sorted_list_to_bst(head: ListNode | None) -> TreeNode | None:
+        # Count length once
+        n = 0
+        cur = head
+        while cur:
+            n += 1
+            cur = cur.next
+
+        state = {"node": head}                 # mutable closure over the moving head
+
+        def build(size: int) -> TreeNode | None:
+            if size <= 0:
+                return None
+            left_size = size // 2
+            left = build(left_size)            # build left subtree FIRST
+            root = TreeNode(state["node"].val) # consume current head as the root
+            state["node"] = state["node"].next
+            root.left = left
+            root.right = build(size - left_size - 1)
+            return root
+
+        return build(n)
+    ```
+
+    O(n) time, O(log n) recursion stack. **The interview answer.**
+
+=== "Layer 3 — Find-the-middle each level (O(n log n) time)"
+
+    Slow/fast pointer at every level. Cleaner than Layer 2 to explain, but a log-factor slower.
+
+    ```python
+    from __future__ import annotations
+
+
+    def sorted_list_to_bst_findmid(head: ListNode | None) -> TreeNode | None:
+        if head is None:
+            return None
+        if head.next is None:
+            return TreeNode(head.val)
+
+        # Find the middle and the node BEFORE it (so we can detach).
+        slow_prev = None
+        slow = head
+        fast = head
+        while fast and fast.next:
+            slow_prev = slow
+            slow = slow.next
+            fast = fast.next.next
+
+        # `slow` is the middle. Detach the prefix.
+        if slow_prev:
+            slow_prev.next = None
+        right_head = slow.next
+        slow.next = None
+
+        root = TreeNode(slow.val)
+        root.left = sorted_list_to_bst_findmid(head if slow_prev else None)
+        root.right = sorted_list_to_bst_findmid(right_head)
         return root
-    return build(n)
+    ```
+
+    O(n log n) time (each of the log n levels does an O(n) scan), O(log n) recursion stack. Useful pedagogically.
+
+=== "Layer 4 — Iterative in-order construction (no recursion)"
+
+    Mirrors Layer 2 but uses an explicit stack of `(size, parent_link)` frames.
+
+    ```python
+    from __future__ import annotations
+
+
+    def sorted_list_to_bst_iter(head: ListNode | None) -> TreeNode | None:
+        n = 0
+        cur = head
+        while cur:
+            n += 1
+            cur = cur.next
+        if n == 0:
+            return None
+
+        # We use an iterative simulation of build(n) by maintaining a stack of
+        # frames; each frame holds (size, where_to_attach, side).
+        # Phase 1: descend left, pushing right-sub frames onto the stack.
+        root_holder = TreeNode()                 # sentinel; result is root_holder.left
+        stack: list[tuple[int, TreeNode, str]] = [(n, root_holder, "left")]
+        node = head
+
+        while stack:
+            size, parent, side = stack.pop()
+            if size <= 0:
+                continue
+            left_size = size // 2
+            right_size = size - left_size - 1
+
+            # We can't actually create the root yet — we need its left first.
+            # So we push a "create me" frame plus the left subtree frame to come first.
+            new_node = TreeNode()                # placeholder; val filled in later
+            if side == "left":
+                parent.left = new_node
+            else:
+                parent.right = new_node
+            # Defer right-subtree creation
+            stack.append((right_size, new_node, "right"))
+            # Defer "fill val and advance node" — but we need it AFTER left subtree.
+            # Trick: encode it as a sentinel size = -1.
+            stack.append((-1, new_node, "fill"))
+            # Push left subtree (will be processed first because stack is LIFO)
+            stack.append((left_size, new_node, "left"))
+
+        # Second pass: fill in vals in in-order (LL pointer order).
+        # Easiest: do a tree-traversal that walks in-order and assigns from `head`.
+        cur = head
+        # In-order with an explicit stack
+        s: list[TreeNode] = []
+        n_walker = root_holder.left
+        while s or n_walker:
+            while n_walker:
+                s.append(n_walker)
+                n_walker = n_walker.left
+            n_walker = s.pop()
+            n_walker.val = cur.val
+            cur = cur.next
+            n_walker = n_walker.right
+
+        return root_holder.left
+    ```
+
+    Correct, but the elegance of Layer 2 is gone. Use only when recursion limits force your hand (n > ~10⁵ in CPython).
+
+=== "Layer 5 — Production: streaming with bounded memory"
+
+    For a *very* large sorted stream where we can't store the entire list — but the consumer only needs the **balanced BST shape** later — we can stream the values and emit nodes in pre-order:
+
+    ```python
+    from __future__ import annotations
+    from typing import Iterator
+
+
+    def stream_balanced_bst_preorder(values: Iterator[int], n: int) -> Iterator[tuple[int, int]]:
+        """Yields (depth, value) tuples in pre-order such that consuming all
+        of them rebuilds a height-balanced BST. Uses O(log n) buffer."""
+        # Simulate the in-order build with a stack of (size, depth) frames.
+        # On each "consume root" step, we yield (depth, value).
+        stack: list[tuple[int, int]] = [(n, 0)]
+        while stack:
+            size, depth = stack.pop()
+            if size <= 0:
+                continue
+            left_size = size // 2
+            right_size = size - left_size - 1
+            stack.append((right_size, depth + 1))
+            stack.append((-1, depth))                    # "consume here"
+            stack.append((left_size, depth + 1))
+        # ... in practice, interleave with values via a co-routine; keeping
+        # this sketch short for the chapter.
+    ```
+
+    Pedagogical sketch; the production answer is to stream into a B-tree on disk, not an in-memory BST.
+
+#### 🔎 Step-by-Step Dry Run
+
+`head = -10 → -3 → 0 → 5 → 9`, n = 5. Layer 2.
+
+`build(5)` is called. `state["node"] = -10`.
+
+```
+build(5):
+  left_size = 2
+  build(2):                            # builds the left subtree (size 2)
+    left_size = 1
+    build(1):                          # builds left-of-left (size 1)
+      left_size = 0
+      left = build(0) = None
+      root = TreeNode(-10);  state.node → -3
+      root.left = None
+      root.right = build(0) = None
+      return TreeNode(-10)
+    left of size-2 = TreeNode(-10)
+    root = TreeNode(-3);  state.node → 0
+    root.left = TreeNode(-10)
+    root.right = build(0) = None
+    return TreeNode(-3, left=-10)
+  left of size-5 = TreeNode(-3, left=-10)
+  root = TreeNode(0);  state.node → 5
+  root.left = the above
+  root.right = build(2):
+    left_size = 1
+    build(1):
+      left_size = 0
+      left = None
+      root = TreeNode(5);  state.node → 9
+      right = None
+      return TreeNode(5)
+    left = TreeNode(5)
+    root = TreeNode(9);  state.node → None
+    right = build(0) = None
+    return TreeNode(9, left=5)
+  return TreeNode(0, left=..., right=...)
 ```
 
-O(n) time, O(log n) recursion.
+Final tree:
 
-#### ⏱️ Complexity
+```
+              0
+             / \
+           -3   9
+           /   /
+        -10   5
+```
 
-O(n) time, O(log n) recursion stack.
+`state["node"]` advances exactly 5 times — once per `TreeNode(state["node"].val)` call. The list is consumed in **left-to-right (in-order)** order, but the recursion materialises the tree top-down. Pretty.
+
+#### 📊 Complexity
+
+| Layer                              | Time       | Space         | Notes                                          |
+|------------------------------------|------------|---------------|------------------------------------------------|
+| Layer 1 — array + divide-conquer   | O(n)       | O(n)          | Easiest to explain; allocates the whole array  |
+| Layer 2 — in-order construction ⭐ | **O(n)**   | **O(log n)**  | The interview answer                           |
+| Layer 3 — find-mid each level      | O(n log n) | O(log n)      | Pedagogical                                    |
+| Layer 4 — iterative                | O(n)       | O(log n)      | When recursion limits bite                     |
+| Layer 5 — streaming                | O(n)       | O(log n)      | Bounded memory; rarely needed                  |
+
+#### ❓ Follow-ups
+
+??? question "Why does building the **left subtree first** make this work in O(n)?"
+    The in-order traversal of any BST visits left-subtree, root, right-subtree. By matching the recursion to that order, when we're about to create a `root` node, the list pointer is exactly at the value that should be the root's value. The left subtree's nodes were "consumed" by the prior recursive call; the right subtree's will be consumed by the next.
+
+??? question "Why split with `left_size = size // 2` instead of `size - left_size - 1`?"
+    `size // 2` produces a left subtree slightly smaller than the right when `size` is even, which is one of the two valid balanced shapes. You could swap (right ≤ left) — both produce valid height-balanced trees.
+
+??? question "Is the result unique?"
+    No — for even-sized lists, two roots are equally "middle" candidates. The problem accepts any valid balanced answer. Layer 1 (`(lo+hi)//2`) gives a left-leaning root; Layer 2 (`size//2`) gives a slightly different shape. Both are correct.
+
+??? question "How would you build a perfectly balanced AVL tree (not just height-balanced)?"
+    The output is already AVL-balanced — height-balanced binary trees built from a sorted sequence with size-halving root selection have height ⌈log₂ n⌉ and the AVL invariant holds. So no further rebalancing is needed. AVL height bound: `⌊1.44 log₂(n+2)⌋`; we're well within.
+
+??? question "What if the list is doubly linked?"
+    Layer 2 still works unchanged — only the `next` direction is used. With back pointers you could walk in either direction, but no algorithmic gain.
+
+??? question "How do you handle the case where the list is enormous (n = 10⁹)?"
+    None of these fit in memory. Stream the sorted source through a B-tree on disk, splitting at each fanout. The "balanced" guarantee comes from the B-tree's bulk-load procedure. The in-memory-BST framing of the problem doesn't apply.
+
+??? question "Can you do this in O(n) without recursion at all?"
+    Layer 4 shows the structure but allocates placeholders and walks twice. There's no genuinely simpler iterative O(n) version — recursion is genuinely the right shape here.
+
+??? question "What's the depth of the final tree?"
+    `⌈log₂(n + 1)⌉`. For n=5 → 3 levels (visible in the dry run). For n=10⁶ → 20 levels.
 
 #### 🐛 Common Bugs
 
-1. **Constructing root before left** — breaks the in-order consumption invariant.
-2. **Off-by-one in size split.**
+1. **Building root before left** — the list pointer is now at the wrong value when you grab `state["node"].val`. **Always build left first.**
+2. **Off-by-one in `right_size`** — must be `size - left_size - 1` (subtract the root). Forgetting `-1` builds a tree one node larger than the list.
+3. **Using `left_size = size // 2` then `right_size = size // 2`** — only works for odd sizes; off-by-one for even.
+4. **Using a non-mutable `head` parameter** instead of a mutable closure — the recursion's left-subtree call can't update the parent's `head`. Use `nonlocal`, a list/dict cell, or a class instance.
+5. **Recursion depth on very long lists** — `n > 10⁴` exceeds CPython's default limit. `sys.setrecursionlimit(...)` works; iterative (Layer 4) is cleaner.
+6. **Returning `None` from `build(0)` but accessing `.val` afterward** — guard the base case at the top of the function.
 
-#### 🏢 Sample Interviewer Quote
+#### ⚠️ Edge Cases
 
-> *"Convert this sorted linked list to a height-balanced BST."*
+- Empty list → returns `None`. `n = 0`, `build(0) → None`.
+- Single node → returns `TreeNode(v)`. `n = 1`, `build(1)` calls `build(0)`, attaches the node, returns.
+- Two nodes → returns `TreeNode(v2, left=TreeNode(v1))` (or symmetric). Either is height-balanced.
+- All equal values (BST not strictly required to have distinct keys per LC 109; if it must, raise on duplicates) — the algorithm doesn't care; resulting tree has `<=` placement.
+- Negative + positive mix — sortedness is the only thing that matters; signs don't.
+- Very long list (n = 10⁵): Layer 2 stack depth ≈ 17, fine in CPython.
 
-Your opener: *"Single pass over the list using in-order construction. Build the left subtree first, then take the current head as root, then build the right subtree. O(n) time, O(log n) recursion."*
+#### 🔑 Key Takeaways
+
+> **Match the recursion structure to in-order traversal**, then the linked list pointer is always pointing at the correct root value when you allocate. Build **left first, root, right** — the order is the contract.
+>
+> The in-order construction trick (Layer 2) appears repeatedly: BST from sorted array, BST from sorted list, deserialize a sequence into any in-order-iterable structure.
+>
+> When the question says "sorted input → balanced BST," reach for **size // 2 root selection**: it produces a tree of height ⌈log₂ n⌉ and naturally height-balances.
+
+#### 🎯 Pattern Used
+
+**In-order construction with sized recursion.** Same template: Convert Sorted Array to BST (LC 108), Construct Binary Tree from Preorder + Inorder (LC 105 reverse direction), Recover Binary Search Tree (LC 99 in-order morph).
 
 ---
 
@@ -4210,452 +6297,2987 @@ Your opener: *"Min-heap of `(value, list_index, node)` for each non-empty list h
 
 <span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Apple</span> <span class="company-tag">Bloomberg</span>
 
-> Design a data structure that follows the **Least Frequently Used** policy. On overflow, evict the least-frequently-used key; ties broken by least-recently-used. `get` and `put` both O(1).
+> Design a data structure that follows the **Least Frequently Used** policy. On overflow, evict the least-frequently-used key; ties broken by least-recently-used. `get` and `put` both O(1). (LeetCode 460.)
 
 #### 📖 Story Mode
 
-LFU is harder than LRU because we have to track *frequency* of each key and find the least frequent in O(1).
+```
+LFUCache(2)
+put(1, 1)         # cache: {1: freq=1}
+put(2, 2)         # cache: {1: freq=1, 2: freq=1}
+get(1)            # 1 → cache: {1: freq=2, 2: freq=1}
+put(3, 3)         # 2 is least-freq → evict; cache: {1: freq=2, 3: freq=1}
+get(2)            # -1 (evicted)
+get(3)            # 3 → cache: {1: freq=2, 3: freq=2}
+put(4, 4)         # tie at freq 2 between 1 and 3; 1 was used earlier → evict 1
+get(1)            # -1 (evicted)
+get(3)            # 3
+get(4)            # 4
+```
+
+LFU is harder than LRU because we have to track *frequency* of each key AND find the least-frequent (LRU-tiebroken) key in O(1) on every eviction.
 
 #### 🌍 Real-World Usage
 
 - **CDN edge caches** with workload skew where rarely-accessed pages should be evicted first.
-- **OS buffer cache** with frequency-aware eviction.
-- **Recommendation engines.**
+- **OS buffer cache** with frequency-aware eviction (Linux's `LFRU`-ish heuristics).
+- **Recommendation engines** caching candidate sets across many requests.
+- **Database query result caches** where common queries should outlive rare ones.
+- **HTTP image caches** in mobile apps where popular thumbnails dominate.
 
 #### 🧠 Thinking Process
 
-Two-level structure:
+Three coordinated maps + a watermark:
 
-- `key → (val, freq, node)` hash map.
-- `freq → doubly linked list` of nodes, each storing the key.
-- Track `min_freq` so we can find the freq-bucket to evict from in O(1).
+- `key → value` — fast lookup of stored values.
+- `key → freq` — current frequency for each key.
+- `freq → ordered set of keys at this frequency` — Python's `OrderedDict` works because it tracks insertion order, giving us LRU-within-a-bucket for free.
+- `min_freq` — the smallest non-empty frequency. Always know which bucket to evict from in O(1).
 
-On `get(key)`:
-- Look up node, take it out of its freq-list, increment its freq, add to the new freq-list.
-- If the old bucket is empty AND was `min_freq`, increment `min_freq`.
+**On `get(key)`** — promote the key to freq+1:
+- Read the current value.
+- Remove key from `freq_to_keys[old_freq]`.
+- If that bucket is now empty AND was `min_freq`, increment `min_freq`.
+- Append key to `freq_to_keys[old_freq + 1]`.
 
-On `put(key, value)`:
-- If key exists: update value, treat like `get` for freq update.
-- Else: if at capacity, evict tail of `min_freq`'s list. Insert new key with freq 1, set `min_freq = 1`.
+**On `put(key, value)`**:
+- If key exists: update value, treat like `get` for the freq bump.
+- Else if at capacity: evict the head (LRU) of `freq_to_keys[min_freq]`.
+- Insert new key with freq=1; set `min_freq = 1`.
 
-#### 🐍 Production-ready Sketch
+#### 🐍 5 Layers of Solution
 
-```python
-from collections import OrderedDict, defaultdict
+=== "Layer 1 — Linear scan eviction (brute)"
+
+    ```python
+    class LFUBrute:
+        def __init__(self, cap):
+            self.cap = cap
+            self.store = {}                          # key -> [value, freq, recency]
+            self.tick = 0
+
+        def get(self, key):
+            self.tick += 1
+            if key not in self.store: return -1
+            entry = self.store[key]
+            entry[1] += 1; entry[2] = self.tick
+            return entry[0]
+
+        def put(self, key, value):
+            self.tick += 1
+            if self.cap <= 0: return
+            if key in self.store:
+                self.store[key][0] = value
+                self.store[key][1] += 1
+                self.store[key][2] = self.tick
+                return
+            if len(self.store) >= self.cap:
+                # find least freq, ties by oldest recency — O(n)
+                victim = min(self.store, key=lambda k: (self.store[k][1], self.store[k][2]))
+                del self.store[victim]
+            self.store[key] = [value, 1, self.tick]
+    ```
+
+    O(1) `get`, **O(n) `put` on eviction**. Easy to reason about, terrible at scale — but fine as a baseline answer.
+
+=== "Layer 2 — `freq → OrderedDict` ⭐"
+
+    ```python
+    from collections import OrderedDict, defaultdict
 
 
-class LFUCache:
-    def __init__(self, capacity: int) -> None:
-        self._cap = capacity
-        self._size = 0
-        self._key_to_val: dict[int, int] = {}
-        self._key_to_freq: dict[int, int] = {}
-        self._freq_to_keys: dict[int, OrderedDict[int, None]] = defaultdict(OrderedDict)
-        self._min_freq = 0
+    class LFUCache:
+        def __init__(self, capacity):
+            self.cap = capacity
+            self.size = 0
+            self.key_to_val = {}
+            self.key_to_freq = {}
+            self.freq_to_keys = defaultdict(OrderedDict)
+            self.min_freq = 0
 
-    def _bump(self, key: int) -> None:
-        f = self._key_to_freq[key]
-        del self._freq_to_keys[f][key]
-        if not self._freq_to_keys[f]:
-            del self._freq_to_keys[f]
-            if self._min_freq == f:
-                self._min_freq += 1
-        self._key_to_freq[key] = f + 1
-        self._freq_to_keys[f + 1][key] = None
+        def _bump(self, key):
+            f = self.key_to_freq[key]
+            del self.freq_to_keys[f][key]
+            if not self.freq_to_keys[f]:
+                del self.freq_to_keys[f]
+                if self.min_freq == f:
+                    self.min_freq += 1
+            self.key_to_freq[key] = f + 1
+            self.freq_to_keys[f + 1][key] = None
 
-    def get(self, key: int) -> int:
-        if key not in self._key_to_val: return -1
-        self._bump(key)
-        return self._key_to_val[key]
-
-    def put(self, key: int, value: int) -> None:
-        if self._cap <= 0: return
-        if key in self._key_to_val:
-            self._key_to_val[key] = value
+        def get(self, key):
+            if key not in self.key_to_val: return -1
             self._bump(key)
-            return
-        if self._size >= self._cap:
-            evict_key, _ = self._freq_to_keys[self._min_freq].popitem(last=False)
-            del self._key_to_val[evict_key]
-            del self._key_to_freq[evict_key]
-            self._size -= 1
-        self._key_to_val[key] = value
-        self._key_to_freq[key] = 1
-        self._freq_to_keys[1][key] = None
-        self._min_freq = 1
-        self._size += 1
-```
+            return self.key_to_val[key]
 
-`OrderedDict` here gives us LRU within each frequency class.
+        def put(self, key, value):
+            if self.cap <= 0: return
+            if key in self.key_to_val:
+                self.key_to_val[key] = value
+                self._bump(key)
+                return
+            if self.size >= self.cap:
+                evict_key, _ = self.freq_to_keys[self.min_freq].popitem(last=False)
+                del self.key_to_val[evict_key]
+                del self.key_to_freq[evict_key]
+                self.size -= 1
+            self.key_to_val[key] = value
+            self.key_to_freq[key] = 1
+            self.freq_to_keys[1][key] = None
+            self.min_freq = 1
+            self.size += 1
+    ```
+
+    O(1) amortized `get`/`put`. `OrderedDict` is implemented as a hash map + doubly linked list, so all the operations we need (insert at end, delete arbitrary, popitem from front) are O(1).
+
+=== "Layer 3 — Hand-rolled DLL nodes (no OrderedDict)"
+
+    Same shape as Layer 2 but maintain the per-frequency lists with explicit doubly-linked nodes (sentinel head + tail per bucket). Useful when you don't have an OrderedDict-equivalent in the language.
+
+    ```python
+    class _Node:
+        __slots__ = ("key", "val", "freq", "prev", "next")
+        def __init__(self, key=0, val=0, freq=1):
+            self.key, self.val, self.freq = key, val, freq
+            self.prev = None; self.next = None
+
+
+    class _DLL:
+        __slots__ = ("head", "tail", "size")
+        def __init__(self):
+            self.head = _Node(); self.tail = _Node()
+            self.head.next = self.tail; self.tail.prev = self.head
+            self.size = 0
+
+        def append(self, node):                      # newest at tail
+            prev = self.tail.prev
+            prev.next = node; node.prev = prev
+            node.next = self.tail; self.tail.prev = node
+            self.size += 1
+
+        def remove(self, node):
+            node.prev.next = node.next
+            node.next.prev = node.prev
+            self.size -= 1
+
+        def pop_head(self):                          # oldest = LRU
+            if self.size == 0: return None
+            n = self.head.next
+            self.remove(n)
+            return n
+
+
+    class LFUCacheDLL:
+        def __init__(self, capacity):
+            self.cap = capacity
+            self.key_to_node = {}
+            self.freq_to_dll = {}
+            self.min_freq = 0
+
+        def _bump(self, node):
+            self.freq_to_dll[node.freq].remove(node)
+            if self.freq_to_dll[node.freq].size == 0:
+                del self.freq_to_dll[node.freq]
+                if self.min_freq == node.freq:
+                    self.min_freq += 1
+            node.freq += 1
+            self.freq_to_dll.setdefault(node.freq, _DLL()).append(node)
+
+        def get(self, key):
+            if key not in self.key_to_node: return -1
+            node = self.key_to_node[key]
+            self._bump(node)
+            return node.val
+
+        def put(self, key, value):
+            if self.cap <= 0: return
+            if key in self.key_to_node:
+                node = self.key_to_node[key]
+                node.val = value
+                self._bump(node)
+                return
+            if len(self.key_to_node) >= self.cap:
+                victim = self.freq_to_dll[self.min_freq].pop_head()
+                del self.key_to_node[victim.key]
+                if self.freq_to_dll[self.min_freq].size == 0:
+                    del self.freq_to_dll[self.min_freq]
+            node = _Node(key, value, 1)
+            self.key_to_node[key] = node
+            self.freq_to_dll.setdefault(1, _DLL()).append(node)
+            self.min_freq = 1
+    ```
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from collections import OrderedDict, defaultdict
+
+
+    class LFUCache:
+        """Bounded-size cache with O(1) get/put and LFU eviction.
+
+        Eviction policy: least-frequently-used; ties broken by least-recently-used.
+        Backed by three maps and a `min_freq` watermark; per-frequency lists use
+        OrderedDict for built-in LRU within each frequency class.
+        """
+
+        def __init__(self, capacity: int) -> None:
+            if capacity < 0:
+                raise ValueError("capacity must be non-negative")
+            self._cap = capacity
+            self._size = 0
+            self._key_to_val: dict[int, int] = {}
+            self._key_to_freq: dict[int, int] = {}
+            self._freq_to_keys: dict[int, OrderedDict[int, None]] = defaultdict(OrderedDict)
+            self._min_freq = 0
+
+        def _bump(self, key: int) -> None:
+            f = self._key_to_freq[key]
+            del self._freq_to_keys[f][key]
+            if not self._freq_to_keys[f]:
+                del self._freq_to_keys[f]
+                if self._min_freq == f:
+                    self._min_freq += 1
+            self._key_to_freq[key] = f + 1
+            self._freq_to_keys[f + 1][key] = None
+
+        def get(self, key: int) -> int:
+            """Return value if present and bump its frequency; else -1.
+
+            Time: O(1).
+            """
+            if key not in self._key_to_val:
+                return -1
+            self._bump(key)
+            return self._key_to_val[key]
+
+        def put(self, key: int, value: int) -> None:
+            """Insert or update. Evicts LFU+LRU on overflow.
+
+            Time: O(1) amortized.
+            """
+            if self._cap <= 0:
+                return
+            if key in self._key_to_val:
+                self._key_to_val[key] = value
+                self._bump(key)
+                return
+            if self._size >= self._cap:
+                evict_key, _ = self._freq_to_keys[self._min_freq].popitem(last=False)
+                del self._key_to_val[evict_key]
+                del self._key_to_freq[evict_key]
+                self._size -= 1
+            self._key_to_val[key] = value
+            self._key_to_freq[key] = 1
+            self._freq_to_keys[1][key] = None
+            self._min_freq = 1
+            self._size += 1
+    ```
+
+=== "Layer 5 — Variants"
+
+    **Variant A — Window-LFU.** Track frequency only over the last N seconds (sliding window). Each access also records a timestamp; sweep on `get`/`put` to expire stale counts.
+
+    **Variant B — TinyLFU / W-TinyLFU.** Approximate LFU with a count-min sketch (sublinear memory) plus an admission filter. Used by Caffeine in JVM.
+
+    **Variant C — LFU with TTL.** Each entry also has expiry; reject expired entries on `get` and shrink the cache.
+
+    **Variant D — Concurrent.** Lock per frequency bucket, or per-shard locking. Caffeine uses lock-free queues and ring buffers for LRU/LFU bookkeeping.
+
+    **Variant E — Persisted LFU.** Periodic snapshot of `(key, freq)` pairs to disk; replay on startup.
+
+#### 🔍 Dry Run
+
+`LFUCache(2)`:
+
+| op | min_freq | key_to_val | key_to_freq | freq_to_keys |
+|----|---------:|------------|-------------|--------------|
+| init | 0 | {} | {} | {} |
+| put(1,1) | 1 | {1:1} | {1:1} | {1: [1]} |
+| put(2,2) | 1 | {1:1, 2:2} | {1:1, 2:1} | {1: [1, 2]} |
+| get(1) → 1 | 1 | {1:1, 2:2} | {1:2, 2:1} | {1: [2], 2: [1]} |
+| put(3,3) evict 2 | 1 | {1:1, 3:3} | {1:2, 3:1} | {1: [3], 2: [1]} |
+| get(2) → -1 | 1 | same | same | same |
+| get(3) → 3 | 2 | {1:1, 3:3} | {1:2, 3:2} | {2: [1, 3]} |
+| put(4,4) evict 1 | 1 | {3:3, 4:4} | {3:2, 4:1} | {1: [4], 2: [3]} |
+
+(`evict 2` because freq=1 is min_freq; key 2 was first in its OrderedDict — that's the LRU tiebreak. `evict 1` is the LRU at freq=2.)
 
 #### ⏱️ Complexity
 
-- **`get`, `put`: O(1)**.
-- **Space: O(capacity)**.
+| Op | Layer 1 (brute) | Layer 2/3/4 |
+|----|------:|------:|
+| `get` | O(1) | **O(1)** |
+| `put` (no evict) | O(1) | **O(1)** |
+| `put` (evict) | O(n) | **O(1)** |
+| Space | O(capacity) | O(capacity) |
 
 #### 🎯 Pattern Used
 
-**Frequency-bucketed hash + per-bucket LRU.** Same pattern is used in several rate-limiting and admission-control structures.
+**Frequency-bucketed hash + per-bucket LRU + min-freq watermark.** Same template drives the canonical TinyLFU paper, Caffeine cache implementations, and many CDN admission-control structures.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why `min_freq` and not `max_freq`?"
+    Eviction targets the *least*-frequent key. We never need the most-frequent. Tracking max would be wasted work.
+
+??? question "Follow-up 2 — When does `min_freq` advance?"
+    Only when the bucket at `min_freq` becomes empty during a `_bump`. On insertion of a fresh key (freq=1), `min_freq` is reset to 1.
+
+??? question "Follow-up 3 — Why `OrderedDict` instead of `set`?"
+    `set` doesn't preserve insertion order. We need LRU tiebreaking within a frequency class, which requires order.
+
+??? question "Follow-up 4 — Compare LFU vs LRU."
+    LRU evicts the recently-quiet key. LFU evicts the rarely-popular key. LFU resists "scan pollution" (a burst of one-time accesses that would flush an LRU cache) but suffers from "stale-favorite" bias — keys that were popular once stay forever.
+
+??? question "Follow-up 5 — Stale-favorite mitigation."
+    Decay frequency periodically (`freq[k] = freq[k] // 2` every M ops), or use Window-LFU (Variant A). Most production caches use a hybrid.
+
+??? question "Follow-up 6 — Thread safety."
+    Wrap `get` and `put` in a re-entrant lock for correctness. For high concurrency, shard the cache by key hash and lock per shard. Production systems (Caffeine) go further with lock-free read-buffer / write-buffer designs.
+
+??? question "Follow-up 7 — `capacity = 0` semantics."
+    Cache is permanently empty: every `get` returns -1, every `put` is a no-op. Layer 4 handles this with the `cap <= 0` guard.
+
+??? question "Follow-up 8 — Approximate LFU with sublinear memory."
+    Count-min sketch for frequencies; admit a new key only if its sketch count exceeds the eviction candidate's. That's TinyLFU. Trades exactness for memory.
 
 #### 🐛 Common Bugs
 
-1. **Not updating `min_freq`** when the current min bucket goes empty.
-2. **Insertion uses old `min_freq`.**
-3. **Cap = 0 not handled.**
+1. **Not updating `min_freq`** when the current min bucket goes empty during `_bump`.
+2. **Insertion uses old `min_freq`** — always reset to 1 on insert of a brand-new key.
+3. **`capacity = 0` not handled** — the `_freq_to_keys[1]` insert and `min_freq=1` happen anyway, blowing past the zero limit.
+4. **Forgetting to delete from `key_to_freq`** on eviction — stale entries cause `_bump` to look at the wrong frequency.
+5. **`popitem(last=True)` instead of `popitem(last=False)`** — evicts MRU instead of LRU within the bucket.
+6. **Bumping freq on a `put` that updates an existing key** is correct (the spec considers writes a use). Forgetting it = bug.
+7. **Comparing `min_freq == f` after `del self._freq_to_keys[f]`** — the order is correct in our `_bump`; switching the order breaks the empty-bucket detection.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] capacity = 0 → all gets -1, all puts no-op
+- [ ] capacity = 1 → every put after the first triggers eviction
+- [ ] `get` on missing key → -1
+- [ ] `put` updating an existing key (no eviction)
+- [ ] Tie at `min_freq` — LRU wins (FIFO within OrderedDict)
+- [ ] Evict then re-insert same key → freq resets to 1
+- [ ] Many gets on one key → other keys evicted first
+- [ ] Stress: random ops at capacity for 10⁶ iterations
 
 #### 🏢 Sample Interviewer Quote
 
 > *"Design an LFU cache, O(1) get and put."*
 
-Your opener: *"Three maps: key → value, key → freq, freq → ordered set of keys. Track `min_freq`. On hit, bump key's freq across maps; if its old bucket empties and was min, advance min. On insert at capacity, evict the LRU key from `min_freq`'s bucket."*
+Your opener: *"Three maps: `key → value`, `key → freq`, `freq → OrderedDict of keys at that frequency`. Track `min_freq` so we know which bucket to evict from. On `get`, look up, remove from old freq bucket, append to freq+1 bucket — and if the old bucket goes empty AND was `min_freq`, advance `min_freq`. On `put` at capacity, evict the LRU key from `min_freq`'s bucket; insert new key at freq=1 and reset `min_freq` to 1. Every operation is O(1) because OrderedDict gives us O(1) insert-end, delete-arbitrary, and popitem-front."*
 
 ---
 
 ### Problem 29 — Design Skiplist (simplified)
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span>
 
-> Implement a Skiplist supporting `add(num)`, `erase(num)`, `search(num)` — all in average O(log n).
+> Implement a Skiplist supporting `add(num)`, `erase(num)`, `search(num)` — all in average O(log n) time. Duplicates are allowed: `add(5)` twice means `erase(5)` only removes one. (LeetCode 1206.)
 
 #### 📖 Story Mode
 
-Skiplists are **probabilistic** alternatives to balanced BSTs. Multiple "express lanes" of singly linked lists at decreasing density.
+```
+Level 3:  -∞ ───────────────────────→ ∞
+                                       
+Level 2:  -∞ ──────→ 5 ──────────────→ ∞
+                                       
+Level 1:  -∞ → 1 ─→ 5 ─→ 7 ─────────→ ∞
+                                       
+Level 0:  -∞ → 1 → 3 → 5 → 7 → 8 → 9 → ∞
+                  ↑                    
+        each higher level skips ~half  
+        the nodes; search walks "stairs"
+```
+
+A skiplist is a **probabilistic** ordered set: a stack of sorted singly-linked lists where each higher level subsamples the level below (typically with probability p = 1/2). Search descends a "staircase" — go right while next < target, then drop down — taking O(log n) expected steps.
 
 #### 🌍 Real-World Usage
 
-- **Redis sorted sets** are skiplists.
-- **LevelDB / RocksDB memtables** in some implementations.
-- **Scalable concurrent data structures** — easier to make lock-free than BSTs.
+- **Redis sorted sets (ZSET)** are skiplists — backing `ZRANGEBYSCORE`, leaderboards, time-series buckets.
+- **LevelDB / RocksDB memtables** in early versions used skiplists for the in-memory portion of the LSM tree.
+- **Apache Cassandra** memtables.
+- **Lock-free concurrent ordered sets** — easier to design lock-free than balanced BSTs because operations are localised to a small "search path."
+- **Java's `ConcurrentSkipListMap`** — the standard concurrent ordered map in JDK.
 
-#### 🐍 Sketch
+#### 🧠 Thinking Process
 
-```python
-import random
+A skiplist trades the *deterministic* O(log n) of a balanced BST for *expected* O(log n) with much simpler code (no rotations, no rebalancing). The randomness is in the **level** assigned to each new node, drawn from a geometric distribution: level k with probability `p^(k-1) · (1-p)`. With p=1/2: ~50% of nodes are level-1, ~25% are level-2, ~12.5% are level-3, etc.
+
+**Search:**
+1. Start at the top-left sentinel.
+2. While the next node on this level is `< target`, advance right.
+3. Drop down one level. Repeat until level 0.
+4. Check whether the next node at level 0 equals target.
+
+**Add:**
+1. Walk down collecting an `update[]` array — per level, the rightmost node whose next is `≥ num`.
+2. Pick a random level for the new node.
+3. Splice the new node in at every level up to its random level.
+
+**Erase:**
+1. Same `update[]` walk to find predecessors at every level.
+2. If `update[0].next.val == num`, splice it out at every level it appears on.
+
+The expected O(log n) bound holds because each level has ~half the nodes of the level below; with high probability the tallest tower has height O(log n).
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Sorted list (brute baseline)"
+
+    ```python
+    import bisect
 
 
-class _SLNode:
-    __slots__ = ("val", "next", "down")
-    def __init__(self, val: int = 0, next: "_SLNode | None" = None, down: "_SLNode | None" = None) -> None:
-        self.val = val; self.next = next; self.down = down
+    class SkiplistBrute:
+        def __init__(self):
+            self._data = []                      # kept sorted
 
+        def search(self, target):
+            i = bisect.bisect_left(self._data, target)
+            return i < len(self._data) and self._data[i] == target
 
-class Skiplist:
-    _MAX_LEVEL = 16
+        def add(self, num):
+            bisect.insort(self._data, num)        # O(n) worst — array shift
 
-    def __init__(self) -> None:
-        # head per level; -inf sentinel for the leftmost
-        self._heads: list[_SLNode] = [_SLNode(-10**9 - 1) for _ in range(self._MAX_LEVEL)]
-        for i in range(self._MAX_LEVEL - 1):
-            self._heads[i].down = self._heads[i + 1]
-
-    def search(self, target: int) -> bool:
-        node = self._heads[0]
-        while node:
-            while node.next and node.next.val < target:
-                node = node.next
-            if node.next and node.next.val == target:
+        def erase(self, num):
+            i = bisect.bisect_left(self._data, num)
+            if i < len(self._data) and self._data[i] == num:
+                self._data.pop(i)                 # O(n) shift
                 return True
-            node = node.down
-        return False
+            return False
+    ```
 
-    def add(self, num: int) -> None:
-        # ... walk down collecting "insert points" at each level
-        # ... promote up to a random level (geometric distribution).
-        # implementation omitted for brevity.
-        ...
+    Search is O(log n) (binary search on the array) but **add/erase are O(n)** because of array shifts. Useful as a reference oracle for testing the real skiplist.
 
-    def erase(self, num: int) -> bool:
-        ...
+=== "Layer 2 — Skiplist with `next` + `down` pointers"
+
+    Two pointers per node. Slightly more memory; very clear mental model.
+
+    ```python
+    import random
+
+
+    class _SLNode:
+        __slots__ = ("val", "next", "down")
+        def __init__(self, val=0, nxt=None, down=None):
+            self.val = val; self.next = nxt; self.down = down
+
+
+    class SkiplistLinked:
+        _MAX_LEVEL = 16
+        _P = 0.5
+
+        def __init__(self):
+            # build a column of sentinels, one per level
+            self._heads = [_SLNode(float("-inf")) for _ in range(self._MAX_LEVEL)]
+            for i in range(self._MAX_LEVEL - 1):
+                self._heads[i].down = self._heads[i + 1]
+            self._top = self._heads[0]
+
+        def _random_level(self):
+            lv = 1
+            while lv < self._MAX_LEVEL and random.random() < self._P:
+                lv += 1
+            return lv
+
+        def search(self, target):
+            node = self._top
+            while node is not None:
+                while node.next and node.next.val < target:
+                    node = node.next
+                if node.next and node.next.val == target:
+                    return True
+                node = node.down
+            return False
+
+        def add(self, num):
+            update = []                          # one entry per level we descend
+            node = self._top
+            while node is not None:
+                while node.next and node.next.val < num:
+                    node = node.next
+                update.append(node)
+                node = node.down
+            # update[i] is the predecessor at level (top - i)
+            level = self._random_level()
+            below = None
+            # insert from the bottom up
+            for i in range(len(update) - 1, len(update) - 1 - level, -1):
+                pred = update[i]
+                new_node = _SLNode(num, pred.next, below)
+                pred.next = new_node
+                below = new_node
+
+        def erase(self, num):
+            node = self._top
+            found = False
+            while node is not None:
+                while node.next and node.next.val < num:
+                    node = node.next
+                if node.next and node.next.val == num:
+                    node.next = node.next.next  # splice out
+                    found = True
+                node = node.down
+            return found
+    ```
+
+    O(log n) expected time per op, O(MAX_LEVEL · n) space worst-case (each node lives at multiple levels).
+
+=== "Layer 3 — Skiplist with `forward[]` array per node ⭐"
+
+    Each node carries an array of forward pointers — one per level it occupies. **One node per value**, not multiple stacked nodes. This is the canonical implementation (William Pugh's original).
+
+    ```python
+    import random
+
+
+    class _SLNode:
+        __slots__ = ("val", "forward")
+        def __init__(self, val=0, level=1):
+            self.val = val
+            self.forward = [None] * level         # forward[i] = next at level i
+
+
+    class Skiplist:
+        _MAX_LEVEL = 16
+        _P = 0.5
+
+        def __init__(self):
+            self._head = _SLNode(float("-inf"), self._MAX_LEVEL)
+            self._level = 1                       # current highest occupied level
+
+        def _random_level(self):
+            lv = 1
+            while lv < self._MAX_LEVEL and random.random() < self._P:
+                lv += 1
+            return lv
+
+        def search(self, target):
+            node = self._head
+            for i in range(self._level - 1, -1, -1):
+                while node.forward[i] and node.forward[i].val < target:
+                    node = node.forward[i]
+            node = node.forward[0]
+            return node is not None and node.val == target
+
+        def add(self, num):
+            update = [self._head] * self._MAX_LEVEL
+            node = self._head
+            for i in range(self._level - 1, -1, -1):
+                while node.forward[i] and node.forward[i].val < num:
+                    node = node.forward[i]
+                update[i] = node
+
+            new_level = self._random_level()
+            if new_level > self._level:
+                # heads at the new top levels still point nowhere — safe defaults
+                self._level = new_level
+
+            new_node = _SLNode(num, new_level)
+            for i in range(new_level):
+                new_node.forward[i] = update[i].forward[i]
+                update[i].forward[i] = new_node
+
+        def erase(self, num):
+            update = [self._head] * self._MAX_LEVEL
+            node = self._head
+            for i in range(self._level - 1, -1, -1):
+                while node.forward[i] and node.forward[i].val < num:
+                    node = node.forward[i]
+                update[i] = node
+
+            target = node.forward[0]
+            if target is None or target.val != num:
+                return False
+            for i in range(self._level):
+                if update[i].forward[i] is not target:
+                    break
+                update[i].forward[i] = target.forward[i]
+            # shrink current level if top levels are now empty
+            while self._level > 1 and self._head.forward[self._level - 1] is None:
+                self._level -= 1
+            return True
+    ```
+
+    Same expected O(log n) per op, but lower constant factor than Layer 2 because there's only one allocation per logical node.
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    import random
+    from typing import Optional
+
+
+    class _SLNode:
+        __slots__ = ("val", "forward")
+
+        def __init__(self, val: int = 0, level: int = 1) -> None:
+            self.val = val
+            self.forward: list[Optional[_SLNode]] = [None] * level
+
+
+    class Skiplist:
+        """Probabilistic ordered multiset (duplicates allowed) with expected
+        O(log n) search/insert/delete.
+
+        The maximum level is fixed at 16, supporting up to ~65k elements
+        before degeneration; bump for larger.
+        """
+
+        _MAX_LEVEL = 16
+        _P = 0.5
+
+        def __init__(self) -> None:
+            self._head = _SLNode(-10**9, self._MAX_LEVEL)  # -inf sentinel
+            self._level = 1
+            self._rng = random.Random()                    # injectable for tests
+
+        def _random_level(self) -> int:
+            lv = 1
+            while lv < self._MAX_LEVEL and self._rng.random() < self._P:
+                lv += 1
+            return lv
+
+        def search(self, target: int) -> bool:
+            """Return True if target is present.
+
+            Time: O(log n) expected.
+            """
+            node = self._head
+            for i in range(self._level - 1, -1, -1):
+                while node.forward[i] is not None and node.forward[i].val < target:
+                    node = node.forward[i]                 # type: ignore[assignment]
+            node = node.forward[0]
+            return node is not None and node.val == target
+
+        def add(self, num: int) -> None:
+            """Insert num. Duplicates are allowed.
+
+            Time: O(log n) expected.
+            """
+            update: list[_SLNode] = [self._head] * self._MAX_LEVEL
+            node = self._head
+            for i in range(self._level - 1, -1, -1):
+                while node.forward[i] is not None and node.forward[i].val < num:
+                    node = node.forward[i]                 # type: ignore[assignment]
+                update[i] = node
+
+            new_level = self._random_level()
+            if new_level > self._level:
+                self._level = new_level
+
+            new_node = _SLNode(num, new_level)
+            for i in range(new_level):
+                new_node.forward[i] = update[i].forward[i]
+                update[i].forward[i] = new_node
+
+        def erase(self, num: int) -> bool:
+            """Remove one occurrence of num; return True iff present.
+
+            Time: O(log n) expected.
+            """
+            update: list[_SLNode] = [self._head] * self._MAX_LEVEL
+            node = self._head
+            for i in range(self._level - 1, -1, -1):
+                while node.forward[i] is not None and node.forward[i].val < num:
+                    node = node.forward[i]                 # type: ignore[assignment]
+                update[i] = node
+
+            target = node.forward[0]
+            if target is None or target.val != num:
+                return False
+            for i in range(self._level):
+                if update[i].forward[i] is not target:
+                    break
+                update[i].forward[i] = target.forward[i]
+            while self._level > 1 and self._head.forward[self._level - 1] is None:
+                self._level -= 1
+            return True
+    ```
+
+=== "Layer 5 — Variants"
+
+    **Variant A — concurrent skiplist.** Java's `ConcurrentSkipListMap` uses CAS on individual `forward[i]` slots. Inserts proceed bottom-up so partial visibility is benign (a half-inserted node can still be found at lower levels, just slower).
+
+    **Variant B — count / rank queries.** Augment each forward pointer with the number of nodes it skips at that level. Now `count_less_than(x)` is O(log n).
+
+    **Variant C — range scan.** Walk along level 0 from the leftmost match — adjacent nodes are sorted, so this is just `node = node.forward[0]` until exceeding the upper bound.
+
+    **Variant D — persistent skiplist.** Path-copy the search path on each modification; old versions remain queryable.
+
+    **Variant E — deterministic skiplist (1-2-3 skiplist).** Forces invariants on level distribution; gets worst-case O(log n) at the cost of more bookkeeping. Rarely used in practice.
+
+    **Variant F — Redis ZSET-style.** Each node stores `(score, member)`; ordered by score with member as tiebreak. Supports `ZRANGEBYSCORE` in O(log n + k).
+
+#### 🔍 Dry Run
+
+`add(1), add(5), add(7), search(5), erase(5), search(5)` with a deterministic RNG that returns levels [1, 2, 1, ...]:
+
 ```
+After add(1):  L0: -∞ → 1
+After add(5):  L1: -∞ ────→ 5
+                L0: -∞ → 1 → 5
+After add(7):  L1: -∞ ────→ 5
+                L0: -∞ → 1 → 5 → 7
 
-The full skiplist implementation is a 100-line interview answer; have the high-level design memorized rather than the byte-perfect code.
+search(5):
+  L1: -∞.forward[1] = 5; not <5, drop down at -∞
+  L0: -∞.forward[0] = 1 < 5, advance to 1
+       1.forward[0] = 5; not <5; node = 1.forward[0] = 5; val==5 ✅ True
+
+erase(5):
+  Walk down collecting update[] = [-∞ (L1), 1 (L0)]
+  target = 1.forward[0] = 5; val==5 → splice
+  L0: 1.forward[0] = 5.forward[0] = 7
+  L1: -∞.forward[1] = 5.forward[1] = None
+
+After erase(5):
+  L1: -∞
+  L0: -∞ → 1 → 7
+
+search(5): walk down; 1.forward[0] = 7 != 5 → False ✅
+```
 
 #### ⏱️ Complexity
 
-- **Average: O(log n) per op.**
-- **Worst case: O(n)** (very unlikely with proper randomization).
+| Op | Brute (sorted list) | **Skiplist** ⭐ | Balanced BST |
+|----|------:|------:|------:|
+| `search` | O(log n) | **O(log n) expected** | O(log n) |
+| `add` | O(n) | **O(log n) expected** | O(log n) |
+| `erase` | O(n) | **O(log n) expected** | O(log n) |
+| Space | O(n) | **O(n) expected** (avg ~2 ptrs/node) | O(n) |
+| Worst case | O(n) | O(n) (low probability with proper RNG) | O(log n) |
+
+#### 🎯 Pattern Used
+
+**Probabilistic multi-level forward search** — a self-balancing ordered structure without rotations. The `update[]` array trick during insert/delete is the universal idiom for skiplist mutation; remembering it cleans up the code dramatically.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why is search expected O(log n)?"
+    Each node climbs to level k with probability p^(k-1)(1-p). The expected number of nodes at level k is n·p^(k-1). With p=1/2 the top level has ~1 node, so the highest level is O(log n). Search goes right at each level until exceeding target — at each level the expected number of right-moves is constant (specifically, 1/(1-p) = 2 for p=0.5). So total expected time is `levels × const = O(log n)`.
+
+??? question "Follow-up 2 — Why might you choose p < 0.5?"
+    Smaller p (e.g., 0.25) gives shorter towers (less memory) but more right-walks per level (more time). p=0.5 is a balanced default; p=0.25 saves memory at a small constant-factor time cost.
+
+??? question "Follow-up 3 — How is this concurrent-friendly?"
+    Insertion at level i only modifies one forward pointer per level. Bottom-up insertion means a partial node (level 0 done, levels 1..k still pending) is still findable at level 0 — search doesn't see corruption. CAS on individual pointers is enough.
+
+??? question "Follow-up 4 — Why allow duplicates here, vs a set?"
+    The LeetCode 1206 contract permits duplicates. Internally each duplicate is its own node. To turn this into a strict set, check `if search(num): return` at the top of `add`.
+
+??? question "Follow-up 5 — Compare skiplist vs balanced BST (red-black, AVL)."
+    Skiplist: simpler code, no rotations, easier to make concurrent, expected O(log n).
+    Balanced BST: deterministic O(log n), better cache locality (contiguous tree), more complex (rotations, color flips).
+    Most JDK / .NET frameworks ship balanced BST as the default ordered map; Redis and LevelDB chose skiplists for the concurrency / simplicity argument.
+
+??? question "Follow-up 6 — What's the pathological worst case?"
+    A bad RNG that picks the same level for all nodes degrades to a linked list (O(n) per op). This is why production code uses a quality PRNG and seeds deterministically only for tests.
+
+??? question "Follow-up 7 — Range queries `[lo, hi]`."
+    Search for `lo` (O(log n)). Then walk forward at level 0 collecting nodes until exceeding `hi`. Total: O(log n + k) where k is the number of results.
+
+??? question "Follow-up 8 — Augmented skiplist for rank queries."
+    Variant B: each forward pointer stores the *number of level-0 nodes it skips*. Now `rank(x) = sum of skip-counts on the search path` — O(log n).
+
+#### 🐛 Common Bugs
+
+1. **Forgetting to update `self._level`** when inserting at a new top level.
+2. **Forgetting to shrink `self._level`** when erasing exposes empty top levels.
+3. **Iterating `update[]` from bottom-up but inserting top-down** — must match. The canonical Layer 3/4 form iterates levels bottom-up for both update collection and splice.
+4. **Off-by-one in the `_random_level` while loop** — must include the first call (level 1 unconditional, level 2+ conditional).
+5. **Using `random.random() <= P` instead of `< P`** — minor but biases the distribution slightly.
+6. **`update[i].forward[i] is not target` short-circuit** — break, don't continue. After the first level where target is absent, all higher levels are also absent.
+7. **Returning `False` from `search` when sentinel comparison should fail** — make sure sentinel uses `-inf` and the empty-list path returns False.
+8. **Leaking nodes** — Python's GC handles this, but in C/C++ remember to free the deleted node after splicing.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] Empty skiplist: `search(x) → False`, `erase(x) → False`
+- [ ] Duplicates: `add(5)`, `add(5)`, `erase(5)` → only one removed; `search(5) → True`
+- [ ] Very large values (sentinel uses `-inf` so all values exceed it)
+- [ ] Single-element skiplist
+- [ ] All elements at same value
+- [ ] Inserting then erasing all elements — should return to initial state with `_level = 1`
+- [ ] Stress: 10⁵ random ops should still be ~O(log n) per op on average
+- [ ] RNG always returns level 1 → degrades to a linked list (correctness preserved)
 
 #### 🏢 Sample Interviewer Quote
 
-> *"Implement a Skiplist."*
+> *"Implement a skiplist supporting search, add, and erase in average O(log n)."*
 
-Your opener: *"A skiplist is a stack of singly-linked lists where each higher level has half the density. Search walks down + right. Add inserts at the bottom and randomly promotes upward (probability 1/2 per level). Erase removes from every level. Each op is O(log n) expected."*
+Your opener: *"A skiplist is a stack of sorted singly-linked lists where each higher level subsamples the level below — typically with probability p=1/2. Each node stores `forward[]`, an array of pointers, one per level it occupies. Search starts at the top sentinel: at each level, walk right while next < target, then drop down. Insert collects an `update[]` array — predecessors at every level — then picks a random level (geometric distribution) and splices the new node in at every level up to that. Erase reuses the same `update[]` walk, then unlinks at every level. Expected O(log n) per op. The randomness replaces the rotations of a balanced BST."*
 
 ---
 
 ### Problem 30 — All O(1) Data Structure
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Uber</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Apple</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Uber</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Apple</span> <span class="company-tag">Google</span>
 
-> Design a data structure that supports `inc(key)`, `dec(key)`, `getMaxKey()`, `getMinKey()`, all in **strictly O(1)**. (LeetCode 432.)
+> Design a data structure to store strings' counts with the ability to return the keys with **maximum** and **minimum** count in **strictly O(1)** time. Support: `inc(key)` (increment a key's count, default 1 for unseen keys), `dec(key)` (decrement; remove at count 0), `getMaxKey()`, `getMinKey()` (return any key with the max/min count, or `""` if empty). (LeetCode 432.)
+
+#### 📖 Story Mode
+
+```
+inc("a")              counts = {a: 1}                   max = "a"   min = "a"
+inc("b") inc("b")     counts = {a: 1, b: 2}             max = "b"   min = "a"
+inc("a") inc("a")     counts = {a: 3, b: 2}             max = "a"   min = "b"
+dec("a")              counts = {a: 2, b: 2}             max = a/b   min = a/b
+dec("b") dec("b")     counts = {a: 2}                   max = "a"   min = "a"
+```
+
+A min-heap or max-heap gives O(log n); a balanced BST gives O(log n). The "strictly O(1)" requirement forbids any tree or heap. The trick: **sort by count via a doubly-linked list of buckets**, and let the hash map jump straight to the right bucket.
+
+#### 🌍 Real-World Usage
+
+- **LFU caches** — pop the least-frequent key (this is the LFU eviction primitive).
+- **Trending content rankings** — get the most-viewed page in O(1) regardless of catalog size.
+- **Word-frequency analytics** with online updates.
+- **Network top-talkers / bottom-talkers dashboards** — show the highest- and lowest-traffic IPs in O(1).
+- **Game leaderboards with live updates** — rank-0 and rank-last lookups for "hot streak" callouts.
 
 #### 🧠 Thinking Process
 
-A doubly linked list of "buckets," each bucket contains all keys with that count. Buckets are ordered by count.
+The first instinct is "use a heap." But heaps cost O(log n) per update, not O(1). And a heap doesn't easily support "decrement an arbitrary key."
 
-- `key → bucket` map for O(1) lookup.
-- Buckets ordered ascending; `head.next` is min, `tail.prev` is max.
+The unlock has three pieces:
 
-On `inc(key)`:
-- Find current bucket. If next bucket has count+1, move key there. Else insert a new bucket between.
-- Remove from old bucket; if empty, splice out.
+1. **Group keys by count.** All keys with the same count share a "bucket." A bucket is just a `set[str]` plus its count.
+2. **Order buckets by count.** Keep them in a **doubly linked list**, sorted ascending by count. The head sentinel points at the smallest-count bucket; the tail sentinel at the largest. `getMinKey` reads any key from `head.next`'s set; `getMaxKey` reads any from `tail.prev`'s set. Both O(1).
+3. **`key → bucket` map.** When `inc("a")` fires, we need to find the bucket holding `"a"` in O(1). A hash map does it.
 
-`dec` is symmetric.
+The actual operations are then a careful dance:
 
-`getMaxKey` / `getMinKey` are O(1) — just read from the appropriate bucket.
+- **`inc(key)`** — find current bucket; check if the next bucket has count+1; move/create. Remove the key from the old bucket, splice the bucket out if empty.
+- **`dec(key)`** — symmetric. If new count is 0, remove the key entirely.
 
-#### 🐍 Sketch
+Three invariants must always hold:
+- The doubly linked list is sorted **strictly ascending** by count (no duplicates).
+- Every bucket is non-empty (we splice out empties immediately).
+- Every key in `key_to_bucket` points at the bucket whose `keys` set contains it.
 
-```python
-class _Bucket:
-    __slots__ = ("count", "keys", "prev", "next")
-    def __init__(self, count: int) -> None:
-        self.count = count
-        self.keys: set[str] = set()
-        self.prev: "_Bucket | None" = None
-        self.next: "_Bucket | None" = None
+#### 🐍 Solutions
+
+=== "Layer 1 — Naïve dict + linear scan"
+
+    Keep a `dict[str, int]`. `inc/dec` are O(1) on the dict, but `getMaxKey/getMinKey` scan the values → O(n).
+
+    ```python
+    from __future__ import annotations
 
 
-class AllOne:
-    def __init__(self) -> None:
-        self._head = _Bucket(0)        # sentinel
-        self._tail = _Bucket(0)
-        self._head.next = self._tail
-        self._tail.prev = self._head
-        self._key_to_bucket: dict[str, _Bucket] = {}
+    class AllOneSlow:
+        def __init__(self) -> None:
+            self._cnt: dict[str, int] = {}
 
-    # _add_after, _remove, inc, dec, getMaxKey, getMinKey
-    # ... (~100 lines total)
-```
+        def inc(self, key: str) -> None:
+            self._cnt[key] = self._cnt.get(key, 0) + 1
 
-The full implementation is interview-length; what they're testing is whether you recognize that **a sorted list of count-buckets** gives all four operations in O(1).
+        def dec(self, key: str) -> None:
+            if self._cnt.get(key, 0) == 0:
+                return
+            self._cnt[key] -= 1
+            if self._cnt[key] == 0:
+                del self._cnt[key]
 
-#### ⏱️ Complexity
+        def get_max_key(self) -> str:
+            if not self._cnt: return ""
+            return max(self._cnt, key=self._cnt.get)        # O(n)
 
-All four: **O(1)** strict.
+        def get_min_key(self) -> str:
+            if not self._cnt: return ""
+            return min(self._cnt, key=self._cnt.get)        # O(n)
+    ```
 
-#### 🏢 Sample Interviewer Quote
+    Trivially correct; fails the "strict O(1)" requirement. Bring it up to motivate the bucket structure.
 
-> *"Design a data structure supporting inc, dec, getMaxKey, getMinKey, all in O(1)."*
+=== "Layer 2 — Doubly-linked count buckets ⭐"
 
-Your opener: *"Doubly linked list of count-buckets, sorted by count. Each bucket holds the keys at that count. A `key → bucket` map gives O(1) lookup. inc/dec move the key to the adjacent (or new) bucket. getMaxKey reads from `tail.prev`'s set; getMinKey from `head.next`'s set."*
+    The canonical answer.
+
+    ```python
+    from __future__ import annotations
+
+
+    class _Bucket:
+        __slots__ = ("count", "keys", "prev", "next")
+
+        def __init__(self, count: int) -> None:
+            self.count: int = count
+            self.keys: set[str] = set()
+            self.prev: "_Bucket | None" = None
+            self.next: "_Bucket | None" = None
+
+
+    class AllOne:
+        def __init__(self) -> None:
+            # Sentinels: head.count = 0 conceptually, tail.count = ∞
+            self._head = _Bucket(0)
+            self._tail = _Bucket(0)
+            self._head.next = self._tail
+            self._tail.prev = self._head
+            self._key_to_bucket: dict[str, _Bucket] = {}
+
+        # ---- list helpers -------------------------------------------------
+        def _insert_after(self, prev: _Bucket, count: int) -> _Bucket:
+            """Insert a new bucket with `count` immediately after `prev`."""
+            new = _Bucket(count)
+            new.prev = prev
+            new.next = prev.next
+            prev.next.prev = new
+            prev.next = new
+            return new
+
+        def _remove(self, bucket: _Bucket) -> None:
+            """Splice `bucket` out of the doubly linked list."""
+            bucket.prev.next = bucket.next
+            bucket.next.prev = bucket.prev
+            bucket.prev = bucket.next = None
+
+        # ---- public API ---------------------------------------------------
+        def inc(self, key: str) -> None:
+            if key in self._key_to_bucket:
+                old = self._key_to_bucket[key]
+                target_count = old.count + 1
+                # Bucket with target_count is either old.next or doesn't exist yet
+                if old.next is not self._tail and old.next.count == target_count:
+                    new_bucket = old.next
+                else:
+                    new_bucket = self._insert_after(old, target_count)
+                new_bucket.keys.add(key)
+                self._key_to_bucket[key] = new_bucket
+                old.keys.discard(key)
+                if not old.keys:
+                    self._remove(old)
+            else:
+                # Brand new key, count = 1
+                first = self._head.next
+                if first is not self._tail and first.count == 1:
+                    bucket = first
+                else:
+                    bucket = self._insert_after(self._head, 1)
+                bucket.keys.add(key)
+                self._key_to_bucket[key] = bucket
+
+        def dec(self, key: str) -> None:
+            if key not in self._key_to_bucket:
+                return
+            old = self._key_to_bucket[key]
+            target_count = old.count - 1
+            if target_count == 0:
+                # Remove key entirely
+                del self._key_to_bucket[key]
+            else:
+                if old.prev is not self._head and old.prev.count == target_count:
+                    new_bucket = old.prev
+                else:
+                    new_bucket = self._insert_after(old.prev, target_count)
+                new_bucket.keys.add(key)
+                self._key_to_bucket[key] = new_bucket
+            old.keys.discard(key)
+            if not old.keys:
+                self._remove(old)
+
+        def get_max_key(self) -> str:
+            if self._tail.prev is self._head:
+                return ""
+            return next(iter(self._tail.prev.keys))
+
+        def get_min_key(self) -> str:
+            if self._head.next is self._tail:
+                return ""
+            return next(iter(self._head.next.keys))
+    ```
+
+    Every operation: **O(1) strict.** Memory: O(unique keys) + O(distinct counts).
+
+=== "Layer 3 — Variant: support `delete(key)` outright"
+
+    Some specs add `delete(key)` (set count to 0 unconditionally). One-line addition:
+
+    ```python
+        def delete(self, key: str) -> None:
+            if key not in self._key_to_bucket:
+                return
+            old = self._key_to_bucket.pop(key)
+            old.keys.discard(key)
+            if not old.keys:
+                self._remove(old)
+    ```
+
+    O(1).
+
+=== "Layer 4 — Variant: top-K and bottom-K (heap on top of buckets)"
+
+    For "give me the top-K most-frequent keys at any time," the bucket structure already streams: walk `tail.prev`, `tail.prev.prev`, ... and emit keys until you have K. O(K) per query. No heap needed.
+
+    ```python
+        def top_k(self, k: int) -> list[str]:
+            out: list[str] = []
+            bucket = self._tail.prev
+            while bucket is not self._head and len(out) < k:
+                for key in bucket.keys:
+                    out.append(key)
+                    if len(out) == k:
+                        return out
+                bucket = bucket.prev
+            return out
+    ```
+
+    O(K) per query, independent of the catalog size. Same template as LFU's eviction-by-frequency.
+
+=== "Layer 5 — Production: thread-safe with shard-locks"
+
+    For a multithreaded counter (e.g. live analytics dashboard), wrapping the whole structure in a single `Lock` is correct but creates a hot lock. The standard production move is to **shard by `hash(key) % N`** and maintain N independent `AllOne` instances; aggregate `getMaxKey` across shards via a small max-of-max (still O(N) → effectively O(1) for fixed N).
+
+    ```python
+        # Sketch — full implementation in the LLD chapter.
+        class ShardedAllOne:
+            def __init__(self, shards: int = 16) -> None:
+                import threading
+                self._shards = [(_AllOne(), threading.Lock()) for _ in range(shards)]
+
+            def _shard(self, key: str):
+                return self._shards[hash(key) % len(self._shards)]
+
+            def inc(self, key: str) -> None:
+                ao, lock = self._shard(key)
+                with lock: ao.inc(key)
+
+            def get_max_key(self) -> str:
+                # Take the per-shard max under each shard's lock; then the global max
+                # is the (count, key) max across shards.
+                ...
+    ```
+
+    For a *truly* lock-free version, replace the per-shard lock with `concurrent.futures` or atomic CAS on the bucket pointers — outside the scope of this problem.
+
+#### 🔎 Step-by-Step Dry Run
+
+Operations: `inc("a"); inc("b"); inc("b"); inc("c"); inc("c"); inc("c"); dec("b"); getMaxKey(); getMinKey()`.
+
+| Op           | List of buckets (head ⇄ ... ⇄ tail)         | `key_to_bucket`             |
+|--------------|---------------------------------------------|-----------------------------|
+| inc("a")     | head ⇄ {a}@1 ⇄ tail                         | a → @1                      |
+| inc("b")     | head ⇄ {a, b}@1 ⇄ tail                      | a, b → @1                   |
+| inc("b")     | head ⇄ {a}@1 ⇄ {b}@2 ⇄ tail                 | a → @1, b → @2              |
+| inc("c")     | head ⇄ {a, c}@1 ⇄ {b}@2 ⇄ tail              | a, c → @1, b → @2           |
+| inc("c")     | head ⇄ {a}@1 ⇄ {b, c}@2 ⇄ tail              | a → @1, b, c → @2           |
+| inc("c")     | head ⇄ {a}@1 ⇄ {b}@2 ⇄ {c}@3 ⇄ tail         | a → @1, b → @2, c → @3      |
+| dec("b")     | head ⇄ {a, b}@1 ⇄ {c}@3 ⇄ tail              | a, b → @1, c → @3           |
+| getMaxKey() → "c"  | (read tail.prev.keys)                  |                             |
+| getMinKey() → "a" or "b" | (read head.next.keys)            |                             |
+
+Notice on `dec("b")`: target_count = 1, target bucket is `old.prev` (which is `{a}@1` already). We move b in, remove it from `{b}@2`. The {b}@2 bucket becomes empty and is spliced out. The list went from `{a}@1 ⇄ {b}@2 ⇄ {c}@3` to `{a, b}@1 ⇄ {c}@3` ✅.
+
+#### 📊 Complexity
+
+| Operation           | Layer 1 (naïve)  | Layer 2 (buckets) ⭐ |
+|---------------------|------------------|----------------------|
+| `inc(key)`          | O(1)             | **O(1)**             |
+| `dec(key)`          | O(1)             | **O(1)**             |
+| `getMaxKey()`       | O(n)             | **O(1)**             |
+| `getMinKey()`       | O(n)             | **O(1)**             |
+| Memory              | O(unique keys)   | O(unique keys + distinct counts) |
+| Thread-safety       | trivial w/ a lock | per-bucket or sharded |
+
+#### ❓ Follow-ups
+
+??? question "Why a doubly linked list rather than a singly linked list of buckets?"
+    Because `dec` may need to move a key to the **previous** bucket (`old.prev`). With a singly linked list we'd need to walk from the head — O(n). The back pointer makes neighbor access O(1).
+
+??? question "Why do we splice an empty bucket out immediately?"
+    Two reasons. (a) Otherwise `getMinKey` could land on an empty bucket and fail. (b) The "next bucket has count+1" check would falsely pass through phantom buckets, breaking the strict-monotonic invariant.
+
+??? question "Can `count` ever be 0?"
+    No. The sentinel head and tail buckets carry `count = 0` for typing convenience, but real buckets are always count ≥ 1. When `dec` would drop a key to 0, we delete the key entirely.
+
+??? question "What if two keys are tied for max/min?"
+    `getMaxKey/getMinKey` returns *any* of them — the contract specifies "a key with max/min count," not a unique one. The `next(iter(bucket.keys))` line picks Python's set iteration order, which is fine.
+
+??? question "How does this relate to LFU Cache (LC 460)?"
+    LFU cache adds a **value** per key and an **eviction** that picks the LRU key from the lowest-frequency bucket. Same bucket-list skeleton; each bucket holds an OrderedDict of keys-to-values for the recency tiebreak. P28 in this chapter goes deeper.
+
+??? question "How would you support `getCountOfMinKey()` and `getCountOfMaxKey()`?"
+    Already O(1) — `head.next.count` and `tail.prev.count`. The bucket already carries its count.
+
+??? question "What's the total memory bound?"
+    O(K) where K is the number of distinct keys ever live. Distinct counts can also grow up to K (one bucket per key in the worst case). Hence O(K) overall — same as a plain dict.
+
+??? question "How to add **persistence** (snapshot + restore)?"
+    Serialize the doubly-linked structure plus the `key_to_bucket` references. On reload, walk the serialized list bottom-up, recreate each bucket, and rebuild the dict in O(K). Same complexity as a fresh build.
+
+#### 🐛 Common Bugs
+
+1. **Forgetting to splice an empty bucket** — corrupts `getMinKey/getMaxKey` and breaks the count-uniqueness invariant.
+2. **Updating `key_to_bucket` BEFORE removing from the old bucket's `keys`** — race condition in multi-threaded code; even single-threaded, this works but can be confusing.
+3. **Using `set.remove` instead of `set.discard`** — `remove` raises if missing; `discard` is silent. Use `discard` for idempotence.
+4. **Sentinel bucket count mismatch** — using `count = 1` for sentinels confuses the "is this a real bucket?" check. Use 0 for head, "∞" (or another sentinel marker) for tail.
+5. **Inserting a new bucket when an adjacent bucket already has the target count** — produces duplicate-count buckets, breaks the invariant. Always check `old.next.count == target_count` first.
+6. **Returning `next(iter(bucket.keys))` from an empty bucket** — `StopIteration`. Guard with the `is_empty` check at the sentinels.
+
+#### ⚠️ Edge Cases
+
+- All keys decremented to zero → list collapses to just sentinels; `getMinKey/getMaxKey` return `""`.
+- `dec` on a missing key → no-op (per spec). Don't raise.
+- `inc` on the same key creating a new top bucket every time → O(K) buckets in the limit; still O(1) per op.
+- A burst of `inc`/`dec` of the same key bouncing between two adjacent buckets → no bucket creation/destruction churn (we reuse).
+- Key strings with arbitrary contents (Unicode, empty string `""`) — fine, since they're just dict keys. **Caveat**: don't use `""` as a key if `getMaxKey/getMinKey` returns `""` for "empty" — you'd lose disambiguation.
+
+#### 🔑 Key Takeaways
+
+> **A sorted doubly-linked list + hash map for O(1) lookup** is the standard pattern when you need both ordered min/max and unordered key access. LRU and LFU caches share this DNA.
+>
+> The **bucket-as-set** insight collapses keys with equal counts; without it, you'd need a separate node per key and updates would no longer be O(1).
+>
+> Always maintain the **strict-monotonic, all-buckets-non-empty** invariants. Empty buckets corrupt min/max; duplicate-count buckets corrupt move-to-neighbor.
+
+#### 🎯 Pattern Used
+
+**Doubly-linked count buckets + hash-map indirection** — the foundational pattern for LRU (P24), LFU (P28), and any "ordered + indexed" data structure.
 
 ---
 
 ### Problem 31 — Insert into a Sorted Circular Linked List
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Meta</span> <span class="company-tag">LinkedIn</span> <span class="company-tag">Google</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Meta</span> <span class="company-tag">LinkedIn</span> <span class="company-tag">Google</span> <span class="company-tag">Microsoft</span>
 
-> Given a node from a sorted circular linked list (any node, not necessarily the smallest), insert a value such that the list remains sorted. Return the inserted node's reference.
+> Given a node from a circular linked list which is sorted in non-decreasing order, write a function to insert a value `insertVal` into the list such that it remains sorted. The given node is **not necessarily the smallest** value. Return the new node so the list still has access to the original given node. (LeetCode 708.)
 
 #### 📖 Story Mode
 
-Given the cycle `3 → 4 → 1 → 3 → ...` (sorted as 1, 3, 4 with the wrap), insert 2 → `3 → 4 → 1 → 2 → 3 → ...`.
+```
+input  cycle:  3 → 4 → 1 → 3 → 4 → 1 → ...    (sorted as 1 ≤ 3 ≤ 4 with the wrap)
+insert 2:      3 → 4 → 1 → 2 → 3 → 4 → 1 → 2 → ...
+
+input cycle:   1 → 3 → 5 → ...   (we're given the node holding 3)
+insert 0:      1 → 3 → 5 → 0 → 1 → ...    (0 is less than the current min;
+                                            insert at the wrap point)
+
+input cycle:   2 → 2 → 2 → ...   (all equal)
+insert 5:      2 → 2 → 2 → 5 → 2 → 2 → ...   (insert anywhere — nothing breaks sort)
+
+input cycle:   None (empty)
+insert 7:      7 → 7 → ...    (singleton; new node points to itself)
+```
+
+The "given any node, not the smallest" constraint is the spice. The wrap point — where the maximum value transitions back to the minimum — is the only place where the relation `prev.val ≤ curr.val` breaks. New extreme values (smaller than min or larger than max) belong **at** that wrap point.
 
 #### 🌍 Real-World Usage
 
-- **Round-robin scheduling** with priority insertion.
-- **Circular buffers** with sorted ranges.
-- **Cron / timer wheels.**
+- **Round-robin scheduling** — insert a new job into a sorted-by-priority circular queue.
+- **Timer wheels** in OS kernels — sorted circular buckets where new timers slide into the right slot.
+- **Circular buffers with priorities** — sound mixers, audio sample queues, NIC ring buffers ordered by deadline.
+- **Cron-style schedulers** — insert a new fire-time into a circular sorted ring of pending tasks.
+- **Game-loop entity lists** — sorted by render order; new entities slot in at insertion-time.
 
 #### 🧠 Thinking Process
 
-Walk one full lap from the given node. At each pair `(prev, curr)`:
+We're given **any** node, not necessarily the smallest, so the algorithm cannot assume ordering of the starting position. The only invariant we can lean on: walking from any node, we'll eventually return to the same node (it's a cycle).
 
-1. **Within sorted range:** `prev.val <= value <= curr.val` → insert.
-2. **At the wrap point:** `prev.val > curr.val` (transition from max to min). Insert if `value >= prev.val` OR `value <= curr.val`.
+For each adjacent pair `(prev, curr)` we encounter, exactly **one** of three conditions holds:
 
-If we walk all the way around without inserting (all values equal), insert anywhere.
+1. **Within a sorted run.** `prev.val ≤ insertVal ≤ curr.val`. Insert between them. Most insertions land here.
+2. **At the wrap point**, where `prev.val > curr.val` (the transition from max-value back to min-value). Insert if either:
+    - `insertVal ≥ prev.val` — it's a new maximum, larger than all existing.
+    - `insertVal ≤ curr.val` — it's a new minimum, smaller than all existing.
+3. **Neither** — keep walking.
 
-#### 🐍 Solution
+If we walk a **full lap** without finding a spot, the list must contain all-equal values. In that case insert anywhere; the sorted invariant is trivially preserved.
 
-```python
-def insert_sorted_circular(node, value):
-    new_node = ListNode(value)
-    if not node:
-        new_node.next = new_node
+The most common bug is termination: when all values equal `insertVal`, the loop never satisfies condition 1 or 2, and without an explicit lap-counter we'd loop forever.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Convert to array, insert, rebuild"
+
+    O(n) time, O(n) space. Demonstrates correctness; not really useful.
+
+    ```python
+    from __future__ import annotations
+
+
+    def insert_via_array(head: ListNode | None, val: int) -> ListNode:
+        if head is None:
+            new_node = ListNode(val)
+            new_node.next = new_node
+            return new_node
+
+        # Collect in cycle order
+        vals: list[int] = []
+        cur = head
+        while True:
+            vals.append(cur.val)
+            cur = cur.next
+            if cur is head:
+                break
+
+        # Pick an arbitrary "anchor" (smallest), sort, insert
+        smallest_idx = vals.index(min(vals))
+        rotated = vals[smallest_idx:] + vals[:smallest_idx]
+        # binary-search insert
+        import bisect
+        bisect.insort(rotated, val)
+
+        # Rebuild a circular list
+        nodes = [ListNode(v) for v in rotated]
+        for i in range(len(nodes)):
+            nodes[i].next = nodes[(i + 1) % len(nodes)]
+        # Find the new node (first occurrence of `val`)
+        return next(n for n in nodes if n.val == val)
+    ```
+
+    Allocates entirely new nodes; loses the caller's reference to the original list.
+
+=== "Layer 2 — Single-pass walk with wrap detection ⭐"
+
+    The canonical answer. O(n) time, O(1) space.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def insert(head: ListNode | None, insert_val: int) -> ListNode:
+        new_node = ListNode(insert_val)
+
+        # Empty list — singleton self-loop
+        if head is None:
+            new_node.next = new_node
+            return new_node
+
+        prev = head
+        curr = head.next
+        while True:
+            # Case 1: within sorted run
+            if prev.val <= insert_val <= curr.val:
+                break
+            # Case 2: at wrap point (prev is max, curr is min)
+            if prev.val > curr.val and (insert_val >= prev.val or insert_val <= curr.val):
+                break
+            prev, curr = curr, curr.next
+            # Case 3: full lap without inserting → all-equal-values case
+            if prev is head:
+                break
+
+        prev.next = new_node
+        new_node.next = curr
         return new_node
-    prev = node
-    curr = node.next
-    while True:
-        if prev.val <= value <= curr.val:
-            break
-        if prev.val > curr.val and (value >= prev.val or value <= curr.val):
-            break
-        prev, curr = curr, curr.next
-        if prev is node: break
-    prev.next = new_node
-    new_node.next = curr
-    return new_node
-```
+    ```
 
-O(n) time, O(1) extra space.
+    O(n) worst case (all-equal values force a full lap), O(1) extra space.
+
+=== "Layer 3 — Compact form (advanced)"
+
+    Some interviewers like a single combined predicate. Logically identical:
+
+    ```python
+    from __future__ import annotations
+
+
+    def insert_compact(head: ListNode | None, insert_val: int) -> ListNode:
+        new_node = ListNode(insert_val)
+        if head is None:
+            new_node.next = new_node
+            return new_node
+
+        prev = head
+        while True:
+            curr = prev.next
+            wrap = prev.val > curr.val
+            if (
+                (not wrap and prev.val <= insert_val <= curr.val)
+                or (wrap and (insert_val >= prev.val or insert_val <= curr.val))
+                or curr is head            # full lap completed
+            ):
+                prev.next = new_node
+                new_node.next = curr
+                return new_node
+            prev = curr
+    ```
+
+    Same complexity. Slightly cleaner termination because the `curr is head` check happens before the move.
+
+=== "Layer 4 — Two-pass: locate the smallest first"
+
+    Some interviewers want to see you find the smallest (start of sorted lap), then standard sorted-insert.
+
+    ```python
+    from __future__ import annotations
+
+
+    def insert_two_pass(head: ListNode | None, insert_val: int) -> ListNode:
+        new_node = ListNode(insert_val)
+        if head is None:
+            new_node.next = new_node
+            return new_node
+
+        # Pass 1: locate the smallest (the wrap point's `curr`)
+        cur = head
+        while not (cur.val > cur.next.val) and cur.next is not head:
+            cur = cur.next
+        smallest = cur.next                # (cur is max; cur.next is min)
+        # Edge case: all values equal → loop ended at head; smallest = head
+        if cur.next is head and cur.val <= cur.next.val:
+            smallest = head
+
+        # Pass 2: insert in linear order from `smallest`
+        prev = cur                         # the max — sits before smallest in the cycle
+        curr = smallest
+        while True:
+            if prev.val <= insert_val <= curr.val or curr is smallest and (insert_val < curr.val or insert_val > prev.val):
+                break
+            prev, curr = curr, curr.next
+            if curr is smallest:
+                break
+        prev.next = new_node
+        new_node.next = curr
+        return new_node
+    ```
+
+    Same O(n); messier control flow. Layer 2 is preferred unless the interviewer specifically wants this decomposition.
+
+=== "Layer 5 — Production: lock-free version with CAS"
+
+    For a multi-producer, single-consumer ring buffer where inserts happen concurrently, the right approach is per-segment locks (or lock-free CAS on `prev.next`). Sketch:
+
+    ```python
+    from __future__ import annotations
+    import threading
+
+
+    class ConcurrentSortedRing:
+        """Coarse-grained lock for clarity; in production, replace with per-segment
+        locking or a CAS loop on prev.next."""
+
+        def __init__(self) -> None:
+            self._head: ListNode | None = None
+            self._lock = threading.Lock()
+
+        def insert(self, val: int) -> ListNode:
+            with self._lock:
+                node = insert(self._head, val)
+                if self._head is None:
+                    self._head = node
+                return node
+    ```
+
+    For lock-free, use atomic CAS on `prev.next` after locating the spot; retry on conflict. The locate phase is read-only — multiple writers can race that. Outside the scope of this problem; mention only if the interviewer asks about concurrency.
+
+#### 🔎 Step-by-Step Dry Run
+
+Cycle: `3 → 4 → 1 → 3 → ...`. We're handed the node holding **3**. Insert `2`.
+
+The cycle's sorted ordering is `1 ≤ 3 ≤ 4`. `2` should land between the `1` and the `3`.
+
+Initial: `prev = 3`, `curr = 4`.
+
+| Iter | `prev.val` | `curr.val` | wrap? | Case 1 (`prev≤v≤curr`) | Case 2 (wrap & extreme) | Action      |
+|------|------------|------------|-------|------------------------|--------------------------|-------------|
+| 1    | 3          | 4          | no    | 3 ≤ 2 ≤ 4? No          | not wrap                 | move        |
+| 2    | 4          | 1          | YES   | not in run             | val=2; 2 ≥ 4? no. 2 ≤ 1? no | move      |
+| 3    | 1          | 3          | no    | 1 ≤ 2 ≤ 3? **Yes**     | —                        | **insert**  |
+
+After iteration 3 we splice: `prev.next = new_node` (`1.next = 2`), `new_node.next = curr` (`2.next = 3`). Result: `3 → 4 → 1 → 2 → 3 → 4 → 1 → 2 → ...` ✅.
+
+Now try inserting `0` (a new minimum) into the same cycle:
+
+| Iter | `prev.val` | `curr.val` | wrap? | Case 1 | Case 2 (val=0)               | Action     |
+|------|------------|------------|-------|--------|------------------------------|------------|
+| 1    | 3          | 4          | no    | 3 ≤ 0 ≤ 4? No | —                       | move       |
+| 2    | 4          | 1          | YES   | —      | 0 ≥ 4? no. 0 ≤ 1? **Yes**   | **insert** |
+
+`prev.next = 0` (4.next = 0), `0.next = curr = 1`. Result: `3 → 4 → 0 → 1 → 3 → 4 → 0 → 1 → ...` ✅.
+
+And inserting `9` (a new maximum):
+
+| Iter | `prev.val` | `curr.val` | wrap? | Case 1 | Case 2 (val=9)               | Action     |
+|------|------------|------------|-------|--------|------------------------------|------------|
+| 1    | 3          | 4          | no    | 3 ≤ 9 ≤ 4? No | —                       | move       |
+| 2    | 4          | 1          | YES   | —      | 9 ≥ 4? **Yes**              | **insert** |
+
+Result: `3 → 4 → 9 → 1 → 3 → ...` ✅.
+
+The all-equal-values case: cycle `2 → 2 → 2`, insert 5.
+
+Iter 1: prev=2, curr=2. Case 1: 2 ≤ 5 ≤ 2? No. Wrap? No. Move.
+Iter 2: prev=2, curr=2. Same. Move.
+Iter 3: prev=2, curr=2. Same. Move. But `prev is head` → exit via Case 3.
+
+Splice: `prev.next = 5`, `5.next = curr` (which is whichever node `prev.next` was pre-insertion). Sorted invariant preserved trivially.
+
+#### 📊 Complexity
+
+| Layer                          | Time | Space | Notes                                       |
+|--------------------------------|------|-------|---------------------------------------------|
+| Layer 1 — array rebuild        | O(n) | O(n)  | Demonstrative; loses caller refs            |
+| Layer 2 — single-pass ⭐        | O(n) | O(1)  | The interview default                       |
+| Layer 3 — compact predicate    | O(n) | O(1)  | Stylistic tweak                             |
+| Layer 4 — two-pass             | O(n) | O(1)  | Slightly clearer logically; more code       |
+| Layer 5 — concurrent           | O(n) | O(1)  | Per-segment locking or CAS for production   |
+
+#### ❓ Follow-ups
+
+??? question "Why does the wrap-point check use `or`, not `and`?"
+    Because new extreme values insert at the wrap point regardless of which direction they overflow. `insertVal ≥ prev.val` (new max, beyond prev) **or** `insertVal ≤ curr.val` (new min, before curr) — either is sufficient. With `and` we'd require *both*, missing both cases.
+
+??? question "Why does the loop terminate even when no Case 1/Case 2 ever fires?"
+    Because of `if prev is head: break`. After one full lap (n iterations) `prev` returns to `head`. This handles the all-equal-values input.
+
+??? question "What if I insert at every wrap-point match instead of waiting for Case 1?"
+    The `prev.val > curr.val` check fires only **once per lap** (at the unique wrap point). So you're not skipping insertion opportunities. The single condition correctly identifies the right spot in O(n).
+
+??? question "What if the input list is unsorted?"
+    The behavior is undefined per spec. Defensively, if the input is genuinely unsorted you'd see multiple `prev.val > curr.val` transitions; the first one might insert in the wrong place. The spec guarantees sorted input — trust it, document it.
+
+??? question "What's the smallest list that can be empty?"
+    The spec says `head` may be `None`, in which case we return a singleton self-loop. Layer 2 handles this with the leading guard.
+
+??? question "Can we use binary search?"
+    Not on a singly linked list — no random access. Even with random access, the cycle complicates indexing because we don't know where the wrap point is. O(n) is optimal here.
+
+??? question "Generalize to a circular doubly linked list."
+    Same algorithm; the splice updates `prev.next.prev = new_node` too. O(n) time, O(1) space.
+
+??? question "What if duplicates aren't allowed?"
+    Add an extra Case 4: if at any point `prev.val == insertVal` or `curr.val == insertVal`, return without inserting (or raise). Easy to bolt on.
 
 #### 🐛 Common Bugs
 
-1. **Forgetting the wrap-point case.**
-2. **Single-node list** — `new_node` becomes a self-loop.
-3. **All values equal** — must terminate the loop after one lap.
+1. **Missing the wrap-point case** entirely — new minima/maxima fail to insert, the value falls through the loop, returns wrong spot.
+2. **Using `<` instead of `<=`** in `prev.val <= insert_val <= curr.val` — duplicates can't insert at the natural spot.
+3. **Forgetting the all-equal termination** (`prev is head`) — infinite loop on cycles with all equal values.
+4. **Single-node empty case** — `if head is None` check missing → null-pointer dereference on `head.next`.
+5. **Returning `head` instead of `new_node`** — the spec wants the new node.
+6. **Mutating `head` during the walk** in language-specific ways — the algorithm doesn't need to mutate `head`; only `prev.next` changes once.
+7. **Layer 3: putting the `curr is head` check after the move** — would cause one extra iteration, occasionally inserting at the wrong spot for the all-equal case.
 
-#### 🏢 Sample Interviewer Quote
+#### ⚠️ Edge Cases
 
-> *"Insert into a sorted circular linked list. Return the new node."*
+- Empty list (`head is None`) → singleton self-loop containing `insertVal`.
+- Single-node list — `prev = curr = head`. Case 1 fires (any value is between `head.val` and `head.val`)? No, only if `insertVal == head.val`. Otherwise `prev.val == curr.val` so `prev.val > curr.val` is false, Case 2 also fails. Loop exits via Case 3 (`prev is head`). Insert before `head`. Correct.
+- All equal values → Case 3 termination, insert anywhere.
+- New minimum or new maximum → Case 2 at the wrap point.
+- Inserting an existing value → Case 1 picks any equal-valued spot; the result has duplicates adjacent.
+- Cycle of 2 nodes with different values (e.g., 1 ⇄ 2): the wrap is between the two nodes; correctly handled.
+- Very long all-equal cycle (n = 10⁶): O(n) walk; fast in CPython, dominated by pointer chase.
+
+#### 🔑 Key Takeaways
+
+> **Three cases**: in-run (`prev ≤ v ≤ curr`), wrap-point with extreme `v`, and full-lap fallthrough. Forgetting any of the three is the most common bug.
+>
+> The **wrap point fires exactly once per lap** — it's the unique pair where `prev.val > curr.val`. Use it as the marker for "new extreme value goes here."
+>
+> Always **terminate after a full lap** (`prev is head`); without it, all-equal-values input loops forever.
+
+#### 🎯 Pattern Used
+
+**Single-pass walk with wrap-aware splice.** Same template: insert into a circular sorted buffer, schedule into a sorted timer wheel, find the gap in a circular sequence.
 
 ---
 
 ### Problem 32 — Plus One Linked List
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span>
 
-> Given a non-negative integer represented as a linked list (most-significant digit first, **not** reversed), increment by 1. Return the head.
+> Given a non-negative integer represented as a non-empty linked list of digits, **most-significant digit first**, plus one to the integer. The digits are stored such that the head holds the most-significant digit. (LeetCode 369.)
 
 #### 📖 Story Mode
 
-`1 → 2 → 3` → `1 → 2 → 4`.
-`1 → 2 → 9` → `1 → 3 → 0`.
-`9 → 9 → 9` → `1 → 0 → 0 → 0` (carry creates a new head).
+```
+input :   1 → 2 → 3            (123)
+output:   1 → 2 → 4            (124)
 
-#### 🐍 Solution — find rightmost non-9, increment, zero the rest
+input :   1 → 2 → 9            (129)
+output:   1 → 3 → 0            (130)        carry into the tens place
 
-```python
-def plus_one(head):
-    dummy = ListNode(0, head)
-    not_nine = dummy           # rightmost node with val != 9
-    node = head
-    while node:
-        if node.val != 9: not_nine = node
-        node = node.next
-    not_nine.val += 1
-    node = not_nine.next
-    while node:
-        node.val = 0
-        node = node.next
-    return dummy if dummy.val == 1 else dummy.next
+input :   9 → 9 → 9            (999)
+output:   1 → 0 → 0 → 0        (1000)       carry escapes the head — new node!
+
+input :   0
+output:   1
+
+input :   1
+output:   2
 ```
 
-O(n) time, O(1) space.
+The MSB-first ordering is the spice: the carry naturally flows **right-to-left**, but the list is wired left-to-right. We can't just walk forward and add a 1 — we need to find the right place to start, or process the list from its tail.
+
+#### 🌍 Real-World Usage
+
+- **Big-number arithmetic** — incrementing version numbers, transaction IDs, monotonic sequence generators stored as MSB-first linked digits.
+- **Date arithmetic with mixed bases** (60s/60m/24h) — the same carry-propagation logic generalises to any base.
+- **Counter increments in distributed systems** where the counter is stored as a linked digit chain (rare, but appears in custom number formats).
+- **Educational** — clarifies the contract between digit order and arithmetic direction.
+
+#### 🧠 Thinking Process
+
+Three respectable approaches:
+
+1. **Reverse, add 1 with carry, reverse back.** Standard LSB-first addition. Works but mutates twice; the constant factor is bad.
+
+2. **Recursive carry from the deepest digit.** Recursion bottoms out at the tail; the unwind propagates the carry. Beautiful, but stack-bound by list length.
+
+3. **The "rightmost non-9" trick (the elegant one).** Walk once to find the **rightmost digit that isn't 9**. Increment that digit; zero everything to its right. If no such digit exists (`999...9`), insert a new leading `1` and zero the rest. **O(n) time, O(1) space, single forward pass.**
+
+The trick works because incrementing `..., d, 9, 9, 9` (where `d ≠ 9`) is exactly `..., d+1, 0, 0, 0`. The carry stops at the first non-9 from the right; nothing further left is affected.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Reverse, increment, reverse back"
+
+    Straightforward, but mutates the list direction twice.
+
+    ```python
+    from __future__ import annotations
+
+
+    class ListNode:
+        def __init__(self, val: int = 0, nxt: "ListNode | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    def plus_one_reverse(head: ListNode) -> ListNode:
+        def reverse(h: ListNode | None) -> ListNode | None:
+            prev = None
+            cur = h
+            while cur:
+                cur.next, prev, cur = prev, cur, cur.next
+            return prev
+
+        head = reverse(head)
+        # Now head is LSB. Add 1 with carry.
+        cur = head
+        carry = 1
+        while cur and carry:
+            total = cur.val + carry
+            cur.val = total % 10
+            carry = total // 10
+            if carry and cur.next is None:
+                cur.next = ListNode(carry)
+                carry = 0
+                break
+            cur = cur.next
+        return reverse(head)
+    ```
+
+    O(n) time, O(1) space; **mutates the list direction** (visible to callers if they're holding internal references).
+
+=== "Layer 2 — Rightmost non-9 trick ⭐"
+
+    The canonical one-pass solution.
+
+    ```python
+    from __future__ import annotations
+
+
+    def plus_one(head: ListNode) -> ListNode:
+        dummy = ListNode(0, head)
+        not_nine = dummy                  # rightmost node with val != 9 so far
+        cur = head
+        while cur:
+            if cur.val != 9:
+                not_nine = cur
+            cur = cur.next
+
+        # Increment the rightmost non-9, zero everything to its right
+        not_nine.val += 1
+        cur = not_nine.next
+        while cur:
+            cur.val = 0
+            cur = cur.next
+
+        # If we incremented the dummy (i.e., all digits were 9), the dummy is now
+        # the new head with val = 1
+        return dummy if dummy.val == 1 else dummy.next
+    ```
+
+    O(n) time, **O(1) space**, single forward walk (plus a partial second walk for the zero-out).
+
+=== "Layer 3 — Recursive carry-propagation"
+
+    Clean, but stack-bound.
+
+    ```python
+    from __future__ import annotations
+
+
+    def plus_one_recursive(head: ListNode) -> ListNode:
+        def add_one(node: ListNode | None) -> int:
+            """Returns carry. Root call passes head; we add 1 at the deepest digit."""
+            if node is None:
+                return 1                      # the +1 from outside
+            carry = add_one(node.next)
+            total = node.val + carry
+            node.val = total % 10
+            return total // 10
+
+        carry = add_one(head)
+        if carry:
+            head = ListNode(carry, head)
+        return head
+    ```
+
+    O(n) time, **O(n) recursion stack**. Fails on long inputs in CPython (default recursion limit 1000).
+
+=== "Layer 4 — Two-pointer 'find first 9 in trailing run'"
+
+    Refinement of Layer 2 that exploits the same insight: stop the rightmost-non-9 search early once you know you're past it. Same complexity, just a slight constant-factor win for nearly-no-9 inputs.
+
+    ```python
+    from __future__ import annotations
+
+
+    def plus_one_two_pointer(head: ListNode) -> ListNode:
+        dummy = ListNode(0, head)
+        last_non9 = dummy
+        cur = head
+        # Single forward pass; tracking last non-9 inline
+        while cur:
+            if cur.val != 9:
+                last_non9 = cur
+            cur = cur.next
+        last_non9.val += 1
+        node = last_non9.next
+        while node:
+            node.val = 0
+            node = node.next
+        return dummy if dummy.val == 1 else dummy.next
+    ```
+
+    Identical to Layer 2 in structure (intentional — there's no algorithmic improvement available beyond Layer 2).
+
+=== "Layer 5 — Production: doubly-linked tail-walk (O(1) extra space, no second pass)"
+
+    With a doubly-linked list (or a tail pointer maintained alongside), we can walk from the tail and stop on the first non-9, without the prior forward scan.
+
+    ```python
+    from __future__ import annotations
+
+
+    class DListNode:
+        def __init__(self, val: int = 0) -> None:
+            self.val = val
+            self.prev: "DListNode | None" = None
+            self.next: "DListNode | None" = None
+
+
+    def plus_one_doubly(head: DListNode | None, tail: DListNode | None) -> tuple[DListNode, DListNode]:
+        """Returns (new_head, new_tail). If carry escapes head, prepends a new node."""
+        cur = tail
+        while cur and cur.val == 9:
+            cur.val = 0
+            cur = cur.prev
+
+        if cur is None:
+            # All digits were 9 — prepend a new leading 1
+            new_head = DListNode(1)
+            new_head.next = head
+            if head: head.prev = new_head
+            return (new_head, tail)
+        cur.val += 1
+        return (head, tail)
+    ```
+
+    True **single-pass O(carry-length)** in the average case (only walks back as far as the trailing 9s). With a singly-linked list and a separate tail pointer maintained, we'd still need the forward scan to find non-9, so the doubly-linked structure is what unlocks the constant-factor gain.
+
+#### 🔎 Step-by-Step Dry Run
+
+`head = 1 → 2 → 9 → 9` (1299), Layer 2.
+
+Initial: `dummy.val = 0`, `dummy.next = head`. `not_nine = dummy`, `cur = 1`.
+
+| Iter | `cur.val` | `cur.val != 9`? | `not_nine` after        | `cur` after  |
+|------|-----------|-----------------|--------------------------|---------------|
+| 1    | 1         | yes             | node holding 1           | node 2        |
+| 2    | 2         | yes             | node holding 2           | node 9 (first)|
+| 3    | 9         | no              | unchanged (still 2)      | node 9 (second)|
+| 4    | 9         | no              | unchanged (still 2)      | None          |
+
+After loop: `not_nine` points at the `2`.
+
+Increment: `not_nine.val = 3`. Now: `dummy → 1 → 3 → 9 → 9`.
+
+Zero-out trailing: walk from `not_nine.next = 9 (first)`:
+- set to 0 → `dummy → 1 → 3 → 0 → 9`
+- next is 9 (second), set to 0 → `dummy → 1 → 3 → 0 → 0`
+- next is None → exit.
+
+`dummy.val == 0`, so return `dummy.next = 1 → 3 → 0 → 0` (1300) ✅.
+
+Now the all-9 case: `head = 9 → 9 → 9` (999).
+
+Initial: `dummy.val = 0`, `not_nine = dummy`, `cur = 9`.
+
+| Iter | `cur.val` | `cur.val != 9`? | `not_nine`            |
+|------|-----------|-----------------|-----------------------|
+| 1    | 9         | no              | dummy                 |
+| 2    | 9         | no              | dummy                 |
+| 3    | 9         | no              | dummy                 |
+
+After loop: `not_nine = dummy`. `dummy.val = 1`. Zero-out from `dummy.next = 9` (first):
+- set 0, set 0, set 0.
+
+Return `dummy` (because `dummy.val == 1`): `1 → 0 → 0 → 0` (1000) ✅.
+
+#### 📊 Complexity
+
+| Layer                          | Time | Space        | Pros / Cons                                  |
+|--------------------------------|------|--------------|----------------------------------------------|
+| Layer 1 — reverse twice        | O(n) | O(1) extra   | Mutates direction twice; ugly                |
+| Layer 2 — rightmost non-9 ⭐   | O(n) | **O(1)**     | The interview default                        |
+| Layer 3 — recursive            | O(n) | O(n) stack   | Beautiful; stack-bound                       |
+| Layer 4 — restated Layer 2     | O(n) | O(1)         | No real gain; included for completeness      |
+| Layer 5 — doubly-linked tail-walk | O(carry length) avg | O(1) | Production; needs `.prev` pointers     |
+
+#### ❓ Follow-ups
+
+??? question "Why does the 'rightmost non-9' trick work?"
+    Incrementing a number written `... d 9 9 9` (where `d` is the rightmost non-9) gives `... (d+1) 0 0 0`. The carry stops at `d`. Nothing left of `d` is affected. So the algorithm reduces to: find `d`, bump it, zero the trailing 9s. Works for any base — adapt the "9" to "base-1."
+
+??? question "What if all digits are 9?"
+    Then there is no rightmost non-9, and the trick falls back on the dummy: incrementing `dummy.val = 0` to `1` gives the new leading digit. Layer 2 handles this seamlessly with the `dummy if dummy.val == 1 else dummy.next` return.
+
+??? question "Why use a dummy node instead of just checking `head.val == 0` after?"
+    The dummy gives us a stable "node before the head" reference for the all-9 case. Without it, we'd need a separate branch to allocate a new head when the carry escapes.
+
+??? question "Generalize to plus K instead of plus 1."
+    Layer 2's trick breaks (the carry can be > 1 from the start). Use Layer 1 (reverse + LSB add) or Layer 3 (recursive) instead. Both natively handle multi-digit carries.
+
+??? question "What's the time complexity if the input is mostly non-9?"
+    Still O(n) worst case for Layer 2 because we need to scan all digits to find the rightmost non-9 (we can't stop early — a later non-9 overrides an earlier one). Layer 5 with doubly-linked walks back from tail in O(carry length), making average inputs sub-linear.
+
+??? question "Can we do this in-place without modifying any digit values until the very end?"
+    Not really — incrementing requires writing. But you *can* batch the writes: walk forward, accumulate the rightmost-non-9 pointer, then do exactly one increment + the zero-out sweep. Layer 2 does this.
+
+??? question "What if the input may contain leading zeros (e.g. `0 → 0 → 1` for the number 1)?"
+    Per spec, leading zeros aren't allowed (except for the number 0 itself). If they appeared, the algorithm still produces a numerically correct result, but the representation might keep the leading zero (e.g. `0 → 0 → 2`). Strip them in a post-pass if needed.
 
 #### 🐛 Common Bugs
 
-1. **Carry propagation without dummy** — overlooks the new-head case for `999`.
-2. **Reversing the list** — works, but O(n) extra writes; the trick above does it cleaner.
+1. **Forgetting the all-9 case**, returning `dummy.next` always — outputs `0 → 0 → 0` for `999`. Use the conditional return.
+2. **Walking carry from the head forward** — wrong direction; carry needs to flow right-to-left.
+3. **Reversing the list and forgetting to reverse back** (Layer 1) — caller sees a reversed list.
+4. **Off-by-one in zero-out** — starting from `not_nine` instead of `not_nine.next` would zero the digit we just incremented.
+5. **Layer 3: missing the `+1` handoff** — the deepest call must return `1`, not `0`. The base case is the source of the carry.
+6. **Returning the wrong head** — confusing `dummy` with `dummy.next`. The conditional `dummy if dummy.val == 1 else dummy.next` is the rule.
+
+#### ⚠️ Edge Cases
+
+- `head = 0` (single zero) → returns `1`. Correct: `not_nine = head` (since 0 ≠ 9), increment to 1.
+- `head = 9` (single nine) → returns `1 → 0`. Carry escapes; dummy becomes the new head with val = 1.
+- `head = 1` → `2`. Trivial.
+- All digits 0 except trailing 9s (e.g., `1 → 0 → 9 → 9 → 9`) → `1 → 1 → 0 → 0 → 0`.
+- Leading 0 already (defensive, not per spec) — algorithm works numerically; leading zero remains.
+- Very long all-9 list (1000+ nines): Layer 2 still O(n), Layer 3 risks `RecursionError`.
+
+#### 🔑 Key Takeaways
+
+> **The "rightmost non-9" trick** is the cleanest way to add 1 to an MSB-first big number. It avoids reversing the list and avoids recursion.
+>
+> The **dummy node** lets us handle the carry-escapes-the-head case (`999 → 1000`) in the same control flow as the normal case. Always reach for a dummy when the head might change.
+>
+> Carry propagation in MSB-first representations naturally requires either reversing, recursing, or being clever about where the carry stops. The "rightmost non-9" approach is the third option.
+
+#### 🎯 Pattern Used
+
+**Single forward scan to locate the carry-stop, then in-place update.** Same template: any "increment a digit string" or "find the right edge of a trailing run of repeats and update one position before it" problem.
 
 ---
 
 ### Problem 33 — Design Phone Directory
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Bloomberg</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Bloomberg</span> <span class="company-tag">Amazon</span>
 
 > Design `PhoneDirectory(maxNumbers)` with:
+>
 > - `get()` — provide a free number; -1 if none.
 > - `check(number)` — is `number` available?
 > - `release(number)` — recycle a number.
 >
-> All ops average O(1).
+> All ops in average O(1). (LeetCode 379.)
 
-#### 🐍 Solution — set + linked list of free numbers
+#### 📖 Story Mode
 
-```python
-class PhoneDirectory:
-    def __init__(self, max_numbers: int) -> None:
-        self._free = list(range(max_numbers))      # treated as a stack
-        self._used: set[int] = set()
-        self._max = max_numbers
-
-    def get(self) -> int:
-        if not self._free: return -1
-        n = self._free.pop()
-        self._used.add(n)
-        return n
-
-    def check(self, number: int) -> bool:
-        return 0 <= number < self._max and number not in self._used
-
-    def release(self, number: int) -> None:
-        if number in self._used:
-            self._used.remove(number)
-            self._free.append(number)
+```
+PhoneDirectory(3)
+get()        # 0   (free pool: {1, 2})
+get()        # 1   (free pool: {2})
+check(2)     # True
+get()        # 2   (free pool: {})
+check(2)     # False (just allocated)
+get()        # -1  (pool exhausted)
+release(2)   # free pool: {2}
+check(2)     # True
+get()        # 2   (re-issued)
 ```
 
-A list-as-stack works, but a linked list of free numbers gives the same O(1) and is a more "data-structures" answer if asked specifically.
+The challenge is making **all three operations O(1)**, including `release`. Naively scanning a boolean array works for `get` but `release` would be O(1) only if you also track the free pool explicitly.
+
+#### 🌍 Real-World Usage
+
+- **DHCP IP-address pool management** — allocate/release IPs from a finite pool.
+- **TCP/UDP port allocators** — operating systems hand out ephemeral ports.
+- **Connection pool / thread pool slot management** in databases and web servers.
+- **Game-server slot allocation** — match players to seats.
+- **Object pools** in game engines and high-perf systems where allocation cost matters.
+
+#### 🧠 Thinking Process
+
+The trick is choosing **two cooperating structures**:
+
+- A **stack/queue/linked list** of currently-free numbers — gives O(1) `pop` for `get` and O(1) `push` for `release`.
+- A **set / boolean array** of currently-used numbers — gives O(1) `check`, and prevents double-release (releasing a number that's already free would corrupt the free pool).
+
+`get` pops the free pool and adds to used. `release` removes from used and pushes onto the free pool. `check` is `not in used`.
+
+**Why not just a set of free numbers?** Sets don't support "give me any element in O(1)" cleanly — Python's `next(iter(s))` works but feels brittle. A list-as-stack or `collections.deque` is cleaner.
+
+**Why not a single bitmap?** `check` and `release` are O(1) on a bitmap, but `get` requires finding the first free bit — which is O(n / 64) at best (or O(log n) with a hierarchical bitmap). The stack approach gives true O(1).
+
+#### 🐍 5 Layers of Solution
+
+=== "Layer 1 — Linear scan over a boolean array (brute)"
+
+    ```python
+    class PhoneDirectoryBrute:
+        def __init__(self, max_numbers):
+            self._used = [False] * max_numbers
+
+        def get(self):
+            for i, u in enumerate(self._used):
+                if not u:
+                    self._used[i] = True
+                    return i
+            return -1
+
+        def check(self, number):
+            return 0 <= number < len(self._used) and not self._used[number]
+
+        def release(self, number):
+            if 0 <= number < len(self._used):
+                self._used[number] = False
+    ```
+
+    **`get` is O(n)**. `check`/`release` are O(1). Easy to whiteboard, fails the "all O(1)" requirement.
+
+=== "Layer 2 — Stack of free numbers + set of used ⭐"
+
+    ```python
+    class PhoneDirectory:
+        def __init__(self, max_numbers):
+            self._free = list(range(max_numbers))   # stack of free numbers
+            self._used = set()                       # currently issued
+            self._max = max_numbers
+
+        def get(self):
+            if not self._free:
+                return -1
+            n = self._free.pop()
+            self._used.add(n)
+            return n
+
+        def check(self, number):
+            return 0 <= number < self._max and number not in self._used
+
+        def release(self, number):
+            if number in self._used:
+                self._used.remove(number)
+                self._free.append(number)
+    ```
+
+    All O(1). Memory: O(max_numbers) for the initial free list. Note we guard `release` to prevent double-release from corrupting the free pool.
+
+=== "Layer 3 — Linked list of free + set of used"
+
+    For interviewers who specifically want a linked-list-based answer (this is a chapter on linked lists):
+
+    ```python
+    from collections import deque
+
+
+    class PhoneDirectoryLL:
+        def __init__(self, max_numbers):
+            self._free = deque(range(max_numbers))   # deque IS a doubly-linked list internally
+            self._used = set()
+            self._max = max_numbers
+
+        def get(self):
+            if not self._free:
+                return -1
+            n = self._free.popleft()
+            self._used.add(n)
+            return n
+
+        def check(self, number):
+            return 0 <= number < self._max and number not in self._used
+
+        def release(self, number):
+            if number in self._used:
+                self._used.remove(number)
+                self._free.append(number)            # newest goes to the back
+    ```
+
+    Same semantics as Layer 2 but `popleft` is FIFO (recycle the oldest released number) — useful when you want to delay re-issuing recently-released numbers (e.g., to avoid confusion in support tickets after a phone hand-back).
+
+=== "Layer 4 — Production-ready"
+
+    ```python
+    from __future__ import annotations
+    from collections import deque
+
+
+    class PhoneDirectory:
+        """Bounded number pool with O(1) get / release / check.
+
+        Backed by a deque of free numbers (FIFO recycle order) and a set of
+        currently-issued numbers. The set guards against double-release and
+        backs the O(1) `check`.
+        """
+
+        def __init__(self, max_numbers: int) -> None:
+            if max_numbers < 0:
+                raise ValueError("max_numbers must be non-negative")
+            self._free: deque[int] = deque(range(max_numbers))
+            self._used: set[int] = set()
+            self._max = max_numbers
+
+        def get(self) -> int:
+            """Return any free number, or -1 if the pool is exhausted.
+
+            Time: O(1).
+            """
+            if not self._free:
+                return -1
+            n = self._free.popleft()
+            self._used.add(n)
+            return n
+
+        def check(self, number: int) -> bool:
+            """Is `number` currently available (i.e., not issued)?
+
+            Time: O(1).
+            """
+            return 0 <= number < self._max and number not in self._used
+
+        def release(self, number: int) -> None:
+            """Recycle `number`. No-op if `number` is not currently issued.
+
+            Time: O(1).
+            """
+            if number in self._used:
+                self._used.remove(number)
+                self._free.append(number)
+    ```
+
+=== "Layer 5 — Variants"
+
+    **Variant A — lazy initialization.** When `max_numbers` is huge (10⁹) and you don't want to build a full free list upfront, use a counter `_next_unused` plus a stack of recycled numbers. `get` returns from the recycled stack first, else `_next_unused++`.
+
+    ```python
+    class PhoneDirectoryLazy:
+        def __init__(self, max_numbers):
+            self._max = max_numbers
+            self._next = 0
+            self._recycled = []                # stack
+            self._used = set()
+
+        def get(self):
+            if self._recycled:
+                n = self._recycled.pop()
+            elif self._next < self._max:
+                n = self._next; self._next += 1
+            else:
+                return -1
+            self._used.add(n)
+            return n
+
+        def check(self, number):
+            return 0 <= number < self._max and number not in self._used
+
+        def release(self, number):
+            if number in self._used:
+                self._used.remove(number)
+                self._recycled.append(number)
+    ```
+
+    O(max_numbers) memory only as it grows.
+
+    **Variant B — bitmap with hierarchical free-bit search.** O(log n) `get` but very memory-efficient. Used in OS kernels.
+
+    **Variant C — TTL on issued numbers.** Each `get` records a timestamp; a background sweep auto-releases numbers held for too long.
+
+    **Variant D — concurrent.** Wrap the deque + set in a lock, or use `queue.Queue` + a thread-safe set. For high concurrency, shard by `number % shards`.
+
+    **Variant E — preferred-number reservation.** Allow `get(preferred=N)` to atomically issue a specific number if available. Useful for "vanity" number requests.
+
+#### 🔍 Dry Run
+
+`PhoneDirectory(3)`:
+
+| op | free (deque) | used (set) | returns |
+|----|-------------|-----------|---------|
+| init | [0, 1, 2] | {} | — |
+| get() | [1, 2] | {0} | 0 |
+| get() | [2] | {0, 1} | 1 |
+| check(2) | unchanged | unchanged | True |
+| get() | [] | {0, 1, 2} | 2 |
+| check(2) | unchanged | unchanged | False |
+| get() | [] | {0, 1, 2} | -1 |
+| release(2) | [2] | {0, 1} | — |
+| check(2) | unchanged | unchanged | True |
+| release(2) | unchanged | unchanged | (no-op, idempotent) |
+| get() | [] | {0, 1, 2} | 2 |
+
+Note `release(2)` called twice — the second call is a no-op (number not in used), no corruption. ✅
+
+#### ⏱️ Complexity
+
+| Approach | `get` | `check` | `release` | Memory |
+|----------|------:|--------:|----------:|-------:|
+| Linear scan (brute) | O(n) | O(1) | O(1) | O(n) |
+| **Deque + set** ⭐ | **O(1)** | **O(1)** | **O(1)** | **O(n)** |
+| Lazy + recycled stack | O(1) | O(1) | O(1) | O(issued + recycled) |
+| Hierarchical bitmap | O(log n) | O(1) | O(log n) | O(n / 64) |
+
+#### 🎯 Pattern Used
+
+**Free-pool + used-set duality.** Same template for any "allocate a slot from a finite pool" problem: thread/connection/object pools, port allocators, IP managers. The key insight is that `release` needs O(1) — and that requires storing the free pool explicitly, not deriving it from the used set on every call.
+
+#### 🔄 Interviewer Follow-ups
+
+??? question "Follow-up 1 — Why not just a `set` of free numbers (no used set)?"
+    `set.pop()` returns *some* element in O(1) (any iteration order). That works for `get`. But `check(n)` becomes "n in free" — inverted from the natural API. Two-set design (free + used, or free-set + bitmap) is cleaner and matches the typical real-world API where "is allocated" is the common query.
+
+??? question "Follow-up 2 — Why guard `release` with `if number in used`?"
+    Without the guard, `release(5)` followed by `release(5)` would push 5 onto the free pool twice — corrupting the invariant that each number appears at most once. Eventually `get` would issue the same number to two callers.
+
+??? question "Follow-up 3 — `max_numbers = 10⁹` — does Layer 2 still work?"
+    No — building `list(range(10⁹))` allocates 10⁹ ints. Use Variant A (lazy): a counter for never-issued numbers + a small stack of recycled ones. Memory grows with the number of *issued* (or recycled) numbers, not the total pool size.
+
+??? question "Follow-up 4 — How would you make this thread-safe?"
+    Wrap operations in a `threading.Lock`. For high contention, shard the pool by `number % num_shards` so each shard has its own lock; `get` round-robins across shards.
+
+??? question "Follow-up 5 — Recycle order — LIFO vs FIFO?"
+    LIFO (stack): hot cache locality, recently-released numbers re-issued first. FIFO (queue): more "fair" in the sense of letting recently-released numbers cool down — useful when number identity matters (e.g., to avoid confusion in customer-support tickets after a hand-back).
+
+??? question "Follow-up 6 — Persistence."
+    Store `(used set, max_numbers)` in a backing store; on startup, rebuild the free deque as `range(max) - used`. Or maintain a write-ahead log of `get`/`release` events.
+
+??? question "Follow-up 7 — Allow `get(preferred=N)`?"
+    Add a method that atomically removes N from the free deque (O(n)!) or maintains a `set` of free numbers in addition. The `set`-of-free upgrade makes `get(preferred=N)` O(1) but `get()` (any number) requires picking some element from the set — slightly less ergonomic.
+
+??? question "Follow-up 8 — How does this compare to OS port allocation?"
+    Linux ephemeral-port allocation uses a hash table of in-use ports plus a starting search hint; on conflict it linearly probes. Performance is typically O(1) amortized but worst-case O(port_range) under heavy churn — same trade-off space.
+
+#### 🐛 Common Bugs
+
+1. **Forgetting the `if number in used` guard in `release`** — allows double-release to corrupt the free pool.
+2. **Returning `0` (a valid number) instead of `-1`** when the pool is exhausted.
+3. **Not validating `number < max_numbers`** in `check` and `release` — out-of-range inputs silently corrupt state.
+4. **Building `list(range(huge_max))` upfront** when most numbers will never be used (use Variant A).
+5. **Iterating `_used` to compute `_free`** on each `get` — that's the brute approach, O(n).
+6. **Forgetting `0 <=` on the `check` range guard** — negative numbers report as "free."
+7. **Race condition** in concurrent code: `get` reads `len(free)`, then a second thread also `pop()`s — guard with a lock.
+
+#### ✅ Edge Cases Checklist
+
+- [ ] `max_numbers = 0` → every `get` returns -1; `check(any)` returns False
+- [ ] Single-number pool (`max_numbers = 1`)
+- [ ] All numbers issued → next `get` returns -1
+- [ ] `release` an already-free number → no-op (idempotent)
+- [ ] `release` a number outside `[0, max)` → no-op (defensive)
+- [ ] `check` on a number outside `[0, max)` → False
+- [ ] Stress: get/release tight loop on a small pool — must remain O(1) per op
+- [ ] After full issue + full release, pool returns to fully-free state
+
+#### 🏢 Sample Interviewer Quote
+
+> *"Design a phone directory that hands out and recycles numbers, all O(1)."*
+
+Your opener: *"Two structures: a deque of currently-free numbers (gives O(1) `get` via `popleft`) and a set of currently-issued numbers (gives O(1) `check` and prevents double-release). Initialize the deque with `range(max_numbers)`. `release` checks the set first — idempotent — then moves the number from used to free. All three operations O(1)."*
 
 ---
 
 ### Problem 34 — Design Linked List
 
-<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span>
+<span class="diff-medium">Medium</span> &nbsp; <span class="company-tag">Microsoft</span> <span class="company-tag">Amazon</span> <span class="company-tag">Bloomberg</span>
 
-> Implement `MyLinkedList` with: `get(index)`, `addAtHead(val)`, `addAtTail(val)`, `addAtIndex(index, val)`, `deleteAtIndex(index)`. All operations in standard linked-list complexity.
+> Design your implementation of the linked list. You can choose to use a singly or doubly linked list. A node in a singly linked list should have two attributes: `val` and `next`. `val` is the value of the current node, and `next` is a pointer/reference to the next node. Implement: `get(index)`, `addAtHead(val)`, `addAtTail(val)`, `addAtIndex(index, val)`, `deleteAtIndex(index)`. (LeetCode 707.)
 
-#### 🐍 Solution
+#### 📖 Story Mode
 
-A wrapper over `ListNode` with a head sentinel and cached size.
-
-```python
-class MyLinkedList:
-    def __init__(self) -> None:
-        self._head = ListNode()       # sentinel
-        self._size = 0
-
-    def get(self, index: int) -> int:
-        if index < 0 or index >= self._size: return -1
-        node = self._head.next
-        for _ in range(index): node = node.next
-        return node.val
-
-    def add_at_head(self, val: int) -> None:
-        self.add_at_index(0, val)
-
-    def add_at_tail(self, val: int) -> None:
-        self.add_at_index(self._size, val)
-
-    def add_at_index(self, index: int, val: int) -> None:
-        if index < 0 or index > self._size: return
-        prev = self._head
-        for _ in range(index): prev = prev.next
-        prev.next = ListNode(val, prev.next)
-        self._size += 1
-
-    def delete_at_index(self, index: int) -> None:
-        if index < 0 or index >= self._size: return
-        prev = self._head
-        for _ in range(index): prev = prev.next
-        prev.next = prev.next.next
-        self._size -= 1
+```
+ll = MyLinkedList()
+ll.add_at_head(1)            list: 1
+ll.add_at_tail(3)            list: 1 → 3
+ll.add_at_index(1, 2)        list: 1 → 2 → 3
+ll.get(1)                    → 2
+ll.delete_at_index(1)        list: 1 → 3
+ll.get(1)                    → 3
+ll.get(5)                    → -1            (out of range)
+ll.add_at_index(-1, 99)      no-op           (negative index)
+ll.add_at_index(2, 4)        list: 1 → 3 → 4 (index == size is allowed for add)
 ```
 
-`get`, `add_at_index`, `delete_at_index` are O(index). `add_at_head` is O(1). `add_at_tail` is O(n) without a tail pointer; add a tail pointer to make it O(1).
+The classic "implement a linked list from scratch" interview problem. The interesting design choices: **sentinel head** (yes, always — it removes ~50% of edge cases), **tail pointer** (yes, makes `addAtTail` O(1)), and **doubly linked** (lets you walk from either end, halving the average index walk).
+
+#### 🌍 Real-World Usage
+
+- **Educational** — implementing this is a rite of passage for systems courses; Linux kernel's `list_head` is essentially this in C.
+- **Custom allocators** — a free-list of memory blocks is exactly a linked list with `addAt*` and `deleteAt*` calls.
+- **Round-robin schedulers** — queue implementations often start as singly-linked-with-tail.
+- **LRU/LFU cache internals** — these depend on doubly-linked nodes for O(1) splicing (P24, P28).
+- **Persistent structures** — functional language list implementations (Lisp, OCaml).
+
+#### 🧠 Thinking Process
+
+Three tiers of implementation, each strictly better than the last:
+
+1. **Singly linked, sentinel head only.** `get`, `addAtIndex`, `deleteAtIndex` are O(min(index, size − index))? No — without back pointers, they're **O(index)** because we walk from head. `addAtHead` is O(1); `addAtTail` is O(size).
+
+2. **Singly linked, sentinel head + tail pointer.** `addAtTail` becomes O(1). Other operations unchanged. The tail pointer must be carefully maintained on `addAtIndex(size, ...)` and `deleteAtIndex(size - 1)`.
+
+3. **Doubly linked, sentinel head + sentinel tail + tail pointer.** Now `addAtIndex(index)` walks from whichever end is closer — `O(min(index, size − index))`. `deleteAtIndex` becomes O(1) given a node reference (rare in this API, but clean for internal use).
+
+The sentinel pattern is universal — it lets `addAtIndex(0, ...)` and `addAtIndex(size, ...)` behave identically to interior insertions, removing the special cases.
+
+#### 🐍 Solutions
+
+=== "Layer 1 — Singly linked, sentinel head only"
+
+    The minimum viable implementation.
+
+    ```python
+    from __future__ import annotations
+
+
+    class _Node:
+        __slots__ = ("val", "next")
+
+        def __init__(self, val: int = 0, nxt: "_Node | None" = None) -> None:
+            self.val = val
+            self.next = nxt
+
+
+    class MyLinkedListSimple:
+        def __init__(self) -> None:
+            self._head = _Node()                # sentinel
+            self._size = 0
+
+        def get(self, index: int) -> int:
+            if not 0 <= index < self._size:
+                return -1
+            node = self._head.next
+            for _ in range(index):
+                assert node is not None        # guarded by size check
+                node = node.next
+            return node.val
+
+        def add_at_head(self, val: int) -> None:
+            self.add_at_index(0, val)
+
+        def add_at_tail(self, val: int) -> None:
+            self.add_at_index(self._size, val)
+
+        def add_at_index(self, index: int, val: int) -> None:
+            if not 0 <= index <= self._size:
+                return
+            prev = self._head
+            for _ in range(index):
+                prev = prev.next
+            prev.next = _Node(val, prev.next)
+            self._size += 1
+
+        def delete_at_index(self, index: int) -> None:
+            if not 0 <= index < self._size:
+                return
+            prev = self._head
+            for _ in range(index):
+                prev = prev.next
+            prev.next = prev.next.next
+            self._size -= 1
+    ```
+
+    `addAtHead`: O(1). `addAtTail`: O(n). `get`/`addAtIndex`/`deleteAtIndex`: O(index).
+
+=== "Layer 2 — Singly linked + tail pointer ⭐"
+
+    Adds a tail pointer. `addAtTail` becomes O(1). The interview default.
+
+    ```python
+    from __future__ import annotations
+
+
+    class MyLinkedList:
+        def __init__(self) -> None:
+            self._head = _Node()
+            self._tail: _Node = self._head      # tail = sentinel when empty
+            self._size = 0
+
+        def get(self, index: int) -> int:
+            if not 0 <= index < self._size:
+                return -1
+            node = self._head.next
+            for _ in range(index):
+                node = node.next
+            return node.val
+
+        def add_at_head(self, val: int) -> None:
+            new_node = _Node(val, self._head.next)
+            self._head.next = new_node
+            if self._tail is self._head:        # was empty
+                self._tail = new_node
+            self._size += 1
+
+        def add_at_tail(self, val: int) -> None:
+            new_node = _Node(val)
+            self._tail.next = new_node
+            self._tail = new_node
+            self._size += 1
+
+        def add_at_index(self, index: int, val: int) -> None:
+            if index <= 0:
+                self.add_at_head(val)
+                return
+            if index == self._size:
+                self.add_at_tail(val)
+                return
+            if index > self._size:
+                return
+            prev = self._head
+            for _ in range(index):
+                prev = prev.next
+            prev.next = _Node(val, prev.next)
+            self._size += 1
+
+        def delete_at_index(self, index: int) -> None:
+            if not 0 <= index < self._size:
+                return
+            prev = self._head
+            for _ in range(index):
+                prev = prev.next
+            target = prev.next
+            prev.next = target.next
+            if target is self._tail:            # deleted the last node
+                self._tail = prev
+            self._size -= 1
+    ```
+
+    `addAtHead`/`addAtTail`: **O(1)**. `get`/`addAtIndex`/`deleteAtIndex`: O(index).
+
+=== "Layer 3 — Doubly linked with sentinels (production)"
+
+    Both sentinel head and sentinel tail; back-pointers; walk from the closer end on `get`.
+
+    ```python
+    from __future__ import annotations
+
+
+    class _DNode:
+        __slots__ = ("val", "prev", "next")
+
+        def __init__(self, val: int = 0) -> None:
+            self.val = val
+            self.prev: "_DNode | None" = None
+            self.next: "_DNode | None" = None
+
+
+    class MyLinkedListDoubly:
+        def __init__(self) -> None:
+            self._head = _DNode()
+            self._tail = _DNode()
+            self._head.next = self._tail
+            self._tail.prev = self._head
+            self._size = 0
+
+        def _node_at(self, index: int) -> _DNode:
+            """Walk from whichever end is closer."""
+            if index < self._size // 2:
+                node = self._head.next
+                for _ in range(index):
+                    node = node.next
+            else:
+                node = self._tail.prev
+                for _ in range(self._size - 1 - index):
+                    node = node.prev
+            return node
+
+        def get(self, index: int) -> int:
+            if not 0 <= index < self._size:
+                return -1
+            return self._node_at(index).val
+
+        def add_at_head(self, val: int) -> None:
+            self._insert_after(self._head, val)
+
+        def add_at_tail(self, val: int) -> None:
+            self._insert_before(self._tail, val)
+
+        def add_at_index(self, index: int, val: int) -> None:
+            if not 0 <= index <= self._size:
+                return
+            if index == self._size:
+                self.add_at_tail(val)
+            else:
+                self._insert_before(self._node_at(index), val)
+
+        def delete_at_index(self, index: int) -> None:
+            if not 0 <= index < self._size:
+                return
+            self._remove(self._node_at(index))
+
+        # ---- helpers ----------------------------------------------------------
+        def _insert_after(self, node: _DNode, val: int) -> _DNode:
+            new_node = _DNode(val)
+            new_node.prev = node
+            new_node.next = node.next
+            node.next.prev = new_node
+            node.next = new_node
+            self._size += 1
+            return new_node
+
+        def _insert_before(self, node: _DNode, val: int) -> _DNode:
+            return self._insert_after(node.prev, val)
+
+        def _remove(self, node: _DNode) -> None:
+            node.prev.next = node.next
+            node.next.prev = node.prev
+            self._size -= 1
+    ```
+
+    `addAtHead`/`addAtTail`: **O(1)**. `get`/`addAtIndex`/`deleteAtIndex`: **O(min(index, size − index))** — half the work on average.
+
+=== "Layer 4 — Variant: thread-safe linked list"
+
+    Coarse-grained `threading.Lock` for correctness; per-node locks for performance (advanced).
+
+    ```python
+    from __future__ import annotations
+    import threading
+
+
+    class ThreadSafeLinkedList(MyLinkedList):
+        def __init__(self) -> None:
+            super().__init__()
+            self._lock = threading.Lock()
+
+        def get(self, index: int) -> int:
+            with self._lock:
+                return super().get(index)
+
+        def add_at_head(self, val: int) -> None:
+            with self._lock:
+                super().add_at_head(val)
+
+        def add_at_tail(self, val: int) -> None:
+            with self._lock:
+                super().add_at_tail(val)
+
+        def add_at_index(self, index: int, val: int) -> None:
+            with self._lock:
+                super().add_at_index(index, val)
+
+        def delete_at_index(self, index: int) -> None:
+            with self._lock:
+                super().delete_at_index(index)
+    ```
+
+    Trivial wrapper. For higher concurrency, use **hand-over-hand locking** (each thread holds at most two adjacent node locks while traversing). Outside scope but worth mentioning.
+
+=== "Layer 5 — Skiplist alternative"
+
+    For an "indexed linked list" with `get(index)` faster than O(index), the standard structure is a **skiplist** (Problem 29). It provides expected O(log n) for all operations. Use when n is large and `get` is hot.
+
+    ```python
+    # Sketch — see Problem 29 for the full implementation
+    class IndexedSkiplist:
+        def get(self, index: int) -> int:
+            ...   # O(log n) expected
+        def add_at_index(self, index: int, val: int) -> None:
+            ...   # O(log n)
+        def delete_at_index(self, index: int) -> None:
+            ...   # O(log n)
+    ```
+
+    The interview default is Layer 2; reach for Layer 5 only when the consumer asks for sub-linear `get`.
+
+#### 🔎 Step-by-Step Dry Run
+
+Operations on a Layer 2 (singly + tail) instance:
+
+| Op                       | Internal state (head sentinel implicit)            | size | tail   |
+|--------------------------|----------------------------------------------------|------|--------|
+| `add_at_head(1)`         | `1`                                                | 1    | →1     |
+| `add_at_tail(3)`         | `1 → 3`                                            | 2    | →3     |
+| `add_at_index(1, 2)`     | `1 → 2 → 3`                                        | 3    | →3     |
+| `get(1)` → 2             | unchanged                                          | 3    | →3     |
+| `delete_at_index(1)`     | `1 → 3`                                            | 2    | →3     |
+| `get(1)` → 3             | unchanged                                          | 2    | →3     |
+| `get(5)` → -1            | unchanged (out of range)                           | 2    | →3     |
+| `add_at_index(-1, 99)`   | unchanged (negative index → no-op)                 | 2    | →3     |
+| `add_at_index(2, 4)`     | `1 → 3 → 4`                                        | 3    | →4     |
+
+Notice on `delete_at_index(1)` of `1 → 2 → 3`: the deleted node is the middle `2`. `target.next = 3`, which is the tail. After splice: `1 → 3`. `target` is not `self._tail` (the `3` is), so we don't update tail. Correct.
+
+If we instead deleted index 2 (the `3`): `target = 3 = self._tail`. After splice: `1 → 2`, `prev = 2`, `self._tail = prev = 2`. Correct.
+
+#### 📊 Complexity
+
+| Operation        | Layer 1 (simple) | Layer 2 (with tail) ⭐ | Layer 3 (doubly)         | Layer 5 (skiplist) |
+|------------------|------------------|--------------------------|--------------------------|--------------------|
+| `get(i)`         | O(i)             | O(i)                     | **O(min(i, n−i))**       | O(log n)           |
+| `addAtHead`      | O(1)             | **O(1)**                 | **O(1)**                 | O(log n)           |
+| `addAtTail`      | O(n)             | **O(1)**                 | **O(1)**                 | O(log n)           |
+| `addAtIndex(i)`  | O(i)             | O(i)                     | **O(min(i, n−i))**       | O(log n)           |
+| `deleteAtIndex(i)`| O(i)            | O(i)                     | **O(min(i, n−i))**       | O(log n)           |
+| Memory per node  | val + 1 ptr      | val + 1 ptr              | val + 2 ptrs             | val + ~log n ptrs  |
+
+#### ❓ Follow-ups
+
+??? question "Why use a sentinel head?"
+    Without it, `addAtHead` and `addAtIndex(0, ...)` are special cases (you have to update `self._head` itself, not just a `.next` pointer of an existing node). The sentinel turns `addAtHead` into "insert after the sentinel," collapsing the special case.
+
+??? question "Why use a sentinel tail in Layer 3?"
+    Same reason — `addAtTail` becomes "insert before the tail sentinel" with no `if list is empty` branch. Doubly linked with two sentinels is the cleanest standard form.
+
+??? question "When does adding a tail pointer NOT help?"
+    When the workload is mostly `addAtHead` and never `addAtTail`. Then the tail pointer is dead weight — it has to be maintained on every modification. Profile your workload before adding bookkeeping.
+
+??? question "Why might Layer 1 be acceptable?"
+    For very small n (< 100) or workloads where insertions are rare and lookups dominate, the constant-factor of an extra pointer doesn't pay off. Or in memory-constrained embedded contexts where `__slots__` matters and one fewer pointer per node is meaningful.
+
+??? question "How do you implement an `iter` for this class?"
+    Add `__iter__`:
+    ```python
+    def __iter__(self):
+        node = self._head.next
+        while node is not None and node is not self._tail:   # in Layer 3, stop at tail sentinel
+            yield node.val
+            node = node.next
+    ```
+    O(n) time, O(1) space, makes `for x in ll` work and lets you use `list(ll)`.
+
+??? question "What's the right way to compute `len(ll)`?"
+    Add `__len__` returning `self._size`. Don't walk the list — that's O(n) and beats the entire purpose of caching size.
+
+??? question "What if I want concurrent reads with serialised writes?"
+    Use `threading.RLock` or `readerwriterlock`. Hand-over-hand locking (lock current node + next, release current after moving) gives genuine read parallelism but is hard to get right. For most interview-level discussions, "we'd use a coarse RW lock" is enough.
+
+??? question "How does this compare to Python's built-in `list`?"
+    Python's `list` is a dynamic **array**, not a linked list — `list.append` is O(1) amortised, `list[i]` is O(1), but `list.insert(0, x)` is O(n). For frequent head/tail inserts use `collections.deque`. For interview "implement a linked list," roll your own as in Layer 2.
+
+#### 🐛 Common Bugs
+
+1. **Forgetting to update `self._tail`** when `addAtIndex(size, ...)` adds at the end — `addAtIndex` falls through to the generic case and leaves `_tail` stale.
+2. **Forgetting to update `self._tail`** when deleting the last node — `_tail` ends up pointing at the deleted node, future `addAtTail` chains onto a deleted node.
+3. **Allowing negative indexes** — Python's `list` supports negative indexes; this API doesn't. Reject with `< 0`.
+4. **Confusing `<= self._size`** (valid for `addAtIndex`) vs `< self._size` (valid for `get`/`deleteAtIndex`). Insertion *at* `size` is appending at the end; lookup at `size` is out-of-range.
+5. **Sentinel slip** — using `self._head` as a real node by accident (e.g., returning `self._head.val` when the list is empty). Always start traversal from `self._head.next`.
+6. **Missing the `prev.next = prev.next.next` form** for delete — using `prev = prev.next; prev.next = prev.next.next` deletes the wrong node (the one *after* the target).
+
+#### ⚠️ Edge Cases
+
+- Empty list: `get(0) → -1`, `delete_at_index(0) → no-op`, `add_at_tail(v) → list becomes [v]` and `_tail` updates.
+- Single-node list: `delete_at_index(0)` must reset `_tail = self._head` (the sentinel) so future `add_at_tail` works.
+- Adding at `index == size`: behaves like `add_at_tail`. Reject `index > size`.
+- Adding at `index < 0`: reject (return without modifying).
+- Adding at `index == 0` on a non-empty list: behaves like `add_at_head`. The size and tail update correctly.
+- Repeated `add_at_tail` should run in O(1) per call. If not, your tail pointer isn't being maintained.
+- Very large n (10⁶): Layer 2's O(n) for middle gets becomes painful; Layer 3 halves it; Layer 5 (skiplist) dominates.
+
+#### 🔑 Key Takeaways
+
+> **Sentinel head** is non-negotiable — it removes the most error-prone special case (insertion at the head). For doubly linked lists, **add a sentinel tail** too.
+>
+> **Cache the size** in a member variable; never walk the list to compute it.
+>
+> A **tail pointer** turns `addAtTail` from O(n) to O(1) at the cost of one pointer per list (not per node). Always add it unless you have a specific reason not to.
+>
+> **Doubly linked** halves the average index walk and makes O(1) deletion-given-a-node-reference possible — essential for LRU/LFU caches.
+
+#### 🎯 Pattern Used
+
+**Sentinel-bounded linked list** with cached size and optional tail pointer — the foundational template for LRU (P24), LFU (P28), and most "design a list" problems.
 
 ---
 
 ### Problem 35 — In-Memory File System with linked-list directory listing
 
-<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span>
+<span class="diff-hard">Hard</span> &nbsp; <span class="company-tag">Google</span> <span class="company-tag">Amazon</span> <span class="company-tag">Meta</span> <span class="company-tag">Microsoft</span>
 
-> Design an in-memory file system. Among the operations, `ls(path)` returns the names in a directory in sorted order. Use linked-list-of-children as the storage for each directory's entries (alternatively a sorted dict).
+> Design an in-memory file system supporting:
+>
+> - `ls(path)` — if `path` is a file, return `[filename]`; if a directory, return entries in **lexicographic order**.
+> - `mkdir(path)` — create directories along the path; intermediate dirs are auto-created.
+> - `addContentToFile(filePath, content)` — create file (if missing) and append content.
+> - `readContentFromFile(filePath)` — return the file's content.
+>
+> All paths are absolute, start with `/`, and never end with `/` (except `/` itself). (LeetCode 588.)
 
-In practice, real filesystems use balanced BSTs or sorted arrays for directory listings, but linked-list-style representation is the simplest correct approach. The interview interest is the **API design and tree-of-nodes structure**, not the linked-list mechanics per se. We'll cover this fully in the LLD chapter.
+#### 📖 Story Mode
 
-#### Sketch
+```
+mkdir("/a/b/c")                          /
+                                         └── a
+                                             └── b
+                                                 └── c
+
+addContentToFile("/a/b/d", "hello")      /
+                                         └── a
+                                             └── b
+                                                 ├── c   (dir)
+                                                 └── d   (file: "hello")
+
+ls("/a/b")                               → ["c", "d"]   (sorted)
+ls("/a/b/d")                             → ["d"]        (file → just its name)
+addContentToFile("/a/b/d", " world")     /a/b/d content: "hello world"
+readContentFromFile("/a/b/d")            → "hello world"
+```
+
+The pattern: **trie/tree-of-nodes**, where each node represents one path segment. Directories store a child-map keyed by name; files store accumulated content. The "linked-list directory listing" framing is the legacy Unix `dirent` view — but a `dict[str, _Node]` is what every real filesystem uses internally.
+
+#### 🌍 Real-world usage
+
+- **Linux VFS / inode table** — every inode has children indexed by name (Linux uses an htable + dcache; ext4 uses HTrees, BTRFS uses B-trees).
+- **In-memory caches (Redis keyspaces, /etc/passwd-style flat namespaces)** — same trie traversal pattern when keys are slash-separated.
+- **Mock filesystems for tests** — `pyfakefs`, `memfs`, Java's `Jimfs`, Go's `afero.MemMapFs` — all use exactly this design.
+- **Configuration trees (etcd, ZooKeeper, Consul KV)** — hierarchical key-value stores that look like filesystems; `ls /` returns top-level prefixes.
+- **AWS S3 path-prefix listing** — flat key store presented as a "directory" via prefix grouping; same traversal mental model.
+- **Compiler module trees, DOM trees, JSON path queries** — any hierarchical name resolution reduces to this design.
+- **Asked at FAANG infra rounds** to test: do you separate the "path-walk + parse" concern from "node operations"? Do you handle the directory-vs-file polymorphism cleanly?
+
+#### 🧠 Thinking process
+
+> The interviewer's signal: do you spot the **trie** under the prose, and do you keep the file/directory polymorphism clean?
+
+**Three layered shapes:**
+
+1. **Single `_Node` for both files and directories** — `content` is `None` for directories, a string for files. One class, one traversal helper. **Canonical answer.**
+2. **Two classes (`Directory`, `File`)** — clean polymorphism but more boilerplate. Tempting in OOP-heavy codebases; rarely worth it for the interview.
+3. **Path-prefix flat dict** (`{"/a/b/c": Node, …}`) — fast direct lookup but needs prefix scans for `ls`. Used by S3-style stores; reject for this problem because `ls` becomes O(n) per call.
+
+**Three responsibilities to separate cleanly:**
+
+- **Path parsing** — split `"/a/b/c"` into `["a", "b", "c"]`; handle root edge case (`"/"` → `[]`).
+- **Tree walk** — given a list of segments, descend (creating dirs if asked) or return the terminal node.
+- **Operation logic** — `ls` formats output, `addContent` mutates the file node, `read` returns content.
+
+**The "auto-create intermediate dirs" rule:** `mkdir("/a/b/c")` and `addContentToFile("/x/y/z.txt", ...)` both must create missing intermediate directories. Reuse one walker with a `create=True` flag.
+
+**The "ls on a file" trap:** when `path` points to a file, return `[basename]`, not the file's content. Easy to miss because `ls` on a directory returns names, but `ls` on a file returns the *one* name.
+
+#### 💻 Five layered solutions
+
+=== "Layer 1 — Brute (path-prefix flat dict)"
+
+    ```python
+    class FileSystem:
+        def __init__(self) -> None:
+            self._files: dict[str, str] = {}
+            self._dirs: set[str] = {"/"}
+
+        def _split(self, p: str) -> list[str]:
+            return [x for x in p.split("/") if x]
+
+        def ls(self, path: str) -> list[str]:
+            if path in self._files:
+                return [path.rsplit("/", 1)[-1]]
+            prefix = path if path.endswith("/") else path + "/"
+            depth = path.count("/") + (0 if path == "/" else 1)
+            entries = set()
+            for k in list(self._files) + list(self._dirs):
+                if k.startswith(prefix) and k != path:
+                    rel = k[len(prefix):]
+                    entries.add(rel.split("/", 1)[0])
+            return sorted(entries)
+
+        def mkdir(self, path: str) -> None:
+            parts = self._split(path)
+            for i in range(1, len(parts) + 1):
+                self._dirs.add("/" + "/".join(parts[:i]))
+
+        def addContentToFile(self, file_path: str, content: str) -> None:
+            self.mkdir("/".join(file_path.rsplit("/", 1)[:-1]) or "/")
+            self._files[file_path] = self._files.get(file_path, "") + content
+
+        def readContentFromFile(self, file_path: str) -> str:
+            return self._files.get(file_path, "")
+    ```
+
+    `ls` is O(N) per call (scans every key). At 10⁵ files this becomes the bottleneck. Mention it, name the cost, upgrade to the tree.
+
+=== "Layer 2 — Single _Node for both files and directories ⭐"
+
+    ```python
+    from __future__ import annotations
+
+    class _Node:
+        """A filesystem node — directory if `content is None`, else a file."""
+        __slots__ = ("children", "content")
+
+        def __init__(self) -> None:
+            self.children: dict[str, _Node] = {}
+            self.content: str | None = None
+
+    class FileSystem:
+        def __init__(self) -> None:
+            self._root = _Node()
+
+        def _walk(self, path: str, *, create: bool = False) -> _Node:
+            node = self._root
+            for part in path.split("/"):
+                if not part:
+                    continue                       # leading "/" or doubled slashes
+                if part not in node.children:
+                    if not create:
+                        raise FileNotFoundError(path)
+                    node.children[part] = _Node()
+                node = node.children[part]
+            return node
+
+        def ls(self, path: str) -> list[str]:
+            node = self._walk(path)
+            if node.content is not None:           # path is a file
+                return [path.rsplit("/", 1)[-1]]
+            return sorted(node.children.keys())
+
+        def mkdir(self, path: str) -> None:
+            self._walk(path, create=True)
+
+        def addContentToFile(self, file_path: str, content: str) -> None:
+            node = self._walk(file_path, create=True)
+            node.content = (node.content or "") + content
+
+        def readContentFromFile(self, file_path: str) -> str:
+            node = self._walk(file_path)
+            return node.content or ""
+    ```
+
+    **Why one `_Node` class for both:** the only difference between a directory and a file is whether `content` is set. A single class lets `_walk` traverse without conditionals at every step. The polymorphism is a property check, not a class hierarchy.
+
+    **Why `__slots__`:** in production, you'll have 10⁶+ nodes; `__slots__` cuts ~50 bytes per node.
+
+    **Per-op cost:** `_walk` is O(d) in path depth. `ls` adds O(k log k) for sorting children. Total: O(d + k log k) per call, where d ≈ depth, k ≈ branching factor.
+
+=== "Layer 3 — Auto-sorted children (no sort on every `ls`)"
+
+    ```python
+    from sortedcontainers import SortedDict
+
+    class _Node:
+        __slots__ = ("children", "content")
+        def __init__(self) -> None:
+            self.children: SortedDict[str, _Node] = SortedDict()
+            self.content: str | None = None
+
+    class FileSystem:
+        def __init__(self) -> None:
+            self._root = _Node()
+
+        def _walk(self, path: str, *, create: bool = False) -> _Node:
+            node = self._root
+            for part in path.split("/"):
+                if not part: continue
+                if part not in node.children:
+                    if not create: raise FileNotFoundError(path)
+                    node.children[part] = _Node()
+                node = node.children[part]
+            return node
+
+        def ls(self, path: str) -> list[str]:
+            node = self._walk(path)
+            if node.content is not None:
+                return [path.rsplit("/", 1)[-1]]
+            return list(node.children.keys())      # already sorted
+
+        def mkdir(self, path: str) -> None:
+            self._walk(path, create=True)
+
+        def addContentToFile(self, file_path: str, content: str) -> None:
+            node = self._walk(file_path, create=True)
+            node.content = (node.content or "") + content
+
+        def readContentFromFile(self, file_path: str) -> str:
+            return self._walk(file_path).content or ""
+    ```
+
+    `SortedDict` keeps children in sorted order — `ls` becomes O(d + k) instead of O(d + k log k). For directories with stable contents and frequent `ls`, this is a clear win. Trade: slower `mkdir` (O(log k) per insert vs O(1) for plain dict).
+
+=== "Layer 4 — Production-ready (typed, error semantics, separator handling)"
+
+    ```python
+    from __future__ import annotations
+    from typing import Iterator
+
+    class _Node:
+        """A filesystem node. Directory iff content is None."""
+        __slots__ = ("children", "content")
+        def __init__(self, content: str | None = None) -> None:
+            self.children: dict[str, _Node] = {}
+            self.content: str | None = content
+
+        @property
+        def is_file(self) -> bool:
+            return self.content is not None
+
+    class FileSystem:
+        SEP = "/"
+
+        def __init__(self) -> None:
+            self._root = _Node()
+
+        # ─── Public API ───────────────────────────────────────────────────
+
+        def ls(self, path: str) -> list[str]:
+            node = self._walk(self._parse(path))
+            if node.is_file:
+                return [self._basename(path)]
+            return sorted(node.children)
+
+        def mkdir(self, path: str) -> None:
+            self._walk(self._parse(path), create=True, expect_dir=True)
+
+        def addContentToFile(self, file_path: str, content: str) -> None:
+            parts = self._parse(file_path)
+            if not parts:
+                raise IsADirectoryError(file_path)
+            node = self._walk(parts, create=True)
+            if not node.is_file:
+                node.content = ""                  # promote new node to file
+            node.content = (node.content or "") + content
+
+        def readContentFromFile(self, file_path: str) -> str:
+            node = self._walk(self._parse(file_path))
+            if not node.is_file:
+                raise IsADirectoryError(file_path)
+            return node.content or ""
+
+        # ─── Internals ────────────────────────────────────────────────────
+
+        def _parse(self, path: str) -> list[str]:
+            if not path.startswith(self.SEP):
+                raise ValueError(f"path must be absolute: {path!r}")
+            return [p for p in path.split(self.SEP) if p]
+
+        def _basename(self, path: str) -> str:
+            return path.rsplit(self.SEP, 1)[-1] or self.SEP
+
+        def _walk(
+            self,
+            parts: list[str],
+            *,
+            create: bool = False,
+            expect_dir: bool = False,
+        ) -> _Node:
+            node = self._root
+            for part in parts:
+                child = node.children.get(part)
+                if child is None:
+                    if not create:
+                        raise FileNotFoundError(self.SEP + self.SEP.join(parts))
+                    child = _Node()
+                    node.children[part] = child
+                if expect_dir and child.is_file:
+                    raise NotADirectoryError(part)
+                node = child
+            return node
+
+        # ─── Debug helpers ────────────────────────────────────────────────
+
+        def walk(self) -> Iterator[tuple[str, list[str], list[str]]]:
+            """os.walk-style traversal yielding (dirpath, dirnames, filenames)."""
+            stack: list[tuple[str, _Node]] = [("/", self._root)]
+            while stack:
+                path, node = stack.pop()
+                dirs = sorted(n for n, c in node.children.items() if not c.is_file)
+                files = sorted(n for n, c in node.children.items() if c.is_file)
+                yield path, dirs, files
+                for d in dirs:
+                    sub = path.rstrip("/") + "/" + d
+                    stack.append((sub, node.children[d]))
+    ```
+
+    **Real-world error semantics** — `IsADirectoryError`, `NotADirectoryError`, `FileNotFoundError` mirror Python's `os` module. The `expect_dir` flag prevents you from accidentally `mkdir`ing through an existing file.
+
+    **`os.walk`-style debug helper** — drop-in for tests; lets you print the whole tree without touching internals.
+
+=== "Layer 5 — Variants & advanced"
+
+    **A. Permissions / ACLs**
+
+    ```python
+    @dataclass
+    class _Node:
+        children: dict[str, "_Node"] = field(default_factory=dict)
+        content: str | None = None
+        owner: str = "root"
+        mode: int = 0o644
+        # check at every walk: caller must pass user; raise PermissionError otherwise.
+    ```
+
+    Adds Unix-like ownership and mode bits. `_walk` consults `mode` and `owner` against a thread-local "current user" before descending.
+
+    **B. Symbolic links**
+
+    ```python
+    class _Node:
+        children: dict[str, _Node] = ...
+        content: str | None = None
+        symlink_target: str | None = None     # if set, walk follows
+    ```
+
+    `_walk` detects `symlink_target` and re-enters from root with the target path. Detect cycles with a max-depth bound (`MAX_SYMLINK_DEPTH = 40`, matching Linux).
+
+    **C. Concurrent access (RW-locks per directory)**
+
+    Per-node `threading.RLock`. Acquire shared locks on the path during `ls` / `read`, exclusive lock on the deepest node during `addContent` / `mkdir`. Standard tree-locking pattern; simpler than a global lock, finer than per-file.
+
+    **D. Persistence / journaling**
+
+    Every mutation appends to a write-ahead log (`mkdir /a`, `write /a/b "hello"`). On restart, replay to rebuild the tree. Standard journaling FS pattern.
+
+    **E. Quotas and disk-usage accounting**
+
+    Every directory caches a `total_size` field; on `addContentToFile`, bubble up the size delta to all ancestors. `du(path)` becomes O(1).
+
+    **F. Watch / notify (inotify-style)**
+
+    Each node has a list of watchers; on mutation, call back. Used by VS Code's file watcher, dropbox sync, etc.
+
+    **G. Distributed namespace (HDFS / GFS)**
+
+    The directory tree lives on a single namenode; data blocks live on datanodes. `ls` is purely a metadata op (in-memory tree); `addContent` allocates blocks on datanodes and stores their addresses in the leaf node.
+
+    **H. Snapshot / copy-on-write**
+
+    On snapshot, freeze the root node; subsequent mutations clone the affected path (copy-on-write). Used by ZFS, BTRFS, APFS.
+
+#### 🔍 Dry run — Layer 2
 
 ```python
-class _Node:
-    def __init__(self) -> None:
-        self.children: dict[str, _Node] = {}
-        self.content: str | None = None     # None for directory
-
-class FileSystem:
-    def __init__(self) -> None:
-        self._root = _Node()
-
-    def ls(self, path: str) -> list[str]:
-        node = self._traverse(path)
-        if node.content is not None:
-            return [path.rsplit("/", 1)[-1]]
-        return sorted(node.children.keys())
-
-    # mkdir, addContentToFile, readContentFromFile, _traverse: ~30 lines.
+fs = FileSystem()
+fs.ls("/")                            # → []  (empty root)
+fs.mkdir("/a/b/c")                    # walks "/", creates a, b, c
+fs.ls("/")                            # → ["a"]
+fs.ls("/a/b")                         # → ["c"]
+fs.addContentToFile("/a/b/d", "hi")   # walks /a/b/d, creates d, sets content="hi"
+fs.ls("/a/b")                         # → ["c", "d"]   (sorted)
+fs.ls("/a/b/d")                       # path is file → ["d"]
+fs.addContentToFile("/a/b/d", "!")    # node.content was "hi", now "hi!"
+fs.readContentFromFile("/a/b/d")      # → "hi!"
 ```
+
+Tree state after the sequence:
+
+```
+root
+└── a (dir)
+    └── b (dir)
+        ├── c (dir, no children, no content)
+        └── d (file, content="hi!")
+```
+
+#### ⏱️ Complexity comparison
+
+| Op | Brute flat-dict (L1) | Tree-of-nodes (L2) | SortedDict children (L3) |
+|---|---|---|---|
+| ls (file) | O(1) | O(d) | O(d) |
+| ls (dir of size k) | **O(N + k log k)** | O(d + k log k) | **O(d + k)** |
+| mkdir | O(d) | O(d) | O(d log k) |
+| addContentToFile | O(d + |content|) | O(d + |content|) | O(d log k + |content|) |
+| readContentFromFile | O(d + |content|) | O(d + |content|) | O(d) |
+| Memory | O(N · path_length) | O(total nodes) | O(total nodes) |
+
+`d` = path depth, `k` = directory branching factor, `N` = total entries.
+
+#### ❓ Follow-ups (interviewer toolkit)
+
+??? question "1) Why one `_Node` class instead of separate `Directory` / `File`?"
+    The traversal logic doesn't care: every `_walk` step descends through `children` regardless. Two classes force `isinstance` checks at every level (or a Visitor pattern). One class with `content is None` ⇒ directory keeps the walker simple and lets the same node *become* a file when content is added. The interviewer wants you to recognize that the class hierarchy isn't load-bearing.
+
+??? question "2) Why is `ls` on a file returning `[basename]` and not the content?"
+    LeetCode 588's spec — `ls` always returns a list of names. For a file, that's a 1-element list with the file's own name. It's deliberately consistent with `ls` on Unix: `ls /etc/hostname` prints `hostname`, not the file content.
+
+??? question "3) What if `mkdir` is called on an existing path?"
+    Idempotent — should not raise. Each path-segment lookup falls through to the existing child. LC 588 expects this; production POSIX `mkdir` errors with `EEXIST` instead. State the contract you're matching.
+
+??? question "4) How does this compare to `dict` keyed by full path?"
+    Flat dict is faster for *exact-path* lookup (`addContent`, `read`) but slower for `ls` (must scan all keys for the prefix). The tree wins because `ls` is the dominant operation in spec — and because intermediate-directory creation is natural in the tree.
+
+??? question "5) What if paths contain backslashes / weird characters?"
+    `_parse` splits on `/` only — segments containing other characters are kept verbatim. POSIX rules: only `/` and NUL are forbidden in names. If you must support Windows paths, normalize at the boundary.
+
+??? question "6) Concurrent access — design the locking?"
+    Per-node `RWLock`. `ls` / `read` take read-locks on the path; `mkdir` / `addContent` take write-lock on the *target* node only (not its ancestors). Walk under read-locks, upgrade to write at the leaf. Avoid a global lock — that throttles unrelated subtrees.
+
+??? question "7) How would you compute disk usage of a subtree?"
+    Recursive sum: at each directory, sum children's sizes. Cache the total per directory and bump on each `addContent`. `du(path)` becomes O(1) — `du -sh` on a 1M-file tree without traversal. Real filesystems (BTRFS, APFS) do this.
+
+??? question "8) Implement `rm(path)`?"
+    Walk to the parent, `del parent.children[basename]`. For `rm -r` (directory), the children dict is dropped, Python GCs the subtree. For `rm` (file only), check `is_file` first.
+
+??? question "9) Implement `mv(src, dst)`?"
+    Walk to src's parent, pop the child node. Walk to dst's parent (creating dirs as needed), set the popped node as `parent.children[new_basename]`. O(d_src + d_dst). Same node moves — preserves identity for any external references (watchers, locks).
+
+??? question "10) Search by glob (`*.py`)?"
+    BFS the tree; at each directory, filter children by `fnmatch`. For `**/*.py` (recursive glob), use a stack and apply the pattern to *full* paths during traversal. Standard `pathlib.Path.glob` algorithm.
+
+??? question "11) Memory efficiency — 10⁶ files?"
+    With `__slots__` each node is ~50 bytes (pointer + dict + content ref). 10⁶ files ≈ 50 MB plus dict overhead. To compress: **path interning** (deduplicate filename strings) and **subtree compression** for directories with single children (Patricia trie style — `/a/b/c` collapsed into one edge if `b` has only one child). Saves 30-50% on deep skinny trees.
+
+??? question "12) Persistence — how do you save/load?"
+    Serialize the tree to JSON (recursive: `{"children": {...}, "content": "..."}`). Or replay-log: every mutation appended to a WAL, replayed on startup. Or snapshot + delta: periodic full snapshots + log of changes since last snapshot. Real filesystems use the third (e.g., ext4 journals).
+
+#### 🐛 Common bugs
+
+1. **`ls` on a file returning the directory's children** — must check `is_file` first and return `[basename]`.
+2. **Mishandling `path = "/"`** — `_parse("/")` returns `[]`, the walker should return root, `ls("/")` returns sorted root children. An off-by-one in the split (`path.split("/")` gives `["", ""]` for `"/"`) causes infinite loop or KeyError.
+3. **`addContentToFile` overwriting instead of appending** — must concatenate; LC 588 explicitly tests appends.
+4. **Missing intermediate-dir auto-creation** — `addContentToFile("/a/b/c.txt", ...)` must `mkdir -p /a/b` automatically.
+5. **Returning unsorted children from `ls`** — `dict.keys()` is insertion-ordered in 3.7+, not alphabetical. Sort.
+6. **Treating an existing file as a directory** — `mkdir("/a")` then `mkdir("/a/b")` works; `addContent("/a", "...")` then `mkdir("/a/b")` should error (file in the way).
+7. **Forgetting to handle empty content** — initial file creation: `node.content = (node.content or "") + content` — without `or ""`, `None + content` crashes.
+8. **`path.split("/")` creating empty strings** — handle `""` segments by skipping (leading slash, doubled slashes).
+9. **Recursion-based walker hitting Python's recursion limit** — for 10⁴-deep paths, prefer iteration. `_walk` here is iterative.
+10. **Sharing the same `_Node` instance accidentally** — if you cache a node and assign it to multiple paths, mutations leak. Always create new `_Node()` per path.
+11. **Race conditions** — two threads both creating `/a/b` simultaneously can `dict.setdefault`-style race. Use a per-parent lock during creation.
+12. **Returning the file's content from `ls`** — I've seen this twice in real reviews. The spec returns the *name*, not the content.
+
+#### ✅ Edge cases checklist
+
+- [ ] Empty filesystem, `ls("/")` → `[]`.
+- [ ] `mkdir("/")` (root already exists) — no-op.
+- [ ] `mkdir` on existing path — idempotent, no error.
+- [ ] `mkdir` on a path that traverses an existing file — error.
+- [ ] `addContentToFile` to a brand-new file — creates intermediate dirs and the file.
+- [ ] `addContentToFile` to an existing file — appends.
+- [ ] `addContentToFile` with empty content — file exists with content `""`.
+- [ ] `readContentFromFile` on missing file — error or empty string? (Spec says it's always called on existing files.)
+- [ ] `ls("/file")` returns `["file"]`, not the content.
+- [ ] Path with trailing slash (`"/a/"`) — must still work; treat as `/a`.
+- [ ] Path with doubled slashes (`"/a//b"`) — must skip empties or normalize.
+- [ ] Very deep paths (10⁴ segments) — iterative walker; recursive would crash.
+- [ ] Concurrent `mkdir` of same path — last writer wins; structure remains consistent.
+- [ ] Filename with special characters — preserved verbatim except `/`.
+- [ ] Massive directory (10⁵ children) — `ls` sorting cost; consider `SortedDict`.
+
+#### 🎤 Sample interviewer quote
+
+> *"Design an in-memory file system with `ls`, `mkdir`, `addContentToFile`, `readContentFromFile`. Paths are absolute. `ls` on a file returns just the filename."*
+
+Your opener: *"It's a trie keyed by path segments. One `_Node` class with `children: dict[str, _Node]` and `content: str | None` — directory if content is None, file otherwise. A single `_walk(path, create=...)` helper handles all four operations: `ls` walks-then-decides-by-content, `mkdir` walks-with-create, `addContentToFile` walks-with-create then concatenates, `readContentFromFile` walks-then-returns-content. Per-op cost is O(d + k log k) where d = depth and k = directory size — with `SortedDict` children that drops to O(d + k). Want me to code the single-class version, or talk through the polymorphism trade-off first?"*
 
 ---
 

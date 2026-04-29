@@ -336,3 +336,11 @@ nav:
 
   - 📚 Resources:
       - Overview: 13-resources/index.md
+      - Big-O Cheatsheet: 13-resources/01-big-o-cheatsheet.md
+      - Python STL Cheatsheet: 13-resources/02-python-stl-cheatsheet.md
+      - Pattern Templates: 13-resources/03-pattern-templates.md
+      - Engineering Blogs: 13-resources/04-engineering-blogs.md
+      - Must-Read Papers: 13-resources/05-papers.md
+      - Tooling: 13-resources/06-tooling.md
+      - Communities: 13-resources/07-communities.md
+      - Glossary: 13-resources/08-glossary.md

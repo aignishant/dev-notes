@@ -467,6 +467,14 @@ nav:
       - Arrays — common questions: dsa/docs/12-common-across-all-companies/02-arrays-common.md
     - Resources:
       - Overview: dsa/docs/13-resources/index.md
+      - Big-O Cheatsheet: dsa/docs/13-resources/01-big-o-cheatsheet.md
+      - Python STL Cheatsheet: dsa/docs/13-resources/02-python-stl-cheatsheet.md
+      - Pattern Templates: dsa/docs/13-resources/03-pattern-templates.md
+      - Engineering Blogs: dsa/docs/13-resources/04-engineering-blogs.md
+      - Must-Read Papers: dsa/docs/13-resources/05-papers.md
+      - Tooling: dsa/docs/13-resources/06-tooling.md
+      - Communities: dsa/docs/13-resources/07-communities.md
+      - Glossary: dsa/docs/13-resources/08-glossary.md
   - AI:
     - Overview: interview-ai/index.md
     - ML Fundamentals:

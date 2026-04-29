@@ -274,6 +274,25 @@ nav:
       - Notification Service: 08-system-design/tier-2-important/02-notification-service.md
       - Web Crawler: 08-system-design/tier-2-important/03-web-crawler.md
       - Search Autocomplete: 08-system-design/tier-2-important/04-search-autocomplete.md
+      - Instagram: 08-system-design/tier-2-important/05-instagram.md
+      - Dropbox / Google Drive: 08-system-design/tier-2-important/06-dropbox.md
+      - Stock Exchange: 08-system-design/tier-2-important/07-stock-exchange.md
+      - Online Code Judge: 08-system-design/tier-2-important/08-online-judge.md
+      - Food Delivery: 08-system-design/tier-2-important/09-food-delivery.md
+      - E-commerce (Amazon): 08-system-design/tier-2-important/10-ecommerce.md
+      - Hotel / Stay Booking: 08-system-design/tier-2-important/11-hotel-booking.md
+      - Payment System (Stripe): 08-system-design/tier-2-important/12-payment-system.md
+      - Ad Click Tracking: 08-system-design/tier-2-important/13-ad-click-tracking.md
+      - Distributed Logging: 08-system-design/tier-2-important/14-distributed-logging.md
+      - Live Streaming (Twitch): 08-system-design/tier-2-important/15-live-streaming.md
+      - Distributed Task Queue: 08-system-design/tier-2-important/16-distributed-task-queue.md
+      - Real-Time Analytics: 08-system-design/tier-2-important/17-real-time-analytics.md
+      - Online Multiplayer Game: 08-system-design/tier-2-important/18-online-multiplayer-game.md
+      - Distributed File System (HDFS): 08-system-design/tier-3-bonus/01-distributed-file-system.md
+      - Distributed KV Store (Dynamo): 08-system-design/tier-3-bonus/02-distributed-kv-store.md
+      - Pub/Sub System (Kafka): 08-system-design/tier-3-bonus/03-pubsub-system.md
+      - API Gateway: 08-system-design/tier-3-bonus/04-api-gateway.md
+      - CI/CD Pipeline: 08-system-design/tier-3-bonus/05-cicd-pipeline.md
 
   - 🧱 Low-Level Design:
       - Overview: 09-low-level-design/index.md

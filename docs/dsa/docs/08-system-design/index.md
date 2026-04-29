@@ -2,7 +2,7 @@
 
 > 25+ projects, fully designed end-to-end. Cloud + on-prem + architecture.
 
-<span class="phase-status phase-done">Phase 16 — Tier 1 complete + Tier 2 batch 1 (4 designs)</span>
+<span class="phase-status phase-done">Phase 17 — All Tier 1 + Tier 2 + Tier 3 live (30 designs)</span>
 
 When complete, this section will be a **complete system-design book**, larger and more detailed than Alex Xu's *System Design Interview* (vols 1 & 2 combined).
 
@@ -48,7 +48,7 @@ Every page follows the same 20-section shape. Once you've read one, you've read 
 
 ---
 
-## ✅ Tier 2 — first batch (4 of 20 live)
+## ✅ Tier 2 — Important 18 (all live)
 
 <div class="grid cards" markdown>
 
@@ -62,7 +62,7 @@ Every page follows the same 20-section shape. Once you've read one, you've read 
 
     ---
 
-    Push + email + SMS at 1 B/day. Two-stage Kafka pipeline (resolve → deliver), idempotency via Redis SETNX, frequency caps + quiet hours, HTTP/2 multiplexed APNs.
+    Push + email + SMS at 1 B/day. Two-stage Kafka pipeline, idempotency via Redis SETNX, frequency caps + quiet hours, HTTP/2 multiplexed APNs.
 
 -   :material-spider: **[Web Crawler](tier-2-important/03-web-crawler.md)**
 
@@ -75,6 +75,128 @@ Every page follows the same 20-section shape. Once you've read one, you've read 
     ---
 
     Sub-50 ms suggestions via FST + per-node top-K. Edge cache collapses 10× QPS; hourly index swap; trending injection through Kafka stream.
+
+-   :material-instagram: **[Instagram (photo feed)](tier-2-important/05-instagram.md)**
+
+    ---
+
+    Hybrid push/pull fanout with celebrity threshold; Redis ZSET timelines capped at 1K; Snowflake IDs; CDN-fronted media.
+
+-   :material-folder-sync: **[Dropbox / Google Drive](tier-2-important/06-dropbox.md)**
+
+    ---
+
+    Content-defined chunking with rolling hash; SHA-keyed block dedup; namespace-partitioned metadata; conflict resolution.
+
+-   :material-chart-line: **[Stock Exchange / Trading](tier-2-important/07-stock-exchange.md)**
+
+    ---
+
+    Per-symbol single-threaded matching engine; LMAX Disruptor ring buffer; nanosecond order book with bid/ask heaps.
+
+-   :material-code-tags: **[Online Code Judge](tier-2-important/08-online-judge.md)**
+
+    ---
+
+    Sandboxed execution via nsjail/Firecracker; per-language time multipliers; Redis ZSET leaderboard; winnowing-fingerprint plagiarism.
+
+-   :material-food: **[Food Delivery (DoorDash/Swiggy)](tier-2-important/09-food-delivery.md)**
+
+    ---
+
+    OrderState machine with allowed-transition map; Redis GEO dispatcher; ML ETA = prep + travel + last-mile; H3-cell surge.
+
+-   :material-cart: **[E-commerce (Amazon)](tier-2-important/10-ecommerce.md)**
+
+    ---
+
+    Saga checkout (reserve → charge → confirm); Redis WATCH inventory reservation with TTL; multi-warehouse partitioning.
+
+-   :material-bed: **[Hotel / Stay Booking](tier-2-important/11-hotel-booking.md)**
+
+    ---
+
+    FOR UPDATE inventory date-row locking; two-stage search (ES top-200 → availability filter); currency locked at quote time.
+
+-   :material-credit-card: **[Payment System (Stripe)](tier-2-important/12-payment-system.md)**
+
+    ---
+
+    Append-only double-entry ledger; idempotency cache pattern; multi-acquirer router; webhook retries up to 12 h.
+
+-   :material-cursor-default-click: **[Ad Click Tracking](tier-2-important/13-ad-click-tracking.md)**
+
+    ---
+
+    HMAC-signed URLs; Redis SET NX dedup; Flink streaming aggregation; dual-write Druid + Redis; sub-150 ms bot filter.
+
+-   :material-file-document-multiple: **[Distributed Logging](tier-2-important/14-distributed-logging.md)**
+
+    ---
+
+    Kafka → parser → ES (hot) + S3 (cold); ILM rollover; per-tenant per-day indices; schema-on-read with allowlist.
+
+-   :material-broadcast: **[Live Streaming (Twitch)](tier-2-important/15-live-streaming.md)**
+
+    ---
+
+    RTMP/SRT regional ingest; GPU ABR transcode; CMAF chunked → LL-HLS for ~2 s lag; multi-CDN egress.
+
+-   :material-clipboard-list-outline: **[Distributed Task Queue](tier-2-important/16-distributed-task-queue.md)**
+
+    ---
+
+    Redis Streams broker; consumer groups for at-least-once; ZSET delayed jobs; exponential-backoff retries → DLQ; per-tenant fairness.
+
+-   :material-chart-multiline: **[Real-Time Analytics (Druid)](tier-2-important/17-real-time-analytics.md)**
+
+    ---
+
+    Kafka in → realtime indexer + batch indexer; rollup at ingest with HLL; bitmap-indexed columnar segments; sub-30 s freshness.
+
+-   :material-gamepad-variant: **[Online Multiplayer Game](tier-2-important/18-online-multiplayer-game.md)**
+
+    ---
+
+    UDP authoritative server at 60 Hz; client-side prediction + reconciliation; delta-encoded snapshots; MMR matchmaking; anti-cheat.
+
+</div>
+
+---
+
+## ✅ Tier 3 — Bonus 5 (all live)
+
+<div class="grid cards" markdown>
+
+-   :material-folder-network: **[Distributed File System (HDFS)](tier-3-bonus/01-distributed-file-system.md)**
+
+    ---
+
+    NameNode/DataNode split; rack-aware 3× replication; QJM edit log; tiered storage; erasure coding for cold data.
+
+-   :material-key-variant: **[Distributed KV Store (Dynamo)](tier-3-bonus/02-distributed-kv-store.md)**
+
+    ---
+
+    Consistent-hashing ring with vnodes; tunable R/W/N quorums; vector clocks; Merkle anti-entropy; hinted handoff.
+
+-   :material-message-bulleted: **[Pub/Sub System (Kafka)](tier-3-bonus/03-pubsub-system.md)**
+
+    ---
+
+    Partitioned append-only log; ISR replication with high-watermark; consumer-group rebalance; idempotent + transactional producers.
+
+-   :material-gate: **[API Gateway (Envoy/Kong)](tier-3-bonus/04-api-gateway.md)**
+
+    ---
+
+    Plugin chain (TLS → auth → rate limit → proxy → log); JWKS cache; Redis Lua token-bucket; circuit breakers; xDS hot reload.
+
+-   :material-source-branch: **[CI/CD Pipeline](tier-3-bonus/05-cicd-pipeline.md)**
+
+    ---
+
+    DAG scheduler from YAML; ephemeral runners with warm pool; content-addressed cache; OIDC-federated secrets; cosign-signed artifacts.
 
 </div>
 

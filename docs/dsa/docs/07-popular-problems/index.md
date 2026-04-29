@@ -82,14 +82,98 @@ This section holds three things, in increasing specificity:
 
     50 problems for LinkedIn's conversational-coding style. Problem-solving narrative > LeetCode trivia, tree-heavy patterns. Three deep-dives — RandomizedSet, Sparse Vector dot product, Nested List Weight Sum II.
 
+-   :material-adobe: **[Adobe 50](product-based/adobe-50.md)**
+
+    ---
+
+    50 problems for Adobe (Creative Cloud / Document Cloud / Experience Cloud). OOP-design heavy, domain-flavored (image filters, layers, vector graphics). Three deep-dives — Flood Fill, Image Smoother, Photoshop Layers.
+
+-   :material-salesforce: **[Salesforce 50](product-based/salesforce-50.md)**
+
+    ---
+
+    50 problems for Salesforce's multi-tenancy + Trust round culture. Strong OOP + SQL focus. Three deep-dives — Account Merge (Union-Find), Multi-tenant Rate Limiter, Org Hierarchy LCA.
+
+-   :material-jira: **[Atlassian 50](product-based/atlassian-50.md)**
+
+    ---
+
+    50 problems for Atlassian's pair-programming + values-heavy interview. Take-home graded on testability + readability. Three deep-dives — Notification System, Issue Cycle Detection, Confluence Page Tree Search.
+
+-   :material-twitter: **[Twitter / X 50](product-based/twitter-50.md)**
+
+    ---
+
+    50 problems for Twitter / X's timeline + fanout + feed-ranking world. Distributed thinking required even in coding rounds. Three deep-dives — Design Twitter, Trending Hashtags, Hot Key Detection (Count-Min Sketch).
+
+-   :material-music-note: **[ByteDance 50](product-based/bytedance-50.md)**
+
+    ---
+
+    50 problems for ByteDance / TikTok's heaviest-LeetCode-load pipeline. Two hards in 60 min is normal. Three deep-dives — Top K Trending Videos (decay), Critical Connections (Tarjan), TikTok Feed Recommendation.
+
+-   :material-shopping: **[Flipkart 50](product-based/flipkart-50.md)**
+
+    ---
+
+    50 problems for Flipkart's e-commerce + Big Billion Days surge style. Idempotency + inventory consistency obsessed. Three deep-dives — Inventory Reservation, Coupon Rule Engine, BBD Surge Handling.
+
+-   :material-snowflake: **[Snowflake 50](product-based/snowflake-50.md)**
+
+    ---
+
+    50 problems for Snowflake's data-warehouse + query-engine bar. C++ / kernel teams + columnar storage thinking. Three deep-dives — External Merge Sort, Columnar Store with Dictionary Encoding, Time-Travel Storage.
+
+-   :material-cloud: **[Databricks 50](product-based/databricks-50.md)**
+
+    ---
+
+    50 problems for Databricks' Spark / Delta Lake / MLflow lineage. Take-home graded heavily on engineering judgment. Three deep-dives — Spark DAG Scheduling, Mini Spark RDD, Delta Lake (append-only log).
+
+-   :material-robot: **[OpenAI 50](product-based/openai-50.md)**
+
+    ---
+
+    50 problems for OpenAI's research-product hybrid. ML-systems flavored coding + safety-aware mission round. Three deep-dives — Inference Request Batcher, Mini BPE Tokenizer, Design ChatGPT Serving.
+
+-   :material-brain: **[Anthropic 50](product-based/anthropic-50.md)**
+
+    ---
+
+    50 problems for Anthropic's careful-thinking + safety-first culture. Multiple values rounds; take-home graded on judgment as much as code. Three deep-dives — Tool-Calling Agent Loop, Conversation Compaction, Constitutional Filter.
+
+-   :material-graphics-processing-unit: **[NVIDIA 50](product-based/nvidia-50.md)**
+
+    ---
+
+    50 problems for NVIDIA's hardware-aware, performance-obsessed bar. C++ + CUDA + parallel-algorithm thinking. Three deep-dives — Parallel Reduction, Kahan Summation, Parallel Top-K.
+
+-   :material-car-electric: **[Tesla 50](product-based/tesla-50.md)**
+
+    ---
+
+    50 problems for Tesla's real-time + safety-critical + first-principles culture. Embedded mindset throughout. Three deep-dives — A* Path Planning, Charging Session FSM, Vehicle Telemetry Pipeline.
+
+-   :material-office-building: **[Service Companies (consolidated)](service-based/index.md)**
+
+    ---
+
+    One page covering TCS / Infosys / Wipro / HCL / Cognizant / Tech Mahindra / Capgemini / Accenture / IBM India / LTIMindtree / Mphasis / DXC / Hexaware / Coforge / Persistent / Zoho. Aptitude → coding → CS-fundamentals → HR. Bond + relocation realities included.
+
+-   :material-bank: **[PSU Companies (consolidated)](psu/index.md)**
+
+    ---
+
+    One page covering ISRO / DRDO / BARC / ECIL / BEL / HAL / BHEL / NTPC / ONGC / IOCL / GAIL / NHAI / RBI Grade B / SEBI Grade A. GATE-route + own-exam-route, GATE-CS subject coverage, project depth + general awareness.
+
 </div>
 
 ---
 
 ## 🚧 Coming next
 
-- **Product company pages** — Adobe, Flipkart, Twitter/X, ByteDance, Salesforce, Atlassian, Snowflake, Databricks, OpenAI, Anthropic, NVIDIA, Tesla… (~12 remaining; Google + Meta + Amazon + Microsoft + Apple + Netflix + Uber + Stripe + Airbnb + LinkedIn done)
-- **Service company pages** — TCS, Infosys, Wipro, HCL, Cognizant, Tech Mahindra, Capgemini, Accenture, IBM India, Mindtree, LTI, Mphasis, DXC, Hexaware, Coforge, Persistent, Zoho… (~17 companies)
-- **PSU pages** — ISRO, DRDO, BARC, ECIL, BEL, HAL, BHEL, NTPC, ONGC, IOCL, GAIL, NHAI, RBI Grade B, SEBI Grade A… (~21 organizations)
+The product / service / PSU pages are now feature-complete. Next phase work:
 
-Each page reuses the [Google 50](product-based/google-50.md) template.
+- **Backfill** — fill the 🚧 placeholder problems on each page to full-v3 form, prioritised by the frequency-vs-effort grid in [Top 100 by Pattern](top-100-by-pattern.md).
+- **System Design Tier-1** — the 12 core system-design questions referenced from Netflix / Twitter / Stripe pages.
+- **Behavioral pack** — STAR-formatted stories, bridging into [Behavioral](../11-behavioral/index.md).

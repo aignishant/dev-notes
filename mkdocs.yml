@@ -385,6 +385,20 @@ nav:
       - Stripe 50: dsa/docs/07-popular-problems/product-based/stripe-50.md
       - Airbnb 50: dsa/docs/07-popular-problems/product-based/airbnb-50.md
       - LinkedIn 50: dsa/docs/07-popular-problems/product-based/linkedin-50.md
+      - Adobe 50: dsa/docs/07-popular-problems/product-based/adobe-50.md
+      - Salesforce 50: dsa/docs/07-popular-problems/product-based/salesforce-50.md
+      - Atlassian 50: dsa/docs/07-popular-problems/product-based/atlassian-50.md
+      - Twitter / X 50: dsa/docs/07-popular-problems/product-based/twitter-50.md
+      - ByteDance 50: dsa/docs/07-popular-problems/product-based/bytedance-50.md
+      - Flipkart 50: dsa/docs/07-popular-problems/product-based/flipkart-50.md
+      - Snowflake 50: dsa/docs/07-popular-problems/product-based/snowflake-50.md
+      - Databricks 50: dsa/docs/07-popular-problems/product-based/databricks-50.md
+      - OpenAI 50: dsa/docs/07-popular-problems/product-based/openai-50.md
+      - Anthropic 50: dsa/docs/07-popular-problems/product-based/anthropic-50.md
+      - NVIDIA 50: dsa/docs/07-popular-problems/product-based/nvidia-50.md
+      - Tesla 50: dsa/docs/07-popular-problems/product-based/tesla-50.md
+      - Service companies (consolidated): dsa/docs/07-popular-problems/service-based/index.md
+      - PSU companies (consolidated): dsa/docs/07-popular-problems/psu/index.md
     - System Design:
       - Overview: dsa/docs/08-system-design/index.md
       - URL Shortener (sample): dsa/docs/08-system-design/tier-1-core/01-url-shortener.md

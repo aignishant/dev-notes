@@ -356,6 +356,12 @@ nav:
     - Advanced:
       - Overview: dsa/docs/05-advanced/index.md
       - Tries (Prefix Trees): dsa/docs/05-advanced/01-tries.md
+      - Union-Find / DSU: dsa/docs/05-advanced/02-union-find.md
+      - Segment Trees: dsa/docs/05-advanced/03-segment-trees.md
+      - Fenwick Tree (BIT): dsa/docs/05-advanced/04-fenwick-bit.md
+      - Suffix Arrays & Suffix Automata: dsa/docs/05-advanced/05-suffix-arrays.md
+      - Heavy-Light Decomposition: dsa/docs/05-advanced/06-heavy-light-decomposition.md
+      - Mo's Algorithm: dsa/docs/05-advanced/07-mo-algorithm.md
     - Ultra-Advanced:
       - Overview: dsa/docs/06-ultra-advanced/index.md
     - Popular Problems:

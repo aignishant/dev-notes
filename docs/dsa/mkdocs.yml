@@ -217,6 +217,12 @@ nav:
   - 🚀 Advanced:
       - Overview: 05-advanced/index.md
       - Tries (Prefix Trees): 05-advanced/01-tries.md
+      - Union-Find / DSU: 05-advanced/02-union-find.md
+      - Segment Trees: 05-advanced/03-segment-trees.md
+      - Fenwick Tree (BIT): 05-advanced/04-fenwick-bit.md
+      - Suffix Arrays & Suffix Automata: 05-advanced/05-suffix-arrays.md
+      - Heavy-Light Decomposition: 05-advanced/06-heavy-light-decomposition.md
+      - Mo's Algorithm: 05-advanced/07-mo-algorithm.md
 
   - 🧠 Ultra-Advanced:
       - Overview: 06-ultra-advanced/index.md

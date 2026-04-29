@@ -24,20 +24,50 @@ Each page in this section follows the **same shape** pioneered by the [pattern b
 
     Dict-of-dicts vs TrieNode vs array-backed. Implement Trie (LC 208), Wildcard search (LC 211), Word Search II (LC 212), Bitwise trie for max XOR (LC 421).
 
+-   :material-vector-union: **[Union-Find / DSU](02-union-find.md)**
+
+    ---
+
+    Path compression + union-by-rank in O(α(n)). Connected components (LC 547), Redundant Connection (LC 684), Accounts Merge (LC 721), Kruskal's MST, weighted DSU for LC 399 / 990.
+
+-   :material-tree: **[Segment Trees](03-segment-trees.md)**
+
+    ---
+
+    Range query + point/range update in O(log n). Recursive vs iterative form, lazy propagation, coordinate compression. LC 307, LC 315, LC 732, LC 850.
+
+-   :material-binary: **[Fenwick Tree (BIT)](04-fenwick-bit.md)**
+
+    ---
+
+    Eight-line BIT for point-update + prefix-sum in O(log n). The `i & -i` trick, range-update via difference arrays, two-BIT range-add + range-sum, and 2D BIT. LC 307, LC 315, LC 493.
+
+-   :material-format-letter-matches: **[Suffix Arrays & Suffix Automata](05-suffix-arrays.md)**
+
+    ---
+
+    SA via doubling in O(n log² n), Kasai's LCP in O(n), and SAM as the all-substring automaton. Longest duplicate substring (LC 1044), longest common substring of k strings, all-distinct-substring count.
+
+-   :material-graph-outline: **[Heavy-Light Decomposition](06-heavy-light-decomposition.md)**
+
+    ---
+
+    Decompose a tree into O(log n) heavy chains, lay them flat, answer path queries via segment tree in O(log² n). Vertex- vs edge-weighted, lazy-prop interaction, when DSU-on-tree replaces it.
+
+-   :material-sigma: **[Mo's Algorithm](07-mo-algorithm.md)**
+
+    ---
+
+    Reorder offline range queries by `√n` buckets to amortise to O((n + q) √n). Vanilla, even/odd snake sort, Mo's with updates (n^(5/3)), Mo's on tree via Euler tour. SPOJ DQUERY, CF 86D Powerful Array.
+
 </div>
 
 ---
 
 ## 🚧 Coming next
 
-The remaining advanced topics:
+The remaining advanced topic:
 
-2. **Union-Find / DSU** — connectivity, cycle detection, Kruskal's MST
-3. **Segment Trees** — range queries, lazy propagation
-4. **Binary Indexed Trees (Fenwick)** — prefix sums on steroids
-5. **Suffix Arrays / Suffix Automata** — string-heavy problems
-6. **Heavy-Light Decomposition** — tree path queries
-7. **Mo's Algorithm** — offline range queries
-8. **Treaps and balanced BSTs from scratch**
+8. **Treaps / Skip Lists** — randomised balanced BSTs from scratch
 
-Each will follow the canonical shape pioneered by [Tries](01-tries.md).
+Will follow the canonical shape pioneered by [Tries](01-tries.md).

@@ -401,9 +401,20 @@ nav:
       - PSU companies (consolidated): dsa/docs/07-popular-problems/psu/index.md
     - System Design:
       - Overview: dsa/docs/08-system-design/index.md
-      - URL Shortener (sample): dsa/docs/08-system-design/tier-1-core/01-url-shortener.md
+      - URL Shortener: dsa/docs/08-system-design/tier-1-core/01-url-shortener.md
+      - Twitter / X Feed: dsa/docs/08-system-design/tier-1-core/02-twitter-feed.md
+      - YouTube / Netflix: dsa/docs/08-system-design/tier-1-core/03-video-streaming.md
+      - Uber / Lyft: dsa/docs/08-system-design/tier-1-core/04-ride-sharing.md
+      - WhatsApp / Messenger: dsa/docs/08-system-design/tier-1-core/05-realtime-chat.md
     - Low-Level Design:
       - Overview: dsa/docs/09-low-level-design/index.md
+      - OOP fundamentals: dsa/docs/09-low-level-design/01-oop-fundamentals.md
+      - SOLID principles: dsa/docs/09-low-level-design/02-solid-principles.md
+      - Design patterns (GoF): dsa/docs/09-low-level-design/03-design-patterns.md
+      - Parking Lot: dsa/docs/09-low-level-design/problems/01-parking-lot.md
+      - Elevator System: dsa/docs/09-low-level-design/problems/02-elevator-system.md
+      - LRU Cache: dsa/docs/09-low-level-design/problems/03-lru-cache.md
+      - Vending Machine: dsa/docs/09-low-level-design/problems/04-vending-machine.md
     - Mock Interviews:
       - Overview: dsa/docs/10-mock-interviews/index.md
     - Behavioral:

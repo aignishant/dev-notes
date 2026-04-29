@@ -265,10 +265,21 @@ nav:
 
   - 🏛️ System Design:
       - Overview: 08-system-design/index.md
-      - URL Shortener (sample): 08-system-design/tier-1-core/01-url-shortener.md
+      - URL Shortener: 08-system-design/tier-1-core/01-url-shortener.md
+      - Twitter / X Feed: 08-system-design/tier-1-core/02-twitter-feed.md
+      - YouTube / Netflix: 08-system-design/tier-1-core/03-video-streaming.md
+      - Uber / Lyft: 08-system-design/tier-1-core/04-ride-sharing.md
+      - WhatsApp / Messenger: 08-system-design/tier-1-core/05-realtime-chat.md
 
   - 🧱 Low-Level Design:
       - Overview: 09-low-level-design/index.md
+      - OOP fundamentals: 09-low-level-design/01-oop-fundamentals.md
+      - SOLID principles: 09-low-level-design/02-solid-principles.md
+      - Design patterns (GoF): 09-low-level-design/03-design-patterns.md
+      - Parking Lot: 09-low-level-design/problems/01-parking-lot.md
+      - Elevator System: 09-low-level-design/problems/02-elevator-system.md
+      - LRU Cache: 09-low-level-design/problems/03-lru-cache.md
+      - Vending Machine: 09-low-level-design/problems/04-vending-machine.md
 
   - 🎤 Mock Interviews:
       - Overview: 10-mock-interviews/index.md

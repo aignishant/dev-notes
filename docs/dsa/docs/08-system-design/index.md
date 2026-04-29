@@ -2,17 +2,49 @@
 
 > 25+ projects, fully designed end-to-end. Cloud + on-prem + architecture.
 
-<span class="phase-status phase-inprogress">Phase 1 — One sample project only</span>
+<span class="phase-status phase-done">Phase 15 — Tier 1 complete (all 5 core designs)</span>
 
 When complete, this section will be a **complete system-design book**, larger and more detailed than Alex Xu's *System Design Interview* (vols 1 & 2 combined).
 
 ---
 
-## ✅ Available now (Phase 1 sample)
+## ✅ Tier 1 — The Core 5 (all five live)
 
-- [URL Shortener (TinyURL/Bitly)](tier-1-core/01-url-shortener.md) — full 20-section design, the **template** for the other 29 system-design projects.
+<div class="grid cards" markdown>
 
-This is the contract for every system-design page. Once approved, the other 29 instantiate the same 20-section shape.
+-   :material-link-variant: **[URL Shortener (TinyURL/Bitly)](tier-1-core/01-url-shortener.md)**
+
+    ---
+
+    The canonical first SD problem. Base62 encoding, 100B URLs, 350K reads/sec. Read-heavy, cache-heavy. The **template** for every other design page.
+
+-   :material-twitter: **[Twitter / X Feed](tier-1-core/02-twitter-feed.md)**
+
+    ---
+
+    Social timeline at 500M MAU. Push vs pull fanout, the celebrity problem, hybrid model. Snowflake IDs, Redis ZSET timelines, Kafka fanout.
+
+-   :material-play-circle: **[YouTube / Netflix (video streaming)](tier-1-core/03-video-streaming.md)**
+
+    ---
+
+    Petabyte-scale video at 2B MAU. Adaptive bitrate, HLS/DASH, transcode farm, multi-CDN, Open-Connect-style edge caches. Egress is the cost.
+
+-   :material-car: **[Uber / Lyft (ride sharing)](tier-1-core/04-ride-sharing.md)**
+
+    ---
+
+    Real-time matching at 30M rides/day. H3 spatial index, surge pricing, per-city sharding, idempotent payments, trip state machine.
+
+-   :material-chat: **[WhatsApp / Messenger (chat)](tier-1-core/05-realtime-chat.md)**
+
+    ---
+
+    Hundreds of millions of persistent connections. E2E (Signal protocol), at-least-once + dedupe, multi-device sync, push fallback. Erlang/OTP scale.
+
+</div>
+
+Every page follows the same 20-section shape. Once you've read one, you've read the contract for them all.
 
 ---
 

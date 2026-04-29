@@ -318,17 +318,27 @@ nav:
       - Overview: dsa/docs/02-data-structures/index.md
       - Arrays:
         - Array basics: dsa/docs/02-data-structures/arrays/01-array-basics.md
+        - Prefix sums & difference arrays: dsa/docs/02-data-structures/arrays/02-prefix-sum-difference.md
       - Strings:
         - String basics: dsa/docs/02-data-structures/strings/01-string-basics.md
         - Pattern matching (KMP, Z, Rabin-Karp): dsa/docs/02-data-structures/strings/02-string-pattern-matching.md
       - Linked Lists:
         - Linked list basics: dsa/docs/02-data-structures/linked-lists/01-linked-list-basics.md
+        - Advanced linked lists: dsa/docs/02-data-structures/linked-lists/02-advanced-linked-lists.md
       - Hash Tables:
         - Hash table basics: dsa/docs/02-data-structures/hash-tables/01-hash-table-basics.md
+        - Hash internals: dsa/docs/02-data-structures/hash-tables/02-hash-internals.md
       - Stacks & Queues:
         - Stacks and queues basics: dsa/docs/02-data-structures/stacks-and-queues/01-stacks-and-queues-basics.md
+        - Monotonic stack & queue: dsa/docs/02-data-structures/stacks-and-queues/02-monotonic-stack-queue.md
       - Trees:
         - Tree basics: dsa/docs/02-data-structures/trees/01-tree-basics.md
+        - Binary Search Trees: dsa/docs/02-data-structures/trees/02-binary-search-trees.md
+        - Tree traversals: dsa/docs/02-data-structures/trees/03-tree-traversals.md
+      - Heaps:
+        - Heap basics: dsa/docs/02-data-structures/heaps/01-heap-basics.md
+      - Graphs:
+        - Graph basics: dsa/docs/02-data-structures/graphs/01-graph-basics.md
     - Algorithms:
       - Overview: dsa/docs/03-algorithms/index.md
       - Sorting: dsa/docs/03-algorithms/01-sorting.md

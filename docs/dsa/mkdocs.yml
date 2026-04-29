@@ -176,17 +176,27 @@ nav:
       - Overview: 02-data-structures/index.md
       - Arrays:
           - Array basics: 02-data-structures/arrays/01-array-basics.md
+          - Prefix sums & difference arrays: 02-data-structures/arrays/02-prefix-sum-difference.md
       - Strings:
           - String basics: 02-data-structures/strings/01-string-basics.md
           - Pattern matching (KMP, Z, Rabin-Karp): 02-data-structures/strings/02-string-pattern-matching.md
       - Linked Lists:
           - Linked list basics: 02-data-structures/linked-lists/01-linked-list-basics.md
+          - Advanced linked lists: 02-data-structures/linked-lists/02-advanced-linked-lists.md
       - Hash Tables:
           - Hash table basics: 02-data-structures/hash-tables/01-hash-table-basics.md
+          - Hash internals: 02-data-structures/hash-tables/02-hash-internals.md
       - Stacks & Queues:
           - Stacks and queues basics: 02-data-structures/stacks-and-queues/01-stacks-and-queues-basics.md
+          - Monotonic stack & queue: 02-data-structures/stacks-and-queues/02-monotonic-stack-queue.md
       - Trees:
           - Tree basics: 02-data-structures/trees/01-tree-basics.md
+          - Binary Search Trees: 02-data-structures/trees/02-binary-search-trees.md
+          - Tree traversals: 02-data-structures/trees/03-tree-traversals.md
+      - Heaps:
+          - Heap basics: 02-data-structures/heaps/01-heap-basics.md
+      - Graphs:
+          - Graph basics: 02-data-structures/graphs/01-graph-basics.md
 
   - ⚙️ Algorithms:
       - Overview: 03-algorithms/index.md

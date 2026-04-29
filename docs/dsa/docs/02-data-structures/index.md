@@ -2,32 +2,118 @@
 
 > The boxes you put data into. Pick the right box, the algorithm is half-solved.
 
-<span class="phase-status phase-inprogress">Phase 1 — Sample chapter only</span>
+<span class="phase-status phase-done">Phase 2 — Linear / Hash / Tree / Heap / Graph chapters live</span>
 
-This section will eventually cover every data structure interviewers ask about, in this order:
-
-| Group | Topics |
-|---|---|
-| Linear | Arrays · Strings · Linked Lists · Stacks · Queues · Deques |
-| Hash-based | Hash Tables · Hash Sets · Multimaps |
-| Tree-based | Binary Trees · BSTs · AVL · Red-Black · Segment Trees · BITs · Tries |
-| Graph-based | Adjacency List · Adjacency Matrix · Edge List · Weighted/Directed |
-| Heap-based | Min-Heap · Max-Heap · Priority Queues · Indexed Heaps |
-| Specialty | LRU · LFU · Skip List · Disjoint Set Union (Union-Find) · Bloom Filter |
+Every algorithm in [the next chapter](../03-algorithms/index.md) is just a recipe applied to one of these boxes. Choosing the right structure is half the interview.
 
 ---
 
-## ✅ Available now (Phase 1 sample)
+## 🧱 Linear
 
-- **Arrays**
-    - [Array basics](arrays/01-array-basics.md) — the gold-standard sample chapter, **40+ problems**, full progressive 5-layer solutions, real-world usage on every problem, line-by-line code explanations, follow-ups, common bugs, edge cases.
+<div class="grid cards" markdown>
 
-This single chapter is the **template** for every chapter that follows. Read it. If anything is unclear or could be better, that feedback is gold — it shapes the rest of the bible.
+-   :material-numeric: **Arrays**
+
+    ---
+
+    - [Array basics](arrays/01-array-basics.md) — 40+ problems, the gold-standard sample chapter.
+    - [Prefix sums & difference arrays](arrays/02-prefix-sum-difference.md) — 1D/2D prefix, range-update difference arrays, the prefix + hashmap idiom.
+
+-   :material-format-quote-close: **Strings**
+
+    ---
+
+    - [String basics](strings/01-string-basics.md) — immutability, slicing, Python idioms.
+    - [Pattern matching (KMP, Z, Rabin-Karp)](strings/02-string-pattern-matching.md) — substring search, the failure function.
+
+-   :material-link-variant: **Linked Lists**
+
+    ---
+
+    - [Linked list basics](linked-lists/01-linked-list-basics.md) — singly linked, dummy heads, fast/slow pointers.
+    - [Advanced linked lists](linked-lists/02-advanced-linked-lists.md) — DLL with sentinels, circular, skip list, random-pointer copy.
+
+-   :material-stack-overflow: **Stacks & Queues**
+
+    ---
+
+    - [Stacks and queues basics](stacks-and-queues/01-stacks-and-queues-basics.md) — LIFO / FIFO / deque.
+    - [Monotonic stack & queue](stacks-and-queues/02-monotonic-stack-queue.md) — next-greater patterns, sliding-window max, histogram.
+
+</div>
 
 ---
 
-## 🚧 Coming in Phase 2
+## 🔑 Hash-based
 
-The full Data Structures section: 70+ pages covering everything in the table above, with the same depth as the Arrays sample.
+<div class="grid cards" markdown>
 
-In the meantime: skim [Foundations](../01-foundations/index.md), then dive into the Arrays chapter. You'll be productive on day one.
+-   :material-key-variant: **Hash Tables**
+
+    ---
+
+    - [Hash table basics](hash-tables/01-hash-table-basics.md) — dict / set, collision counting, idioms.
+    - [Hash internals](hash-tables/02-hash-internals.md) — chaining vs open addressing, Robin Hood, cuckoo, consistent hashing.
+
+</div>
+
+---
+
+## 🌳 Tree-based
+
+<div class="grid cards" markdown>
+
+-   :material-file-tree: **Trees**
+
+    ---
+
+    - [Tree basics](trees/01-tree-basics.md) — binary tree fundamentals, recursive thinking.
+    - [Binary Search Trees](trees/02-binary-search-trees.md) — invariant, the 3 delete cases, validation, inorder.
+    - [Tree traversals](trees/03-tree-traversals.md) — pre/in/post/level (recursive + iterative), Morris, serialize.
+
+</div>
+
+For balanced trees, segment trees, BIT, and tries see [Advanced](../05-advanced/index.md).
+
+---
+
+## ⛰️ Heap-based
+
+<div class="grid cards" markdown>
+
+-   :material-chart-arc: **Heaps**
+
+    ---
+
+    - [Heap basics](heaps/01-heap-basics.md) — heap property, `heapq`, max-heap via negation, top-K, two-heap median.
+
+</div>
+
+---
+
+## 🌐 Graph-based
+
+<div class="grid cards" markdown>
+
+-   :material-graph-outline: **Graphs**
+
+    ---
+
+    - [Graph basics](graphs/01-graph-basics.md) — vocabulary, three representations, BFS/DFS, grid-as-graph, bipartite.
+
+</div>
+
+For BFS/DFS/Dijkstra/Bellman-Ford/Floyd-Warshall/A\*/MST/SCC depth see [Algorithms — Graph algorithms](../03-algorithms/07-graph-algorithms.md).
+
+---
+
+## ⚡ The fastest tour
+
+If you only have an evening:
+
+1. Read the **Arrays basics** sample — it's the template every other chapter follows.
+2. Skim **Hash internals** — collision strategies show up in 30% of system-design rounds.
+3. Read **Heap basics** — the API is small but the problems are everywhere.
+4. Skim **Graph basics** — every graph problem starts here.
+
+Everything else rewards depth over speed.

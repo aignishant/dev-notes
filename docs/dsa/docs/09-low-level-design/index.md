@@ -2,7 +2,7 @@
 
 > Object-oriented design + classic LLD problems. The middle round at most product companies after the algorithmic round.
 
-<span class="phase-status phase-done">Phase 13 — foundations + 4 classic problems</span>
+<span class="phase-status phase-done">Phase 13 — foundations + 8 classic problems</span>
 
 ---
 
@@ -51,6 +51,30 @@
     ---
 
     The State pattern done right. Idle → AcceptingMoney → Dispensing transitions, change-making algorithm, fault handling, card-payment extensions.
+
+-   :material-cash-multiple: **[Design Splitwise](problems/05-splitwise.md)**
+
+    ---
+
+    Track shared expenses; minimum-settlement graph problem. Strategy pattern over split types (equal / exact / percent / shares), greedy heap settlement.
+
+-   :material-tic-tac-toe: **[Design Tic-Tac-Toe](problems/06-tic-tac-toe.md)**
+
+    ---
+
+    The "trivial" warm-up that secretly grades decomposition. O(1) win detection via per-line counters, Strategy for AI bot, N×N + K-in-a-row extension.
+
+-   :material-speedometer: **[Design a Rate Limiter](problems/07-rate-limiter.md)**
+
+    ---
+
+    Token bucket vs leaky bucket vs sliding window. Strategy pattern; lazy refill; distributed deployment with Redis Lua atomicity.
+
+-   :material-folder-multiple: **[Design an In-Memory File System](problems/08-file-system.md)**
+
+    ---
+
+    The Composite-pattern interview. `Node` ABC with `File` and `Directory` siblings; path parser; mkdir / ls / cat with extensions for symlinks, permissions, COW snapshots.
 
 </div>
 
@@ -111,6 +135,6 @@ If you have **2 weeks**: do all 4 problems, plus 4 more from the backlog (Splitw
 
 ## 🔭 Coming next
 
-A backlog of 10+ more LLD problems is planned: Splitwise · BookMyShow · Snake & Ladder · Chess · Tic-Tac-Toe · ATM · Library · File System · Logger · Online Stock Brokerage · Rate Limiter · Distributed task queue.
+A backlog of more LLD problems is planned: BookMyShow · Snake & Ladder · Chess · ATM · Library · Logger · Online Stock Brokerage · Distributed task queue · Cache (write-through / write-back).
 
 Patterns drilled deeper: **Visitor, Mediator, Command, Memento** with worked examples beyond the GoF reference.

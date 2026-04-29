@@ -2,7 +2,7 @@
 
 > 25+ projects, fully designed end-to-end. Cloud + on-prem + architecture.
 
-<span class="phase-status phase-done">Phase 15 — Tier 1 complete (all 5 core designs)</span>
+<span class="phase-status phase-done">Phase 16 — Tier 1 complete + Tier 2 batch 1 (4 designs)</span>
 
 When complete, this section will be a **complete system-design book**, larger and more detailed than Alex Xu's *System Design Interview* (vols 1 & 2 combined).
 
@@ -45,6 +45,38 @@ When complete, this section will be a **complete system-design book**, larger an
 </div>
 
 Every page follows the same 20-section shape. Once you've read one, you've read the contract for them all.
+
+---
+
+## ✅ Tier 2 — first batch (4 of 20 live)
+
+<div class="grid cards" markdown>
+
+-   :material-database-cog: **[Distributed Cache (Redis-style)](tier-2-important/01-distributed-cache.md)**
+
+    ---
+
+    Sharded in-memory KV with consistent hashing, async replication, lazy + active expiry. The infrastructure piece behind every tier-1 design.
+
+-   :material-bell-ring: **[Notification Service](tier-2-important/02-notification-service.md)**
+
+    ---
+
+    Push + email + SMS at 1 B/day. Two-stage Kafka pipeline (resolve → deliver), idempotency via Redis SETNX, frequency caps + quiet hours, HTTP/2 multiplexed APNs.
+
+-   :material-spider: **[Web Crawler](tier-2-important/03-web-crawler.md)**
+
+    ---
+
+    Politely fetch billions of pages with per-domain queues, Bloom-filter URL dedup, SimHash content dedup, headless-Chrome lane for JS-heavy sites.
+
+-   :material-magnify-plus: **[Search Autocomplete](tier-2-important/04-search-autocomplete.md)**
+
+    ---
+
+    Sub-50 ms suggestions via FST + per-node top-K. Edge cache collapses 10× QPS; hourly index swap; trending injection through Kafka stream.
+
+</div>
 
 ---
 

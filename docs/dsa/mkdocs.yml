@@ -310,6 +310,12 @@ nav:
 
   - 🎤 Mock Interviews:
       - Overview: 10-mock-interviews/index.md
+      - Mock 1 — DSA Coding (LRU): 10-mock-interviews/01-dsa-coding-mock.md
+      - Mock 2 — DSA Graph Escalation: 10-mock-interviews/02-dsa-graph-mock.md
+      - Mock 3 — System Design (TinyURL): 10-mock-interviews/03-system-design-mock.md
+      - Mock 4 — Behavioural / Bar-Raiser: 10-mock-interviews/04-behavioral-mock.md
+      - Self-Grading Rubric: 10-mock-interviews/05-self-grading-rubric.md
+      - Live Mocks (Pramp / interviewing.io): 10-mock-interviews/06-live-mocks-tips.md
 
   - 💬 Behavioral:
       - Overview: 11-behavioral/index.md

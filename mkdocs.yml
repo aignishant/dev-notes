@@ -444,6 +444,12 @@ nav:
       - In-Memory File System: dsa/docs/09-low-level-design/problems/08-file-system.md
     - Mock Interviews:
       - Overview: dsa/docs/10-mock-interviews/index.md
+      - Mock 1 — DSA Coding (LRU): dsa/docs/10-mock-interviews/01-dsa-coding-mock.md
+      - Mock 2 — DSA Graph Escalation: dsa/docs/10-mock-interviews/02-dsa-graph-mock.md
+      - Mock 3 — System Design (TinyURL): dsa/docs/10-mock-interviews/03-system-design-mock.md
+      - Mock 4 — Behavioural / Bar-Raiser: dsa/docs/10-mock-interviews/04-behavioral-mock.md
+      - Self-Grading Rubric: dsa/docs/10-mock-interviews/05-self-grading-rubric.md
+      - Live Mocks (Pramp / interviewing.io): dsa/docs/10-mock-interviews/06-live-mocks-tips.md
     - Behavioral:
       - Overview: dsa/docs/11-behavioral/index.md
       - STAR method: dsa/docs/11-behavioral/star-method.md

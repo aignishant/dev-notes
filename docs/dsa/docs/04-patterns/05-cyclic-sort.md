@@ -2,7 +2,7 @@
 
 > When the input is "an array of n numbers in the range `[1..n]` (or `[0..n-1]`) — find the missing one / the duplicate / the smallest positive integer absent." The trick is to place each value at the index that *equals* it, then a single linear scan reveals exactly what's wrong. **O(n) time, O(1) extra space**, and you'll see it asked verbatim at Microsoft, Amazon, and Google.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 16)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

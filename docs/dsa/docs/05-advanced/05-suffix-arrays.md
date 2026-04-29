@@ -2,7 +2,7 @@
 
 > The data structure for "**many substrings of one long string.**" A **suffix array** is a sorted list of all `n` suffixes of a string — by index, not by storing each suffix. Combined with the **LCP (Longest Common Prefix) array**, you can answer: "longest repeated substring," "number of distinct substrings," "longest common substring of two texts," "k-th smallest substring," and "substring search" in linear-or-near-linear time. **Suffix automata** (SAM) are the deterministic-finite-automaton cousin — same problems, different machinery, often fewer lines.
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 36)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

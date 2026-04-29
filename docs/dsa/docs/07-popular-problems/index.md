@@ -2,7 +2,7 @@
 
 > Curated lists and per-company question banks.
 
-<span class="phase-status phase-inprogress">Phase 8 — curated lists chapter (Top 100 by Pattern shipped; company pages in flight)</span>
+<span class="phase-status phase-done">Phase 8 — Top 100 by pattern + 22 product + service + PSU</span>
 
 This section holds three things, in increasing specificity:
 

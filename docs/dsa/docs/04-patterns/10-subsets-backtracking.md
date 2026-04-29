@@ -2,7 +2,7 @@
 
 > The recursive "try-all-then-undo" engine that powers every "generate all valid X" question — subsets, permutations, combinations, palindrome partitioning, N-Queens, Sudoku, word break, generate parentheses. One template ("choose, recurse, un-choose") underlies a dozen distinct problems. The thing to internalise is **how to skip duplicates without missing valid answers** and **when to prune dead branches early**.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 21)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

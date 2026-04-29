@@ -2,7 +2,7 @@
 
 > The trick that turns "**q range queries on a static array**" into a sequence of **incremental window adjustments**, by reordering the queries cleverly so the window endpoints only ever move `O((n + q) √n)` times **in total**. Each query becomes "add/remove a few elements from the current window," which is far cheaper than recomputing from scratch. Net: **O((n + q) √n)** offline range queries with cheap insert/delete.
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 38)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

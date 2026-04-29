@@ -2,7 +2,7 @@
 
 > Merging two sorted lists is a warm-up; merging **k** of them is the same idea with one twist — a min-heap of `k` "front-row tickets," one per list, that re-fills as you advance. The technique generalises beyond literal lists: any time you have `k` monotone sources and want them streamed in global order, this is the pattern. The Smallest Range Covering Elements from K Lists trick (LC 632) is the same heap viewed from a different angle.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 24)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

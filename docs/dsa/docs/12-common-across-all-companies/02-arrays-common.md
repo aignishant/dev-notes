@@ -2,7 +2,7 @@
 
 > The 25 array problems that show up *everywhere* — product, service, PSU. If your time is limited, solve these first. This page is the **template** for the 15 other "common across companies" topic pages in this section.
 
-<span class="company-tag">Google</span> &nbsp; <span class="company-tag">Meta</span> &nbsp; <span class="company-tag">Amazon</span> &nbsp; <span class="company-tag">Microsoft</span> &nbsp; <span class="company-tag">TCS</span> &nbsp; <span class="company-tag">Infosys</span> &nbsp; <span class="company-tag">ISRO</span> &nbsp; <span class="company-tag">DRDO</span> &nbsp; <span class="phase-status phase-inprogress">Phase 1 — sample template</span>
+<span class="company-tag">Google</span> &nbsp; <span class="company-tag">Meta</span> &nbsp; <span class="company-tag">Amazon</span> &nbsp; <span class="company-tag">Microsoft</span> &nbsp; <span class="company-tag">TCS</span> &nbsp; <span class="company-tag">Infosys</span> &nbsp; <span class="company-tag">ISRO</span> &nbsp; <span class="company-tag">DRDO</span> &nbsp; <span class="phase-status phase-done">Phase 14 — Common Across</span>
 
 ---
 

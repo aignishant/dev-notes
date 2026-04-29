@@ -2,7 +2,7 @@
 
 > Walk a tree level by level — root first, then all of root's children, then all the grandchildren. The pattern that solves "right side view," "zigzag," "level averages," "minimum depth," "rotting oranges in a grid" — basically every problem where the answer cares about distance-from-root or distance-from-source. One queue, one length-snapshot trick, twenty FAANG problems.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 18)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

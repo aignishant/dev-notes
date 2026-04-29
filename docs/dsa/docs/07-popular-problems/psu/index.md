@@ -6,7 +6,7 @@
 
 <span class="company-tag">ISRO</span> <span class="company-tag">DRDO</span> <span class="company-tag">BARC</span> <span class="company-tag">ECIL</span> <span class="company-tag">BEL</span> <span class="company-tag">HAL</span> <span class="company-tag">BHEL</span> <span class="company-tag">NTPC</span> <span class="company-tag">ONGC</span> <span class="company-tag">IOCL</span> <span class="company-tag">GAIL</span> <span class="company-tag">NHAI</span> <span class="company-tag">RBI Grade B</span> <span class="company-tag">SEBI Grade A</span>
 
-<span class="phase-status phase-inprogress">Phase 8 — PSU consolidated</span>
+<span class="phase-status phase-done">Phase 8 — PSU companies</span>
 
 ---
 

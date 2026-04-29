@@ -2,7 +2,7 @@
 
 > The trick that turns "**path queries on a tree**" into "**range queries on an array**." Decompose the tree into a small number of vertex-disjoint **chains** such that any root-to-leaf path crosses at most `O(log n)` chains. Lay each chain contiguously in an array; answer path queries by stitching together `O(log n)` range queries on a segment tree (or BIT). Net: **O(log² n) per path query / update** on a tree of n nodes.
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 37)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

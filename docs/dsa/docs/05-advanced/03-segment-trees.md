@@ -2,7 +2,7 @@
 
 > The Swiss army knife of **range queries with point or range updates**. Build a balanced binary tree where each leaf holds one array element and each internal node holds the **aggregate** (sum, min, max, gcd, …) of its subtree's range. Both query and update run in **O(log n)**. Add **lazy propagation** and you can update an entire range in O(log n) too — this is the data structure that powers competitive programming's hardest range problems.
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 34)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

@@ -2,7 +2,7 @@
 
 > The chapter where you can't keep the data. A trillion events stream past, you have a few megabytes of RAM, and the interviewer wants the median, the heavy hitters, the count of distinct items, and a uniform random sample — *exactly* if possible, *approximately* with a tunable error if not. The four flavors here cover that space: **two-heap sliding median** (exact, online, `O(log n)`), **Reservoir sampling** (exact uniform sample with `O(1)` memory), **Count-Min / Misra-Gries** (approximate frequency / heavy hitters with `ε`-additive error), and **HyperLogLog** (approximate cardinality with ~1.04/√m relative error). One Bloom filter at the end for set-membership. Net: the streaming-systems toolkit that powers Cloudflare, Splunk, Druid, and every analytics database.
 
-<span class="phase-status phase-inprogress">Phase 7 — Ultra-Advanced topic 5 of 7</span>
+<span class="phase-status phase-done">Phase 7 — Ultra-Advanced</span>
 
 ---
 

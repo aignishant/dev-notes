@@ -2,7 +2,7 @@
 
 > The chapter where coordinates, vectors, and orientation tests replace `if x < y`. The trick that unlocks every problem here is the **cross product** — a single sign tells you whether three points turn left, right, or are colinear, and that one primitive solves convex hull, segment intersection, point-in-polygon, polygon area, and half-plane intersection. Add a **sweep line** for `n log n` algorithms (closest pair, segment intersections, rectangle union), and a **KD-tree** for spatial nearest-neighbour queries. Net: a self-contained toolkit for any 2D geometry problem you'll see in interviews.
 
-<span class="phase-status phase-inprogress">Phase 7 — Ultra-Advanced topic 3 of 7</span>
+<span class="phase-status phase-done">Phase 7 — Ultra-Advanced</span>
 
 ---
 

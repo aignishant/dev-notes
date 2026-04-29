@@ -2,7 +2,7 @@
 
 > The smallest, sharpest pattern in the bible. **XOR has three magic properties** — `x ^ 0 = x`, `x ^ x = 0`, and `x ^ y ^ x = y` — and an entire family of "find the odd one out" problems collapses to a single linear pass with no extra space. Single Number, Missing Number, Two Singles in a duplicated array, Maximum XOR of Two Numbers (with a trie), Sum of Two Integers without `+`, and the bit-tricks playbook (`n & (n-1)`, `n & -n`) all live here.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 31, final canonical pattern)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

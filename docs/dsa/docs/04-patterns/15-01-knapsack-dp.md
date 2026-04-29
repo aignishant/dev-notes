@@ -2,7 +2,7 @@
 
 > The mother of all subset-selection DPs. Given a list of items, each with a *weight* and *value*, pick a subset that maximises value under a capacity budget. The "0/1" half of the name says **each item is either taken or not — no halves, no duplicates.** Once you internalise the 2D `dp[i][w]` table and the rolling-array trick that compresses it to 1D (with the **right-to-left** iteration order), Subset Sum, Partition Equal Subset Sum, Target Sum, Last Stone Weight II, and a dozen others all collapse to template substitutions.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 26)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

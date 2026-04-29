@@ -2,7 +2,7 @@
 
 > The chapter where DP stops being "1D / 2D table" and becomes a **language**: state design as a craft, transitions as algebra, optimisations as theorems. Four flavors carry the weight of every "DP-tier-hard" problem you'll meet: **digit DP** for "count integers in `[L, R]` satisfying property P", **bitmask DP** for "assign / visit / partition over a small universe (n ≤ 20)", **DP on trees with rerooting** for "compute f(v) for every root v in `O(n)` not `O(n²)`", and **SOS / Knuth-style optimisations** that drop a quadratic to `O(n · 2ⁿ)` or `O(n²)` to `O(n log n)`. Master the four and you've covered the long tail of contest-grade DP.
 
-<span class="phase-status phase-inprogress">Phase 7 — Ultra-Advanced topic 4 of 7</span>
+<span class="phase-status phase-done">Phase 7 — Ultra-Advanced</span>
 
 ---
 

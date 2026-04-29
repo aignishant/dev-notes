@@ -2,7 +2,7 @@
 
 > The three-pointer dance that flips a linked list — or any sublist of one — in O(n) time and **O(1) extra space**. Reverse a list, reverse a sublist, reverse every k nodes, swap pairs, check palindrome, rotate by k. Once you internalise the `prev / curr / next_node` triplet, half the linked-list questions in the FAANG bank fall in five lines.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 17)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

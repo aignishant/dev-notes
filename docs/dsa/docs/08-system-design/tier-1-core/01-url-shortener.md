@@ -2,7 +2,7 @@
 
 > Design a service that converts long URLs into short ones (e.g. `https://very-long-blog-post-url/...` → `tiny.url/aB3xY9`), then redirects users back to the original on click. The canonical "first" system design problem at every product company. **This page is the template** for the other 29 system-design deep-dives.
 
-<span class="company-tag">Google</span> &nbsp; <span class="company-tag">Meta</span> &nbsp; <span class="company-tag">Amazon</span> &nbsp; <span class="company-tag">Microsoft</span> &nbsp; <span class="company-tag">Uber</span> &nbsp; <span class="company-tag">Stripe</span> &nbsp; <span class="phase-status phase-inprogress">Phase 1 — sample SD page</span>
+<span class="company-tag">Google</span> &nbsp; <span class="company-tag">Meta</span> &nbsp; <span class="company-tag">Amazon</span> &nbsp; <span class="company-tag">Microsoft</span> &nbsp; <span class="company-tag">Uber</span> &nbsp; <span class="company-tag">Stripe</span> &nbsp; <span class="phase-status phase-done">Phase 9 — System Design</span>
 
 ---
 

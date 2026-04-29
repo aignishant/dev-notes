@@ -2,7 +2,7 @@
 
 > The canonical **two-sequence** DP. `dp[i][j]` describes some property of `a[..i]` versus `b[..j]`, and the recurrence reads three neighbours: `dp[i-1][j-1]`, `dp[i-1][j]`, `dp[i][j-1]`. Once you internalise that grid shape, **Edit Distance**, **Shortest Common Supersequence**, **Distinct Subsequences**, **Min ASCII Delete Sum**, **Interleaving String**, and **Longest Increasing Subsequence** all collapse to one template with a swapped recurrence. The whole "compare two strings" interview category lives here.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 30)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

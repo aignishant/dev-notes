@@ -2,7 +2,7 @@
 
 > The first advanced data structure most engineers reach for in interviews. A trie is **a tree whose paths spell strings** — every edge is labelled with a character, and every node corresponds to a *prefix* of some inserted string. Insert and query are both O(L) in the length of the string, **independent of the dictionary size**. The whole "autocomplete, prefix search, dictionary, word-game, XOR-pair" interview category lives here.
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 32)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

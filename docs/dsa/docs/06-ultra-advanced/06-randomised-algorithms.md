@@ -2,7 +2,7 @@
 
 > The chapter where coin flips beat cleverness. Random pivot in quicksort makes adversarial input impossible. Random edge contraction in Karger's algorithm finds a min-cut in `O(V²)` per trial — repeat `O(V² log V)` times and you beat the deterministic `O(V³)` Stoer-Wagner with embarrassingly parallel code. Miller-Rabin tests primality of a 1024-bit integer in milliseconds where deterministic AKS would take hours. The four flavors here are **Las Vegas** (always correct, randomized runtime), **Monte Carlo** (fixed runtime, randomized correctness), **fingerprinting** (compare big things by comparing small hashes), and **the probabilistic method** (prove an object exists by showing a random one works with positive probability). Net: randomization is not a workaround — it is *the* technique that powers modern crypto, distributed consensus, and most lower-bound proofs.
 
-<span class="phase-status phase-inprogress">Phase 7 — Ultra-Advanced topic 6 of 7</span>
+<span class="phase-status phase-done">Phase 7 — Ultra-Advanced</span>
 
 ---
 

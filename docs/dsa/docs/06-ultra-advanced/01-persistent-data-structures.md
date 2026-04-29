@@ -2,7 +2,7 @@
 
 > Data structures where **every modification returns a new version** without mutating the old one — and yet each modification still costs only `O(log n)` time and memory by **sharing all the unchanged subtree** with the previous version. The trick: **path-copying.** Clone the root-to-modified-leaf spine, point the clone's untouched children at the *old* nodes. Now both old and new versions are valid roots; navigating from each gives you the structure as it was at that version. Net: **kth-element-as-of-version-v in `O(log n)`**, with `O(log n)` extra memory per version.
 
-<span class="phase-status phase-inprogress">Phase 7 — Ultra-Advanced topic 1 of 7</span>
+<span class="phase-status phase-done">Phase 7 — Ultra-Advanced</span>
 
 ---
 

@@ -2,7 +2,7 @@
 
 > The 50 problems Google has asked most often over the last 5 years, with the patterns behind them and what the interviewer is actually grading. This page is the **template** for every other company page in this bible.
 
-<span class="company-tag">Google</span> &nbsp; <span class="phase-status phase-inprogress">Phase 1 — sample company page</span>
+<span class="company-tag">Google</span> &nbsp; <span class="phase-status phase-done">Phase 8 — Company list</span>
 
 ---
 

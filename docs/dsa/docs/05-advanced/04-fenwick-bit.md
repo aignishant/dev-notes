@@ -2,7 +2,7 @@
 
 > **Half the code of a segment tree, same O(log n) for prefix problems.** A Fenwick tree (a.k.a. BIT) is the cleanest data structure for "point update + prefix-sum query" — and with the right framing it stretches to range update + point query, range update + range query, and 2D versions. The whole algorithm fits in **eight lines** of Python and the only non-obvious mechanic is the `i & -i` trick (which we already met in [Bitwise XOR](../04-patterns/20-bitwise-xor.md)).
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 35)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

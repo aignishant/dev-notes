@@ -2,7 +2,7 @@
 
 > The data structure for **dynamic connectivity**. You have a set of elements partitioned into disjoint groups, and you support two operations: `find(x)` (which group is `x` in?) and `union(x, y)` (merge the groups of `x` and `y`). Both operations run in **near-constant amortised time** — `O(α(n))`, the inverse Ackermann function, indistinguishable from O(1) for any input that fits in a galaxy. Powers Kruskal's MST, cycle detection in undirected graphs, friend-circle / island problems with **online** edge additions, and the offline Tarjan LCA algorithm.
 
-<span class="phase-status phase-inprogress">Phase 6 — Advanced topic (Batch 33)</span>
+<span class="phase-status phase-done">Phase 6 — Advanced</span>
 
 ---
 

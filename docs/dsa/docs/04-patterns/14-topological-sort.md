@@ -2,7 +2,7 @@
 
 > An ordering of vertices in a **directed acyclic graph** such that every edge `u → v` puts `u` before `v` in the output. The two canonical algorithms — **Kahn's BFS** (peel off in-degree-zero nodes) and **DFS post-order with reverse** — also double as **cycle detectors**: if you can't produce a topological order, the graph has a cycle. Course schedules, build systems, task dependency graphs, alien dictionaries — anything with "do A before B" lives here.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 25)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

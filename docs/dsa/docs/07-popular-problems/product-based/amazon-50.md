@@ -2,7 +2,7 @@
 
 > The 50 problems Amazon (AWS, Retail, Alexa, Ads, Prime Video) has asked most often over the last 5 years, with the patterns behind them and what the interviewer is actually grading. Same six-part shape as the [Google 50](google-50.md) and [Meta 50](meta-50.md) pages.
 
-<span class="company-tag">Amazon</span> &nbsp; <span class="phase-status phase-inprogress">Phase 8 — company page</span>
+<span class="company-tag">Amazon</span> &nbsp; <span class="phase-status phase-done">Phase 8 — Company list</span>
 
 ---
 

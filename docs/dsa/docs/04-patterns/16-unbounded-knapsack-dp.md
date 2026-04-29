@@ -2,7 +2,7 @@
 
 > Same recurrence as 0/1 knapsack, **one character of difference**: you iterate `w` **left-to-right** instead of right-to-left. That single change lets each item be reused unlimited times. Coin Change (min coins, count ways), Rod Cutting, Combination Sum IV, and Perfect Squares all live here. The "what's the iteration order?" question is the entire interview signal — get it right, every variant follows.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 27)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

@@ -2,7 +2,7 @@
 
 > The 50 problems Twitter / X (timeline, search, ads) has asked most often. Same six-part shape as the [Google 50](google-50.md) page.
 
-<span class="company-tag">Twitter / X</span> &nbsp; <span class="phase-status phase-inprogress">Phase 8 — company page</span>
+<span class="company-tag">Twitter / X</span> &nbsp; <span class="phase-status phase-done">Phase 8 — Company list</span>
 
 ---
 

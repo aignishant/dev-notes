@@ -2,7 +2,7 @@
 
 > A two-pointer family of techniques where you keep a "window" over a contiguous slice of the input and slide it forward, expanding or shrinking, instead of restarting from scratch. The #1 most-asked pattern at every product company. This page is the **template** for the other 19 pattern pages.
 
-<span class="phase-status phase-inprogress">Phase 1 — sample pattern page</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

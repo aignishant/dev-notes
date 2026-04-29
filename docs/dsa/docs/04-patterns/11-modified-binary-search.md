@@ -2,7 +2,7 @@
 
 > Binary search beyond "find this value in this sorted array." Rotated arrays, infinite arrays, bitonic arrays, peak finding, and — the killer move — **binary searching the answer space itself** (Koko's eating speed, ship within D days, split array minimum sum). Once you stop thinking of binary search as "where is X?" and start thinking of it as "find the boundary between *no* and *yes*," half a textbook of medium/hard problems collapses to log-time templates.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 22)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

@@ -2,7 +2,7 @@
 
 > Where to start, how to pace yourself, and how to think about interviews.
 
-<span class="phase-status phase-inprogress">Phase 1 — In progress</span>
+<span class="phase-status phase-done">Phase 0 — Roadmap</span>
 
 This section is your **planner**. Before you touch a single problem, spend 30 minutes here. It will save you weeks of wasted effort.
 

@@ -2,7 +2,7 @@
 
 > Two priority queues running back-to-back, each guarding one half of the data. The textbook trick for "running median of a stream," and the secret weapon for "schedule projects greedily by capital then profit" (IPO), "sliding-window median," and "earliest-possible-day-to-finish-tasks." A pattern your interviewer will reach for the moment you say *"running statistics on a stream."*
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 20)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

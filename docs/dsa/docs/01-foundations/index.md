@@ -2,7 +2,7 @@
 
 > Python + complexity. Skip this and everything else takes 3× longer.
 
-<span class="phase-status phase-inprogress">Phase 1 — In progress</span>
+<span class="phase-status phase-done">Phase 1 — Foundations</span>
 
 These are the building blocks. Whether you're a complete beginner or have been coding for years, **at least skim each page** — interviewers test the small details (slicing, mutation, complexity vocabulary) more often than they test "the algorithm."
 

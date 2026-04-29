@@ -6,7 +6,7 @@
 
 <span class="company-tag">TCS</span> <span class="company-tag">Infosys</span> <span class="company-tag">Wipro</span> <span class="company-tag">HCL</span> <span class="company-tag">Cognizant</span> <span class="company-tag">Tech Mahindra</span> <span class="company-tag">Capgemini</span> <span class="company-tag">Accenture</span> <span class="company-tag">IBM India</span> <span class="company-tag">LTIMindtree</span> <span class="company-tag">Mphasis</span> <span class="company-tag">DXC</span> <span class="company-tag">Hexaware</span> <span class="company-tag">Coforge</span> <span class="company-tag">Persistent</span> <span class="company-tag">Zoho</span>
 
-<span class="phase-status phase-inprogress">Phase 8 — service companies consolidated</span>
+<span class="phase-status phase-done">Phase 8 — Service companies</span>
 
 ---
 

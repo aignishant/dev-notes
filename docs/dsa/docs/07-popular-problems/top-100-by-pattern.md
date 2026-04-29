@@ -2,7 +2,7 @@
 
 > The 100 highest-leverage interview problems, **grouped by the 20 patterns** that solve them. Five problems per pattern. Solve these and you'll recognise the pattern in 95% of interview problems on sight — because every problem here has been asked by every product company at some point in the last five years.
 
-<span class="phase-status phase-inprogress">Phase 8 — curated lists chapter</span>
+<span class="phase-status phase-done">Phase 8 — Curated lists</span>
 
 ---
 

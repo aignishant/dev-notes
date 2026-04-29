@@ -2,7 +2,7 @@
 
 > Sort by start, sweep once, merge overlaps. The pattern that solves every "calendar / range / scheduling" problem you'll ever see in an interview. Feels obvious after one demo and yet half of candidates botch the boundary check.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 15)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

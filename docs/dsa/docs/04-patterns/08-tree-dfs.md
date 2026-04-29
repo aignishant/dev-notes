@@ -2,7 +2,7 @@
 
 > Recursion's home turf. Walk the tree along one branch all the way down, then back up. The pattern that solves "max depth," "diameter," "path sum," "validate BST," "lowest common ancestor," "serialize/deserialize," and most "tree-shaped" interview questions. Two recursion shapes — **top-down** (carry info from parent) and **bottom-up** (each subtree returns info to its parent) — and one iterative stack flavor for when recursion depth is a worry.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 19)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

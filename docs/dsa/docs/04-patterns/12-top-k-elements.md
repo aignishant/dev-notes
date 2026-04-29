@@ -2,7 +2,7 @@
 
 > "Give me the **k** largest / smallest / closest / most-frequent." Heaps were *invented* for this. The trick that separates juniors from seniors: use a heap of **size k**, not size n. Then the right answer to "what's the time complexity?" is **O(n log k)**, not O(n log n) — and for k ≪ n that gap is the difference between passing and not. The QuickSelect alternative trades worst-case guarantees for an average O(n) that's usually faster in practice.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 23)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

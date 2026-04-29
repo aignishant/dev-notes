@@ -2,7 +2,7 @@
 
 > The 50 problems Tesla (Autopilot, Full Self-Driving, Megapack, Optimus) has asked most often. Same six-part shape as the [Google 50](google-50.md) page.
 
-<span class="company-tag">Tesla</span> &nbsp; <span class="phase-status phase-inprogress">Phase 8 — company page</span>
+<span class="company-tag">Tesla</span> &nbsp; <span class="phase-status phase-done">Phase 8 — Company list</span>
 
 ---
 

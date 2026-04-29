@@ -2,7 +2,7 @@
 
 > The first **interval DP** in the bible: `dp[i][j]` describes some property of the substring `s[i..j]`, and the recurrence reads strictly *smaller* intervals (`dp[i+1][j-1]`, `dp[i+1][j]`, `dp[i][j-1]`). The trick that ties the family together is the **diagonal-by-diagonal fill order** — outer loop over interval *length*, inner loop over the left endpoint. Once that's internalised, Longest Palindromic Subsequence (LC 516), Longest Palindromic Substring (LC 5), Min Insertions to Make Palindrome (LC 1312), and Palindrome Partitioning II (LC 132) all collapse to one-page solutions.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 29)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

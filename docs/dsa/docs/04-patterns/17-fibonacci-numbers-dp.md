@@ -2,7 +2,7 @@
 
 > The simplest 1D DP family. State at position `i` depends on a tiny constant-size window of the previous states — usually just `i-1` and `i-2`. Climbing Stairs, House Robber, Decode Ways, Min Cost Climbing Stairs, and most "linear array, scalar transition" DPs all live here. The signature optimisation: **drop the array entirely and keep just two rolling variables** — O(1) space without losing the recurrence.
 
-<span class="phase-status phase-inprogress">Phase 5 — pattern page (Batch 28)</span>
+<span class="phase-status phase-done">Phase 5 — Patterns</span>
 
 ---
 

@@ -2,7 +2,7 @@
 
 > The single most powerful **graph reduction** in algorithms. Dozens of seemingly-unrelated problems — bipartite matching, edge-disjoint paths, project selection, image segmentation, baseball-elimination — collapse to "send the most flow you can from a source `s` to a sink `t` in a directed graph with edge capacities." Solve it once with Dinic's algorithm in `O(V² E)` (or `O(E √V)` on unit-capacity graphs), and a whole world of problems opens up. The duality theorem **max-flow = min-cut** lets you read the bottleneck off the saturated edges for free.
 
-<span class="phase-status phase-inprogress">Phase 7 — Ultra-Advanced topic 2 of 7</span>
+<span class="phase-status phase-done">Phase 7 — Ultra-Advanced</span>
 
 ---
 

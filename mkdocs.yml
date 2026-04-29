@@ -408,6 +408,16 @@ nav:
       - Overview: dsa/docs/10-mock-interviews/index.md
     - Behavioral:
       - Overview: dsa/docs/11-behavioral/index.md
+      - STAR method: dsa/docs/11-behavioral/star-method.md
+      - Amazon Leadership Principles: dsa/docs/11-behavioral/amazon-leadership-principles.md
+      - Googleyness: dsa/docs/11-behavioral/googleyness.md
+      - Meta — Move Fast: dsa/docs/11-behavioral/meta-move-fast.md
+      - Microsoft / Apple / Adobe: dsa/docs/11-behavioral/microsoft-apple-adobe.md
+      - Service company HR: dsa/docs/11-behavioral/service-company-hr.md
+      - PSU interview style: dsa/docs/11-behavioral/psu-interview-style.md
+      - 50 common questions: dsa/docs/11-behavioral/common-questions.md
+      - Story bank: dsa/docs/11-behavioral/story-bank.md
+      - Salary negotiation: dsa/docs/11-behavioral/salary-negotiation.md
     - Common Across Companies:
       - Overview: dsa/docs/12-common-across-all-companies/index.md
       - Arrays — common questions: dsa/docs/12-common-across-all-companies/02-arrays-common.md

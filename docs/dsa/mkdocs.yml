@@ -237,7 +237,17 @@ nav:
 
   - 🔥 Popular Problems:
       - Overview: 07-popular-problems/index.md
+      - Top 100 by Pattern: 07-popular-problems/top-100-by-pattern.md
       - Google 50 (sample): 07-popular-problems/product-based/google-50.md
+      - Meta 50: 07-popular-problems/product-based/meta-50.md
+      - Amazon 50: 07-popular-problems/product-based/amazon-50.md
+      - Microsoft 50: 07-popular-problems/product-based/microsoft-50.md
+      - Apple 50: 07-popular-problems/product-based/apple-50.md
+      - Netflix 50: 07-popular-problems/product-based/netflix-50.md
+      - Uber 50: 07-popular-problems/product-based/uber-50.md
+      - Stripe 50: 07-popular-problems/product-based/stripe-50.md
+      - Airbnb 50: 07-popular-problems/product-based/airbnb-50.md
+      - LinkedIn 50: 07-popular-problems/product-based/linkedin-50.md
 
   - 🏛️ System Design:
       - Overview: 08-system-design/index.md

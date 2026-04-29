@@ -190,6 +190,16 @@ nav:
 
   - ⚙️ Algorithms:
       - Overview: 03-algorithms/index.md
+      - Sorting: 03-algorithms/01-sorting.md
+      - Searching: 03-algorithms/02-searching.md
+      - Recursion: 03-algorithms/03-recursion.md
+      - Divide & Conquer: 03-algorithms/04-divide-and-conquer.md
+      - Dynamic Programming: 03-algorithms/05-dynamic-programming.md
+      - Greedy: 03-algorithms/06-greedy.md
+      - Graph Algorithms: 03-algorithms/07-graph-algorithms.md
+      - String Algorithms: 03-algorithms/08-string-algorithms.md
+      - Math Algorithms: 03-algorithms/09-math-algorithms.md
+      - Bit Manipulation: 03-algorithms/10-bit-manipulation.md
 
   - 🎯 Patterns:
       - Overview: 04-patterns/index.md

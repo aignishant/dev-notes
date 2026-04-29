@@ -331,6 +331,16 @@ nav:
         - Tree basics: dsa/docs/02-data-structures/trees/01-tree-basics.md
     - Algorithms:
       - Overview: dsa/docs/03-algorithms/index.md
+      - Sorting: dsa/docs/03-algorithms/01-sorting.md
+      - Searching: dsa/docs/03-algorithms/02-searching.md
+      - Recursion: dsa/docs/03-algorithms/03-recursion.md
+      - Divide & Conquer: dsa/docs/03-algorithms/04-divide-and-conquer.md
+      - Dynamic Programming: dsa/docs/03-algorithms/05-dynamic-programming.md
+      - Greedy: dsa/docs/03-algorithms/06-greedy.md
+      - Graph Algorithms: dsa/docs/03-algorithms/07-graph-algorithms.md
+      - String Algorithms: dsa/docs/03-algorithms/08-string-algorithms.md
+      - Math Algorithms: dsa/docs/03-algorithms/09-math-algorithms.md
+      - Bit Manipulation: dsa/docs/03-algorithms/10-bit-manipulation.md
     - Patterns:
       - Overview: dsa/docs/04-patterns/index.md
       - Sliding Window: dsa/docs/04-patterns/01-sliding-window.md

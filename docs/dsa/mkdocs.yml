@@ -223,9 +223,16 @@ nav:
       - Suffix Arrays & Suffix Automata: 05-advanced/05-suffix-arrays.md
       - Heavy-Light Decomposition: 05-advanced/06-heavy-light-decomposition.md
       - Mo's Algorithm: 05-advanced/07-mo-algorithm.md
+      - Treaps & Skip Lists: 05-advanced/08-treaps-skip-lists.md
 
   - 🧠 Ultra-Advanced:
       - Overview: 06-ultra-advanced/index.md
+      - Persistent Data Structures: 06-ultra-advanced/01-persistent-data-structures.md
+      - Max-Flow / Min-Cut: 06-ultra-advanced/02-max-flow-min-cut.md
+      - Computational Geometry: 06-ultra-advanced/03-computational-geometry.md
+      - Advanced DP: 06-ultra-advanced/04-advanced-dp.md
+      - Online Algorithms & Sketches: 06-ultra-advanced/05-online-sketches.md
+      - Randomised Algorithms: 06-ultra-advanced/06-randomised-algorithms.md
 
   - 🔥 Popular Problems:
       - Overview: 07-popular-problems/index.md

@@ -362,8 +362,15 @@ nav:
       - Suffix Arrays & Suffix Automata: dsa/docs/05-advanced/05-suffix-arrays.md
       - Heavy-Light Decomposition: dsa/docs/05-advanced/06-heavy-light-decomposition.md
       - Mo's Algorithm: dsa/docs/05-advanced/07-mo-algorithm.md
+      - Treaps & Skip Lists: dsa/docs/05-advanced/08-treaps-skip-lists.md
     - Ultra-Advanced:
       - Overview: dsa/docs/06-ultra-advanced/index.md
+      - Persistent Data Structures: dsa/docs/06-ultra-advanced/01-persistent-data-structures.md
+      - Max-Flow / Min-Cut: dsa/docs/06-ultra-advanced/02-max-flow-min-cut.md
+      - Computational Geometry: dsa/docs/06-ultra-advanced/03-computational-geometry.md
+      - Advanced DP: dsa/docs/06-ultra-advanced/04-advanced-dp.md
+      - Online Algorithms & Sketches: dsa/docs/06-ultra-advanced/05-online-sketches.md
+      - Randomised Algorithms: dsa/docs/06-ultra-advanced/06-randomised-algorithms.md
     - Popular Problems:
       - Overview: dsa/docs/07-popular-problems/index.md
       - Google 50 (sample): dsa/docs/07-popular-problems/product-based/google-50.md

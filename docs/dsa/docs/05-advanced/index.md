@@ -2,7 +2,7 @@
 
 > Topics that show up in senior interviews, ICPC-style rounds, and Google L5+ loops.
 
-<span class="phase-status phase-inprogress">Phase 6 — building out the advanced data structures</span>
+<span class="phase-status phase-done">Phase 6 — Complete (8 of 8 advanced data structures)</span>
 
 Each page in this section follows the **same shape** pioneered by the [pattern bible](../04-patterns/index.md):
 
@@ -60,14 +60,16 @@ Each page in this section follows the **same shape** pioneered by the [pattern b
 
     Reorder offline range queries by `√n` buckets to amortise to O((n + q) √n). Vanilla, even/odd snake sort, Mo's with updates (n^(5/3)), Mo's on tree via Euler tour. SPOJ DQUERY, CF 86D Powerful Array.
 
+-   :material-shuffle-variant: **[Treaps & Skip Lists](08-treaps-skip-lists.md)**
+
+    ---
+
+    Randomised balanced BSTs in <100 lines: priority-driven treap, implicit treap with split/merge for range surgery, geometric-level skip list for concurrent ordered maps, persistent treap via path-copying. The "I want a balanced BST without 400 lines of red-black" answer.
+
 </div>
 
 ---
 
-## 🚧 Coming next
+## 🎉 Phase 6 complete
 
-The remaining advanced topic:
-
-8. **Treaps / Skip Lists** — randomised balanced BSTs from scratch
-
-Will follow the canonical shape pioneered by [Tries](01-tries.md).
+All 8 advanced data structures are written. Continue with **🧠 [Ultra-Advanced](../06-ultra-advanced/index.md)** for the next chapter — persistent data structures, max-flow / min-cut, computational geometry, advanced DP, sketches, randomised algorithms, and game theory.

@@ -352,7 +352,22 @@ nav:
 
   - 🌐 Common Across Companies:
       - Overview: 12-common-across-all-companies/index.md
-      - Arrays — common questions: 12-common-across-all-companies/02-arrays-common.md
+      - Arrays: 12-common-across-all-companies/02-arrays-common.md
+      - Strings: 12-common-across-all-companies/03-strings-common.md
+      - Linked Lists: 12-common-across-all-companies/04-linked-lists-common.md
+      - Hash: 12-common-across-all-companies/05-hash-common.md
+      - Intervals: 12-common-across-all-companies/06-intervals-common.md
+      - Sliding Window: 12-common-across-all-companies/07-sliding-window-common.md
+      - Two Pointers: 12-common-across-all-companies/08-two-pointers-common.md
+      - Binary Search: 12-common-across-all-companies/09-binary-search-common.md
+      - Stack & Queue: 12-common-across-all-companies/10-stack-queue-common.md
+      - Trees: 12-common-across-all-companies/11-trees-common.md
+      - Graphs: 12-common-across-all-companies/12-graphs-common.md
+      - Heap: 12-common-across-all-companies/13-heap-common.md
+      - Backtracking: 12-common-across-all-companies/14-backtracking-common.md
+      - Dynamic Programming: 12-common-across-all-companies/15-dp-common.md
+      - Math: 12-common-across-all-companies/16-math-common.md
+      - Bit Manipulation: 12-common-across-all-companies/17-bit-manipulation-common.md
 
   - 📚 Resources:
       - Overview: 13-resources/index.md

@@ -484,7 +484,22 @@ nav:
       - Salary negotiation: dsa/docs/11-behavioral/salary-negotiation.md
     - Common Across Companies:
       - Overview: dsa/docs/12-common-across-all-companies/index.md
-      - Arrays — common questions: dsa/docs/12-common-across-all-companies/02-arrays-common.md
+      - Arrays: dsa/docs/12-common-across-all-companies/02-arrays-common.md
+      - Strings: dsa/docs/12-common-across-all-companies/03-strings-common.md
+      - Linked Lists: dsa/docs/12-common-across-all-companies/04-linked-lists-common.md
+      - Hash: dsa/docs/12-common-across-all-companies/05-hash-common.md
+      - Intervals: dsa/docs/12-common-across-all-companies/06-intervals-common.md
+      - Sliding Window: dsa/docs/12-common-across-all-companies/07-sliding-window-common.md
+      - Two Pointers: dsa/docs/12-common-across-all-companies/08-two-pointers-common.md
+      - Binary Search: dsa/docs/12-common-across-all-companies/09-binary-search-common.md
+      - Stack & Queue: dsa/docs/12-common-across-all-companies/10-stack-queue-common.md
+      - Trees: dsa/docs/12-common-across-all-companies/11-trees-common.md
+      - Graphs: dsa/docs/12-common-across-all-companies/12-graphs-common.md
+      - Heap: dsa/docs/12-common-across-all-companies/13-heap-common.md
+      - Backtracking: dsa/docs/12-common-across-all-companies/14-backtracking-common.md
+      - Dynamic Programming: dsa/docs/12-common-across-all-companies/15-dp-common.md
+      - Math: dsa/docs/12-common-across-all-companies/16-math-common.md
+      - Bit Manipulation: dsa/docs/12-common-across-all-companies/17-bit-manipulation-common.md
     - Resources:
       - Overview: dsa/docs/13-resources/index.md
       - Big-O Cheatsheet: dsa/docs/13-resources/01-big-o-cheatsheet.md

@@ -8,34 +8,121 @@ This section is your **planner**. Before you touch a single problem, spend 30 mi
 
 ---
 
-## What's in this section
+## 📖 Start here — the owner's manual
 
-| Page | When to read it |
-|---|---|
-| [How to use this bible](how-to-use-this-doc.md) | First. The "owner's manual." |
-| [Pick your study plan](pick-your-plan.md) | Right after, to choose your timeline. |
-| [3-week sprint plan](3-week-sprint-plan.md) | Interview in 21 days, basics already in place. |
-| [5-week balanced plan](5-week-balanced-plan.md) | Solid prep, some prior knowledge. |
-| [6-week thorough plan](6-week-thorough-plan.md) | Standard prep window. |
-| [1-month crash plan](1-month-crash-plan.md) | Emergency, all-in. |
-| [3-month fast-track](3-month-fast-track.md) | The most popular plan. |
-| [6-month study plan](6-month-study-plan.md) | Beginner, starting from zero. |
-| [Daily routine](daily-routine.md) | What an actual study day looks like. |
-| [How to approach any problem](how-to-approach-any-problem.md) | The 7-step framework you'll use forever. |
-| [Company-wise prep](company-wise-prep.md) | Google vs Meta vs TCS vs ISRO… |
-| [Product vs Service vs PSU strategy](product-vs-service-vs-psu-strategy.md) | The three interview cultures. |
-| [Interview stages explained](interview-stages-explained.md) | OA → phone screen → onsite → behavioral. |
-| [Progress tracker](progress-tracker.md) | A printable checklist to track yourself. |
+<div class="grid cards" markdown>
+
+-   :material-book-open-variant: **[How to use this bible](how-to-use-this-doc.md)**
+
+    ---
+
+    The "owner's manual." Read this first. Why this doc exists, how it's structured, the four study modes (sprint / fast-track / balanced / deep-dive), and the *one* mistake everyone makes when they start.
+
+-   :material-target: **[How to approach any problem](how-to-approach-any-problem.md)**
+
+    ---
+
+    The 7-step framework you'll use forever: read → restate → examples → brute force → optimise → code → dry-run. Internalise this *before* you start solving. Every interview win flows from these seven steps.
+
+-   :material-clipboard-text-clock: **[Daily routine](daily-routine.md)**
+
+    ---
+
+    What an actual study day looks like — warm-up, 1 new pattern, 2 mediums, 1 review, dry-run journal. Includes the 90-minute and 4-hour variants for weekday vs weekend.
+
+-   :material-checkbox-marked-circle-outline: **[Progress tracker](progress-tracker.md)**
+
+    ---
+
+    A printable checklist to mark patterns, problems, and mock interviews as done. Print it, stick it on your wall, fill it in. Visible progress beats invisible doubt.
+
+</div>
 
 ---
 
-## TL;DR — the right reading order
+## 📅 Pick a study plan — pick exactly one and commit
 
-1. [How to use this bible](how-to-use-this-doc.md)
-2. [Pick your study plan](pick-your-plan.md) — and **commit** to one
-3. [How to approach any problem](how-to-approach-any-problem.md) — internalize the 7-step framework
-4. [Daily routine](daily-routine.md) — set up your habit
-5. [Interview stages explained](interview-stages-explained.md) — know what's coming
-6. Off to the [Foundations](../01-foundations/index.md) section. You're done with the planner.
+<div class="grid cards" markdown>
+
+-   :material-compass-outline: **[Pick your study plan](pick-your-plan.md)**
+
+    ---
+
+    The decision tree: how much time do you have, what's your starting point, what's the role? Routes you to the right plan below.
+
+-   :material-fire: **[3-week sprint plan](3-week-sprint-plan.md)** <span class="difficulty hard">Sprint</span>
+
+    ---
+
+    Interview in 21 days, basics already in place. Top-50 patterns + one mock per week. No fluff.
+
+-   :material-scale-balance: **[5-week balanced plan](5-week-balanced-plan.md)** <span class="difficulty medium">Balanced</span>
+
+    ---
+
+    Solid prep, some prior knowledge. Wider pattern coverage, three mocks, a behavioural pass.
+
+-   :material-calendar-week: **[6-week thorough plan](6-week-thorough-plan.md)** <span class="difficulty medium">Thorough</span>
+
+    ---
+
+    The standard prep window. Every pattern, two passes through advanced topics, full system-design module.
+
+-   :material-alarm-light: **[1-month crash plan](1-month-crash-plan.md)** <span class="difficulty hard">Emergency</span>
+
+    ---
+
+    Emergency, all-in. 30 days, 8h/day, no off days. For when the recruiter slid into your DMs *yesterday*.
+
+-   :material-rocket-launch: **[3-month fast-track](3-month-fast-track.md)** <span class="difficulty medium">Most popular</span>
+
+    ---
+
+    The most popular plan. Patterns → advanced → system design → mocks. Comfortable pace, real depth.
+
+-   :material-school-outline: **[6-month study plan](6-month-study-plan.md)** <span class="difficulty easy">Beginner</span>
+
+    ---
+
+    Beginner, starting from zero. Python first, then DS, then patterns. The "I'm switching to SWE" plan.
+
+</div>
+
+---
+
+## 🏢 Know your interview — culture, stages, and prep
+
+<div class="grid cards" markdown>
+
+-   :material-domain: **[Company-wise prep](company-wise-prep.md)**
+
+    ---
+
+    Google vs Meta vs Amazon vs Microsoft vs TCS vs Infosys vs ISRO vs DRDO. What each company actually asks, the difficulty curve, and the unwritten rules.
+
+-   :material-source-branch: **[Product vs Service vs PSU strategy](product-vs-service-vs-psu-strategy.md)**
+
+    ---
+
+    The three Indian-tech interview cultures decoded. Aptitude-heavy vs DSA-heavy vs core-CS-heavy. Pick the right prep ratio for your target.
+
+-   :material-stairs: **[Interview stages explained](interview-stages-explained.md)**
+
+    ---
+
+    OA → phone screen → onsite (DSA + system design + behavioural) → bar-raiser → hiring committee. What each stage signals and how to pass it.
+
+</div>
+
+---
+
+## ✅ TL;DR — the right reading order
+
+1. **[How to use this bible](how-to-use-this-doc.md)** — the owner's manual
+2. **[Pick your study plan](pick-your-plan.md)** — and **commit** to one
+3. **[How to approach any problem](how-to-approach-any-problem.md)** — internalise the 7-step framework
+4. **[Daily routine](daily-routine.md)** — set up the habit
+5. **[Interview stages explained](interview-stages-explained.md)** — know what's coming
+6. → **[Foundations](../01-foundations/index.md)** — you're done with the planner.
 
 You can always come back here to switch plans, look up a company's interview style, or update your tracker.

@@ -2,7 +2,7 @@
 
 > The "you probably won't be asked this, but if you are, you'll be the only candidate who can solve it" topics.
 
-<span class="phase-status phase-inprogress">Phase 7 — building out the ultra-advanced chapter</span>
+<span class="phase-status phase-done">Phase 7 — chapter complete (7 of 7 topics)</span>
 
 Each page in this section follows the **same shape** as [Advanced](../05-advanced/index.md): plain-English signal → multiple flavors → sub-patterns table → 20-problem table → three deep-dives → bugs → interviewer phrasings → connections → 8 self-checks.
 
@@ -48,14 +48,16 @@ Each page in this section follows the **same shape** as [Advanced](../05-advance
 
     Las Vegas (random runtime, exact output) vs Monte Carlo (fixed runtime, bounded-error output). Randomised quickselect `O(n)` expected, Miller-Rabin primality with `4^(−k)` failure, Karger min-cut via random edge contraction with `2/(n(n−1))` per-trial success bound, Schwartz-Zippel polynomial identity testing, the probabilistic method, and Fisher-Yates. The "coin flips beat cleverness" toolkit.
 
+-   :material-chess-king: **[Game Theory & Alpha-Beta](07-game-theory.md)**
+
+    ---
+
+    Sprague-Grundy theorem reducing every impartial game to Nim via XOR of Grundy numbers. Minimax with alpha-beta pruning achieving `O(b^(d/2))` with perfect ordering. Iterative deepening + transposition tables + killer moves + null-move + LMR — the architecture that powers Stockfish-class chess engines. Stone-game DP and bitmask game DP for the LC `Predict the Winner / Stone Game / Can I Win` family.
+
 </div>
 
 ---
 
-## 🚧 Coming next
+## ✅ Chapter complete
 
-The remaining ultra-advanced topics:
-
-7. **Game theory & alpha-beta** — Sprague-Grundy, minimax pruning, game-tree search
-
-Each will follow the canonical shape pioneered by [Persistent Data Structures](01-persistent-data-structures.md).
+All seven ultra-advanced topics are now live. Read the chapter front-to-back as a capstone tour, or revisit topic-by-topic as interview prep demands.

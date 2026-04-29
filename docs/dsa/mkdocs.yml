@@ -233,6 +233,7 @@ nav:
       - Advanced DP: 06-ultra-advanced/04-advanced-dp.md
       - Online Algorithms & Sketches: 06-ultra-advanced/05-online-sketches.md
       - Randomised Algorithms: 06-ultra-advanced/06-randomised-algorithms.md
+      - Game Theory & Alpha-Beta: 06-ultra-advanced/07-game-theory.md
 
   - 🔥 Popular Problems:
       - Overview: 07-popular-problems/index.md

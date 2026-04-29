@@ -371,6 +371,7 @@ nav:
       - Advanced DP: dsa/docs/06-ultra-advanced/04-advanced-dp.md
       - Online Algorithms & Sketches: dsa/docs/06-ultra-advanced/05-online-sketches.md
       - Randomised Algorithms: dsa/docs/06-ultra-advanced/06-randomised-algorithms.md
+      - Game Theory & Alpha-Beta: dsa/docs/06-ultra-advanced/07-game-theory.md
     - Popular Problems:
       - Overview: dsa/docs/07-popular-problems/index.md
       - Google 50 (sample): dsa/docs/07-popular-problems/product-based/google-50.md

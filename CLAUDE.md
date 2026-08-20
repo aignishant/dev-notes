@@ -1,3 +1,4 @@
+
 # dev-notes — project instructions
 
 This is a multi-section MkDocs Material knowledge base. The root `mkdocs.yml` builds the umbrella site at `/dev-notes/`. Sub-projects (e.g. `docs/dsa/`) keep their own `mkdocs.yml` so they can be built standalone, but their pages are also wired into the root nav.

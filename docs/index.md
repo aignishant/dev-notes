@@ -31,6 +31,14 @@ A living engineering + interview prep knowledge base — Google SecOps, Python, 
 
     ---
 
+    Lead-level interview prep — 15 sections, 96+ pages covering integrations, playbooks, parsers, CI/CD, system design.
+
+    [:octicons-arrow-right-24: Open Content Hub](content-hub/index.md)
+
+-   :fontawesome-brands-python:{ .lg .middle } &nbsp; **Python**
+
+    ---
+
     Deep-dive notes on Python core, OOP, async, FastAPI, microservices, DSA patterns, and modern Python.
 
     [:octicons-arrow-right-24: Open Python notes](python-interview/index.md)
@@ -53,6 +61,19 @@ A living engineering + interview prep knowledge base — Google SecOps, Python, 
 
 -   :material-security:{ .lg .middle } &nbsp; **Ethical Hacking**
 
+    ---
+
+    Foundations → recon → offensive → specializations → defense → career. With labs, methodology, and reporting.
+
+    [:octicons-arrow-right-24: Open Ethical Hacking](ethical-hacking-docs/docs/index.md)
+
+-   :material-tools:{ .lg .middle } &nbsp; **Redshift Toolkit**
+
+    ---
+
+    Hands-on offensive security playbook — networking, web app, Active Directory, privilege escalation.
+
+    [:octicons-arrow-right-24: Open Redshift toolkit](ethical-hacking-unsorted/index.md)
 
 </div>
 
